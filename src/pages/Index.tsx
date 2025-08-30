@@ -73,11 +73,11 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-farfalla-teal/10 via-white to-farfalla-pink/10">
+      <section className="relative overflow-hidden farfalla-hero-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div className="text-center">
             <Badge className="farfalla-badge-promo mb-6 animate-in slide-in-from-bottom-4 duration-1000">
@@ -111,7 +111,7 @@ const Index = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 bg-farfalla-muted/30">
+      <section className="py-16 farfalla-section-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
@@ -132,7 +132,7 @@ const Index = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16">
+      <section className="py-16 farfalla-section-overlay">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-poppins font-bold text-farfalla-ink mb-4">
@@ -172,7 +172,7 @@ const Index = () => {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 bg-farfalla-muted/20">
+      <section className="py-16 farfalla-section-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-poppins font-bold text-farfalla-ink mb-4">
@@ -203,9 +203,9 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16">
+      <section className="py-16 farfalla-section-overlay">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="farfalla-card p-8 md:p-12 text-center bg-gradient-to-br from-farfalla-teal/5 to-farfalla-pink/5">
+          <div className="farfalla-glass p-8 md:p-12 text-center farfalla-glow">
             <Truck className="h-16 w-16 text-farfalla-teal mx-auto mb-6" />
             <h2 className="text-2xl md:text-3xl font-poppins font-bold text-farfalla-ink mb-4">
               Envío Gratis en Compras Superiores a $150.000

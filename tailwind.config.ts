@@ -52,13 +52,27 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Farfalla Brand Colors
+				// Enhanced Farfalla Brand Colors
 				'farfalla-teal': {
 					DEFAULT: 'hsl(var(--farfalla-teal))',
 					50: 'hsl(var(--farfalla-teal-50))',
-					700: 'hsl(var(--farfalla-teal-700))'
+					100: 'hsl(var(--farfalla-teal-100))',
+					200: 'hsl(var(--farfalla-teal-200))',
+					700: 'hsl(var(--farfalla-teal-700))',
+					800: 'hsl(var(--farfalla-teal-800))',
+					900: 'hsl(var(--farfalla-teal-900))'
 				},
-				'farfalla-pink': 'hsl(var(--farfalla-pink))',
+				'farfalla-pink': {
+					DEFAULT: 'hsl(var(--farfalla-pink))',
+					50: 'hsl(var(--farfalla-pink-50))',
+					100: 'hsl(var(--farfalla-pink-100))',
+					200: 'hsl(var(--farfalla-pink-200))',
+					700: 'hsl(var(--farfalla-pink-700))',
+					800: 'hsl(var(--farfalla-pink-800))'
+				},
+				'farfalla-coral': 'hsl(var(--farfalla-coral))',
+				'farfalla-mint': 'hsl(var(--farfalla-mint))',
+				'farfalla-lavender': 'hsl(var(--farfalla-lavender))',
 				'farfalla-ink': 'hsl(var(--farfalla-ink))',
 				'farfalla-muted': 'hsl(var(--farfalla-muted))',
 				sidebar: {

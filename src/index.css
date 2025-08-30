@@ -7,34 +7,49 @@
 /* Farfalla Estudio Design System */
 @layer base {
   :root {
-    /* Farfalla Brand Colors (HSL format) */
+    /* Farfalla Brand Colors (HSL format) - Enhanced Palette */
     --farfalla-teal: 177 38% 69%;        /* #88D3CE */
     --farfalla-teal-50: 175 50% 77%;     /* #AFDFE1 */
+    --farfalla-teal-100: 176 45% 85%;    /* Lighter variation */
+    --farfalla-teal-200: 177 42% 75%;    /* Light variation */
     --farfalla-teal-700: 174 40% 54%;    /* #5BBDB6 */
+    --farfalla-teal-800: 173 45% 45%;    /* Darker variation */
+    --farfalla-teal-900: 172 50% 35%;    /* Deep variation */
+    
     --farfalla-pink: 350 73% 83%;        /* #F4B0B9 */
+    --farfalla-pink-50: 352 80% 90%;     /* Very light pink */
+    --farfalla-pink-100: 351 75% 88%;    /* Light pink */
+    --farfalla-pink-200: 350 70% 85%;    /* Medium light pink */
+    --farfalla-pink-700: 349 70% 70%;    /* Deeper pink */
+    --farfalla-pink-800: 348 65% 60%;    /* Dark pink */
+    
+    --farfalla-coral: 15 75% 75%;        /* Coral bridge color */
+    --farfalla-mint: 160 45% 80%;        /* Mint bridge color */
+    --farfalla-lavender: 280 35% 85%;    /* Soft lavender */
+    
     --farfalla-ink: 0 0% 20%;            /* #333333 */
     --farfalla-muted: 0 0% 96%;          /* #F6F6F6 */
 
-    /* Semantic tokens */
-    --background: 0 0% 100%;
+    /* Dynamic Background System */
+    --background: linear-gradient(135deg, hsl(175 50% 98%) 0%, hsl(350 30% 98%) 100%);
     --foreground: var(--farfalla-ink);
     
-    --card: 0 0% 100%;
+    --card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(175 20% 99%) 100%);
     --card-foreground: var(--farfalla-ink);
     
-    --popover: 0 0% 100%;
+    --popover: hsl(0 0% 100%);
     --popover-foreground: var(--farfalla-ink);
     
     --primary: var(--farfalla-teal);
     --primary-foreground: 0 0% 100%;
     
-    --secondary: var(--farfalla-muted);
+    --secondary: linear-gradient(135deg, hsl(var(--farfalla-teal-100)) 0%, hsl(var(--farfalla-pink-100)) 100%);
     --secondary-foreground: var(--farfalla-ink);
     
     --accent: var(--farfalla-pink);
     --accent-foreground: 0 0% 100%;
     
-    --muted: var(--farfalla-muted);
+    --muted: linear-gradient(180deg, hsl(var(--farfalla-teal-50)) 0%, hsl(var(--farfalla-pink-50)) 100%);
     --muted-foreground: 0 0% 45%;
     
     --destructive: 0 84% 60%;
@@ -46,15 +61,21 @@
     
     --radius: 1rem;
     
-    /* Farfalla Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--farfalla-teal)) 0%, hsl(var(--farfalla-teal-50)) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(var(--farfalla-pink)) 0%, hsl(350 73% 88%) 100%);
-    --gradient-soft: linear-gradient(180deg, hsl(var(--farfalla-muted)) 0%, hsl(0 0% 100%) 100%);
+    /* Enhanced Farfalla Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--farfalla-teal)) 0%, hsl(var(--farfalla-pink)) 50%, hsl(var(--farfalla-teal-700)) 100%);
+    --gradient-hero-soft: linear-gradient(135deg, hsl(var(--farfalla-teal-100)) 0%, hsl(var(--farfalla-pink-100)) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--farfalla-pink)) 0%, hsl(var(--farfalla-coral)) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(var(--farfalla-teal)) 0%, hsl(var(--farfalla-teal-700)) 100%);
+    --gradient-section: linear-gradient(180deg, hsl(var(--farfalla-teal-50)) 0%, hsl(var(--farfalla-pink-50)) 50%, hsl(var(--farfalla-teal-100)) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(var(--farfalla-teal-50) / 0.3) 100%);
+    --gradient-overlay: linear-gradient(135deg, hsl(var(--farfalla-teal) / 0.1) 0%, hsl(var(--farfalla-pink) / 0.1) 100%);
     
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -2px hsl(var(--farfalla-teal) / 0.1);
-    --shadow-elegant: 0 10px 40px -10px hsl(var(--farfalla-teal) / 0.2);
-    --shadow-card: 0 2px 10px -2px hsl(0 0% 0% / 0.05);
+    /* Dynamic Shadows with Color */
+    --shadow-soft: 0 4px 20px -2px hsl(var(--farfalla-teal) / 0.15);
+    --shadow-elegant: 0 10px 40px -10px hsl(var(--farfalla-teal) / 0.25);
+    --shadow-pink: 0 8px 30px -5px hsl(var(--farfalla-pink) / 0.2);
+    --shadow-card: 0 2px 15px -2px hsl(var(--farfalla-teal) / 0.08);
+    --shadow-glow: 0 0 30px hsl(var(--farfalla-teal) / 0.3);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -122,57 +143,81 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    background: var(--background);
+    @apply text-foreground font-inter;
   }
 }
 
 @layer components {
-  /* Farfalla Custom Components */
+  /* Enhanced Farfalla Custom Components */
   .farfalla-btn-hero {
-    @apply bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent/80 
-           text-accent-foreground font-poppins font-semibold px-8 py-4 rounded-2xl 
-           shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]
+    background: var(--gradient-accent);
+    @apply text-accent-foreground font-poppins font-semibold px-8 py-4 rounded-2xl 
+           shadow-[var(--shadow-pink)] hover:shadow-[var(--shadow-glow)]
            transform hover:scale-105 transition-[var(--transition-smooth)] 
-           text-lg border-0;
+           text-lg border-0 hover:brightness-110;
   }
   
   .farfalla-btn-primary {
-    @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80
-           text-primary-foreground font-poppins font-medium px-6 py-3 rounded-2xl
+    background: var(--gradient-primary);
+    @apply text-primary-foreground font-poppins font-medium px-6 py-3 rounded-2xl
            shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]
            transform hover:scale-105 transition-[var(--transition-smooth)]
-           border-0;
+           border-0 hover:brightness-110;
+  }
+  
+  .farfalla-btn-secondary {
+    background: var(--gradient-hero-soft);
+    @apply text-farfalla-ink font-poppins font-medium px-6 py-3 rounded-2xl
+           shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-soft)]
+           transform hover:scale-105 transition-[var(--transition-smooth)]
+           border border-white/30 hover:border-white/50;
   }
   
   .farfalla-card {
-    @apply bg-card border border-border/50 rounded-2xl p-6 
-           shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-soft)]
-           transition-[var(--transition-smooth)] hover:-translate-y-1;
+    background: var(--gradient-card);
+    @apply border border-white/20 rounded-2xl p-6 backdrop-blur-sm
+           shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elegant)]
+           transition-[var(--transition-smooth)] hover:-translate-y-2;
   }
   
   .farfalla-badge-promo {
-    @apply bg-gradient-to-r from-accent to-accent/90 text-accent-foreground 
-           px-3 py-1 rounded-full text-sm font-poppins font-medium
-           shadow-[var(--shadow-soft)];
+    background: var(--gradient-accent);
+    @apply text-accent-foreground px-3 py-1 rounded-full text-sm font-poppins font-medium
+           shadow-[var(--shadow-pink)];
   }
   
   .farfalla-badge-envio {
-    @apply bg-gradient-to-r from-primary to-primary/90 text-primary-foreground 
-           px-3 py-1 rounded-full text-sm font-poppins font-medium;
+    background: var(--gradient-primary);
+    @apply text-primary-foreground px-3 py-1 rounded-full text-sm font-poppins font-medium
+           shadow-[var(--shadow-soft)];
   }
   
   .farfalla-input {
-    @apply bg-background border border-input rounded-2xl px-4 py-3 
+    @apply bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl px-4 py-3 
            focus:border-primary focus:ring-2 focus:ring-primary/20
            transition-[var(--transition-smooth)] font-inter;
   }
   
   .farfalla-hero-bg {
-    @apply bg-gradient-to-br from-background via-muted/30 to-primary/5;
+    background: var(--gradient-hero);
+    @apply relative;
   }
   
-  .farfalla-section-bg {
-    @apply bg-gradient-to-b from-muted/50 to-background;
+  .farfalla-section-gradient {
+    background: var(--gradient-section);
+  }
+  
+  .farfalla-section-overlay {
+    background: var(--gradient-overlay);
+  }
+  
+  .farfalla-glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
+  }
+  
+  .farfalla-glow {
+    @apply shadow-[var(--shadow-glow)];
   }
 }
 
