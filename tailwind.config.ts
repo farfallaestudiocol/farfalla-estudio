@@ -52,6 +52,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Farfalla Brand Colors
+				'farfalla-teal': {
+					DEFAULT: 'hsl(var(--farfalla-teal))',
+					50: 'hsl(var(--farfalla-teal-50))',
+					700: 'hsl(var(--farfalla-teal-700))'
+				},
+				'farfalla-pink': 'hsl(var(--farfalla-pink))',
+				'farfalla-ink': 'hsl(var(--farfalla-ink))',
+				'farfalla-muted': 'hsl(var(--farfalla-muted))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +71,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			fontFamily: {
+				'poppins': ['Poppins', 'sans-serif'],
+				'inter': ['Inter', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

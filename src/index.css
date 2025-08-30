@@ -1,42 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Farfalla Estudio Design System */
 @layer base {
   :root {
+    /* Farfalla Brand Colors (HSL format) */
+    --farfalla-teal: 177 38% 69%;        /* #88D3CE */
+    --farfalla-teal-50: 175 50% 77%;     /* #AFDFE1 */
+    --farfalla-teal-700: 174 40% 54%;    /* #5BBDB6 */
+    --farfalla-pink: 350 73% 83%;        /* #F4B0B9 */
+    --farfalla-ink: 0 0% 20%;            /* #333333 */
+    --farfalla-muted: 0 0% 96%;          /* #F6F6F6 */
+
+    /* Semantic tokens */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: var(--farfalla-ink);
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: var(--farfalla-ink);
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --popover-foreground: var(--farfalla-ink);
+    
+    --primary: var(--farfalla-teal);
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: var(--farfalla-muted);
+    --secondary-foreground: var(--farfalla-ink);
+    
+    --accent: var(--farfalla-pink);
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: var(--farfalla-muted);
+    --muted-foreground: 0 0% 45%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: var(--farfalla-teal);
+    
+    --radius: 1rem;
+    
+    /* Farfalla Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--farfalla-teal)) 0%, hsl(var(--farfalla-teal-50)) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--farfalla-pink)) 0%, hsl(350 73% 88%) 100%);
+    --gradient-soft: linear-gradient(180deg, hsl(var(--farfalla-muted)) 0%, hsl(0 0% 100%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -2px hsl(var(--farfalla-teal) / 0.1);
+    --shadow-elegant: 0 10px 40px -10px hsl(var(--farfalla-teal) / 0.2);
+    --shadow-card: 0 2px 10px -2px hsl(0 0% 0% / 0.05);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +122,111 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+  }
+}
+
+@layer components {
+  /* Farfalla Custom Components */
+  .farfalla-btn-hero {
+    @apply bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent/80 
+           text-accent-foreground font-poppins font-semibold px-8 py-4 rounded-2xl 
+           shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]
+           transform hover:scale-105 transition-[var(--transition-smooth)] 
+           text-lg border-0;
+  }
+  
+  .farfalla-btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80
+           text-primary-foreground font-poppins font-medium px-6 py-3 rounded-2xl
+           shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]
+           transform hover:scale-105 transition-[var(--transition-smooth)]
+           border-0;
+  }
+  
+  .farfalla-card {
+    @apply bg-card border border-border/50 rounded-2xl p-6 
+           shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-soft)]
+           transition-[var(--transition-smooth)] hover:-translate-y-1;
+  }
+  
+  .farfalla-badge-promo {
+    @apply bg-gradient-to-r from-accent to-accent/90 text-accent-foreground 
+           px-3 py-1 rounded-full text-sm font-poppins font-medium
+           shadow-[var(--shadow-soft)];
+  }
+  
+  .farfalla-badge-envio {
+    @apply bg-gradient-to-r from-primary to-primary/90 text-primary-foreground 
+           px-3 py-1 rounded-full text-sm font-poppins font-medium;
+  }
+  
+  .farfalla-input {
+    @apply bg-background border border-input rounded-2xl px-4 py-3 
+           focus:border-primary focus:ring-2 focus:ring-primary/20
+           transition-[var(--transition-smooth)] font-inter;
+  }
+  
+  .farfalla-hero-bg {
+    @apply bg-gradient-to-br from-background via-muted/30 to-primary/5;
+  }
+  
+  .farfalla-section-bg {
+    @apply bg-gradient-to-b from-muted/50 to-background;
+  }
+}
+
+@layer utilities {
+  .font-poppins {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  .animate-bounce-in {
+    animation: bounceIn 0.8s var(--transition-bounce) forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
