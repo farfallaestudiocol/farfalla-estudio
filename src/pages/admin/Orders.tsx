@@ -42,6 +42,7 @@ interface Order {
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
   order_items?: OrderItem[];
@@ -304,74 +305,86 @@ export default function AdminOrders() {
                 </p>
               </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Número de Orden</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Pago</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">
-                      {order.order_number}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{order.customer_name}</p>
-                        <p className="text-sm text-muted-foreground">{order.customer_email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(order.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      {formatPrice(order.total_amount, order.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-2">
-                        {getStatusBadge(order.status)}
-                        <Select
-                          value={order.status}
-                          onValueChange={(value) => updateOrderStatus(order.id, value)}
-                        >
-                          <SelectTrigger className="w-32 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pendiente</SelectItem>
-                            <SelectItem value="processing">Procesando</SelectItem>
-                            <SelectItem value="shipped">Enviado</SelectItem>
-                            <SelectItem value="delivered">Entregado</SelectItem>
-                            <SelectItem value="cancelled">Cancelado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getPaymentStatusBadge(order.payment_status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/order/${order.id}`)}
-                          className="farfalla-btn-secondary"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Número de Orden</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Pago</TableHead>
+                    <TableHead>Notas</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">
+                        {order.order_number}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{order.customer_name}</p>
+                          <p className="text-sm text-muted-foreground">{order.customer_email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(order.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        {formatPrice(order.total_amount, order.currency)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-2">
+                          {getStatusBadge(order.status)}
+                          <Select
+                            value={order.status}
+                            onValueChange={(value) => updateOrderStatus(order.id, value)}
+                          >
+                            <SelectTrigger className="w-32 h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pendiente</SelectItem>
+                              <SelectItem value="processing">Procesando</SelectItem>
+                              <SelectItem value="shipped">Enviado</SelectItem>
+                              <SelectItem value="delivered">Entregado</SelectItem>
+                              <SelectItem value="cancelled">Cancelado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getPaymentStatusBadge(order.payment_status)}
+                      </TableCell>
+                      <TableCell>
+                        {order.notes ? (
+                          <div className="max-w-xs">
+                            <p className="text-sm text-muted-foreground truncate" title={order.notes}>
+                              {order.notes}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Sin notas</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/order/${order.id}`)}
+                            className="farfalla-btn-secondary"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
             </Table>
           )}
         </CardContent>

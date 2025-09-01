@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { 
   ShoppingCart, 
@@ -19,7 +21,8 @@ import {
   Trash2, 
   ArrowLeft,
   Package,
-  Truck
+  Truck,
+  MessageSquare
 } from 'lucide-react';
 
 const Cart = () => {
@@ -35,6 +38,7 @@ const Cart = () => {
   
   const { settings } = useSiteSettings();
   const { user, profile } = useAuth();
+  const [orderNotes, setOrderNotes] = useState('');
 
   const formatPrice = (price: number) => {
     const currency = settings?.currency || 'COP';
@@ -232,48 +236,67 @@ const Cart = () => {
                     Resumen del Pedido
                   </h2>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>Subtotal ({getCartCount()} productos)</span>
-                      <span>{formatPrice(getCartTotal())}</span>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Subtotal ({getCartCount()} productos)</span>
+                        <span>{formatPrice(getCartTotal())}</span>
+                      </div>
+
+                      {settings?.shipping_enabled && (
+                        <div className="flex justify-between">
+                          <span>Envío</span>
+                          <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
+                            {shipping === 0 ? 'Gratis' : formatPrice(shipping)}
+                          </span>
+                        </div>
+                      )}
+
+                      {settings?.tax_enabled && tax > 0 && (
+                        <div className="flex justify-between">
+                          <span>IVA ({Math.round((settings?.tax_rate || 0) * 100)}%)</span>
+                          <span>{formatPrice(tax)}</span>
+                        </div>
+                      )}
+
+                      {settings?.free_shipping_enabled && shipping === 0 && getCartTotal() >= (settings?.free_shipping_minimum || 0) && (
+                        <div className="flex items-center gap-2 text-sm text-green-600">
+                          <Truck className="h-4 w-4" />
+                          <span>¡Envío gratis aplicado!</span>
+                        </div>
+                      )}
+
+                      {settings?.free_shipping_enabled && shipping > 0 && (
+                        <div className="text-sm text-muted-foreground">
+                          Agrega {formatPrice((settings?.free_shipping_minimum || 0) - getCartTotal())} más para envío gratis
+                        </div>
+                      )}
+
+                      <Separator />
+
+                      <div className="flex justify-between text-lg font-poppins font-bold">
+                        <span>Total</span>
+                        <span className="text-farfalla-ink">{formatPrice(finalTotal)}</span>
+                      </div>
                     </div>
 
-                    {settings?.shipping_enabled && (
-                      <div className="flex justify-between">
-                        <span>Envío</span>
-                        <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
-                          {shipping === 0 ? 'Gratis' : formatPrice(shipping)}
-                        </span>
-                      </div>
-                    )}
-
-                    {settings?.tax_enabled && tax > 0 && (
-                      <div className="flex justify-between">
-                        <span>IVA ({Math.round((settings?.tax_rate || 0) * 100)}%)</span>
-                        <span>{formatPrice(tax)}</span>
-                      </div>
-                    )}
-
-                    {settings?.free_shipping_enabled && shipping === 0 && getCartTotal() >= (settings?.free_shipping_minimum || 0) && (
-                      <div className="flex items-center gap-2 text-sm text-green-600">
-                        <Truck className="h-4 w-4" />
-                        <span>¡Envío gratis aplicado!</span>
-                      </div>
-                    )}
-
-                    {settings?.free_shipping_enabled && shipping > 0 && (
-                      <div className="text-sm text-muted-foreground">
-                        Agrega {formatPrice((settings?.free_shipping_minimum || 0) - getCartTotal())} más para envío gratis
-                      </div>
-                    )}
-
-                    <Separator />
-
-                    <div className="flex justify-between text-lg font-poppins font-bold">
-                      <span>Total</span>
-                      <span className="text-farfalla-ink">{formatPrice(finalTotal)}</span>
+                    {/* Order Notes */}
+                    <div className="mt-6 space-y-2">
+                      <Label htmlFor="order-notes" className="flex items-center gap-2 text-sm font-medium">
+                        <MessageSquare className="h-4 w-4" />
+                        Notas o instrucciones especiales
+                      </Label>
+                      <Textarea
+                        id="order-notes"
+                        placeholder="Ej: Sin cebolla, entregar en portería, llamar antes de llegar..."
+                        value={orderNotes}
+                        onChange={(e) => setOrderNotes(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Opcional: Agrega cualquier instrucción especial para tu pedido
+                      </p>
                     </div>
-                  </div>
 
                   {/* Wompi Payment Widget */}
                   <div className="mt-6">
@@ -311,7 +334,7 @@ const Cart = () => {
                             currency: settings?.currency || 'COP',
                             payment_method: 'wompi',
                             payment_reference: result.transaction?.id || '',
-                            notes: ''
+                            notes: orderNotes.trim()
                           };
 
                           // Call create order function
