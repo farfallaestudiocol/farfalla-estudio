@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   FolderOpen, 
   Layers,
@@ -84,6 +84,7 @@ const managementItems = [
 export function AdminSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
@@ -100,13 +101,15 @@ export function AdminSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild size="lg" isActive={currentPath === "/admin"}>
-                  <Link to="/admin" className="flex items-center gap-2">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
-                      <BarChart3 className="size-4" />
-                    </div>
-                    <span className={`font-semibold ${collapsed ? 'hidden' : ''}`}>Dashboard</span>
-                  </Link>
+                <SidebarMenuButton 
+                  size="lg" 
+                  isActive={currentPath === "/admin"}
+                  onClick={() => navigate("/admin")}
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
+                    <BarChart3 className="size-4" />
+                  </div>
+                  <span className={`font-semibold ${collapsed ? 'hidden' : ''}`}>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -123,7 +126,7 @@ export function AdminSidebar() {
               {hierarchyItems.map((item) => (
                 <Collapsible key={item.title} defaultOpen={isGroupActive(item)}>
                   <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
+                    <CollapsibleTrigger className="w-full">
                       <SidebarMenuButton 
                         className="w-full justify-between" 
                         isActive={isActive(item.url)}
@@ -140,10 +143,11 @@ export function AdminSidebar() {
                       <SidebarMenuSub>
                         {item.children.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton asChild isActive={isActive(subItem.url)}>
-                              <Link to={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </Link>
+                            <SidebarMenuSubButton 
+                              isActive={isActive(subItem.url)}
+                              onClick={() => navigate(subItem.url)}
+                            >
+                              <span>{subItem.title}</span>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -165,11 +169,12 @@ export function AdminSidebar() {
             <SidebarMenu>
               {managementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="size-4" />
-                      <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton 
+                    isActive={isActive(item.url)}
+                    onClick={() => navigate(item.url)}
+                  >
+                    <item.icon className="size-4" />
+                    <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -182,11 +187,9 @@ export function AdminSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/" className="flex items-center gap-2">
-                    <Home className="size-4" />
-                    <span className={collapsed ? 'hidden' : ''}>Volver al Sitio</span>
-                  </Link>
+                <SidebarMenuButton onClick={() => navigate("/")}>
+                  <Home className="size-4" />
+                  <span className={collapsed ? 'hidden' : ''}>Volver al Sitio</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
