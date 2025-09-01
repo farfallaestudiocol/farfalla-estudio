@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -114,11 +115,9 @@ export function AdminSidebar() {
 
         {/* Product Hierarchy */}
         <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="text-farfalla-ink font-medium">
-              Jerarquía de Productos
-            </SidebarGroupLabel>
-          )}
+          <SidebarGroupLabel className={`text-farfalla-ink font-medium ${collapsed ? 'hidden' : ''}`}>
+            Jerarquía de Productos
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {hierarchyItems.map((item) => (
@@ -131,27 +130,25 @@ export function AdminSidebar() {
                       >
                         <div className="flex items-center gap-2">
                           <item.icon className="size-4" />
-                          {!collapsed && <span>{item.title}</span>}
+                          <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
                         </div>
-                        {!collapsed && <ChevronRight className="size-4 transition-transform group-data-[state=open]:rotate-90" />}
+                        <ChevronRight className={`size-4 transition-transform group-data-[state=open]:rotate-90 ${collapsed ? 'hidden' : ''}`} />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     
-                    {!collapsed && (
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.children.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton asChild isActive={isActive(subItem.url)}>
-                                <Link to={subItem.url}>
-                                  <span>{subItem.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    )}
+                    <CollapsibleContent className={collapsed ? 'hidden' : ''}>
+                      <SidebarMenuSub>
+                        {item.children.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild isActive={isActive(subItem.url)}>
+                              <Link to={subItem.url}>
+                                <span>{subItem.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
               ))}
@@ -161,11 +158,9 @@ export function AdminSidebar() {
 
         {/* Site Management */}
         <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="text-farfalla-ink font-medium">
-              Gestión del Sitio
-            </SidebarGroupLabel>
-          )}
+          <SidebarGroupLabel className={`text-farfalla-ink font-medium ${collapsed ? 'hidden' : ''}`}>
+            Gestión del Sitio
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {managementItems.map((item) => (
