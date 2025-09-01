@@ -48,10 +48,11 @@ const Settings = () => {
       'shipping_cost', 
       'free_shipping_enabled',
       'free_shipping_minimum',
-      'free_shipping_threshold',  // Added this one
+      'free_shipping_threshold',
       'tax_enabled',
       'tax_rate',
-      'currency'
+      'currency',
+      'wompi_environment'
     ];
 
     const filtered = settings.filter(setting => {
