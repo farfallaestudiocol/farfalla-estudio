@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, User, Menu, X, LogOut, Settings } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
@@ -38,6 +39,10 @@ const Header = () => {
     fetchCategories();
   }, []);
 
+  // Split categories for responsive display
+  const visibleCategories = categories.slice(0, 4);
+  const hiddenCategories = categories.slice(4);
+
   return (
     <header className="bg-background border-b border-border/50 sticky top-0 z-50 backdrop-blur-lg bg-background/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,16 +58,41 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {categories.map((category) => (
-              <a
-                key={category.id}
-                href={`/categoria/${category.slug}`}
-                className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200"
-              >
-                {category.name}
-              </a>
-            ))}
+          <nav className="hidden md:flex">
+            <NavigationMenu>
+              <NavigationMenuList className="space-x-2">
+                {visibleCategories.map((category) => (
+                  <NavigationMenuItem key={category.id}>
+                    <NavigationMenuLink
+                      href={`/categoria/${category.slug}`}
+                      className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200 px-3 py-2 rounded-md"
+                    >
+                      {category.name}
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+                {hiddenCategories.length > 0 && (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-farfalla-ink hover:text-primary font-inter font-medium">
+                      Más <ChevronDown className="ml-1 h-3 w-3" />
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid gap-1 p-2 w-48">
+                        {hiddenCategories.map((category) => (
+                          <NavigationMenuLink
+                            key={category.id}
+                            href={`/categoria/${category.slug}`}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{category.name}</div>
+                          </NavigationMenuLink>
+                        ))}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
           </nav>
 
           {/* Search Bar - Desktop */}
