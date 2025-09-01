@@ -43,11 +43,27 @@ const Settings = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = settings.filter(setting =>
-      setting.setting_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      setting.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      setting.setting_value?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const ecommerceKeys = [
+      'shipping_enabled',
+      'shipping_cost', 
+      'free_shipping_enabled',
+      'free_shipping_minimum',
+      'tax_enabled',
+      'tax_rate',
+      'currency'
+    ];
+
+    const filtered = settings.filter(setting => {
+      // Exclude e-commerce settings from general tab
+      const isEcommerceSetting = ecommerceKeys.includes(setting.setting_key);
+      
+      const matchesSearch = setting.setting_key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        setting.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        setting.setting_value?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return !isEcommerceSetting && matchesSearch;
+    });
+    
     setFilteredSettings(filtered);
   }, [settings, searchTerm]);
 
