@@ -170,9 +170,9 @@ const Variants = () => {
               </p>
             </div>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/variants/new">
+              <Link to="/admin/variants/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Nueva Variante
+                <span>Nueva Variante</span>
               </Link>
             </Button>
           </div>
@@ -287,9 +287,9 @@ const Variants = () => {
               {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primera variante de producto'}
             </p>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/variants/new">
+              <Link to="/admin/variants/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Variante
+                <span>Crear Variante</span>
               </Link>
             </Button>
           </div>

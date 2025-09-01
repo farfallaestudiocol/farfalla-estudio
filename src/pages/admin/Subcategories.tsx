@@ -162,9 +162,9 @@ const Subcategories = () => {
               </p>
             </div>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/subcategories/new">
+              <Link to="/admin/subcategories/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Nueva Subcategoría
+                <span>Nueva Subcategoría</span>
               </Link>
             </Button>
           </div>
@@ -277,9 +277,9 @@ const Subcategories = () => {
               {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primera subcategoría'}
             </p>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/subcategories/new">
+              <Link to="/admin/subcategories/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Subcategoría
+                <span>Crear Subcategoría</span>
               </Link>
             </Button>
           </div>

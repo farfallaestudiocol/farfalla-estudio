@@ -152,9 +152,9 @@ const Categories = () => {
               </p>
             </div>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/categories/new">
+              <Link to="/admin/categories/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Nueva Categoría
+                <span>Nueva Categoría</span>
               </Link>
             </Button>
           </div>
@@ -264,9 +264,9 @@ const Categories = () => {
               {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primera categoría'}
             </p>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/categories/new">
+              <Link to="/admin/categories/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Categoría
+                <span>Crear Categoría</span>
               </Link>
             </Button>
           </div>

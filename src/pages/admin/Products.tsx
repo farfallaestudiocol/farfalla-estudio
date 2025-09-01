@@ -168,9 +168,9 @@ const Products = () => {
               </p>
             </div>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/products/new">
+              <Link to="/admin/products/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Nuevo Producto
+                <span>Nuevo Producto</span>
               </Link>
             </Button>
           </div>
@@ -293,9 +293,9 @@ const Products = () => {
               {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primer producto'}
             </p>
             <Button asChild className="farfalla-btn-primary">
-              <Link to="/admin/products/new">
+              <Link to="/admin/products/new" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Producto
+                <span>Crear Producto</span>
               </Link>
             </Button>
           </div>
