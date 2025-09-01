@@ -48,8 +48,8 @@ Deno.serve(async (req) => {
     // Convert amount to cents (Wompi expects cents)
     const amountInCents = Math.round(amount * 100)
 
-    // Create the string to sign: reference^amount_in_cents^currency^integrity_secret
-    const stringToSign = `${reference}^${amountInCents}^${currency}^${integritySecret}`
+    // Create the string to sign: reference+amount_in_cents+currency+integrity_secret (concatenated without separators)
+    const stringToSign = `${reference}${amountInCents}${currency}${integritySecret}`
 
     console.log('Generating signature for:', { reference, amountInCents, currency })
 
