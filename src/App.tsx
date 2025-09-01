@@ -6,11 +6,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthCheck } from "@/components/AuthCheck";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import CategoryPage from "./pages/CategoryPage";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import Categories from "./pages/admin/Categories";
 import CategoryForm from "./pages/admin/CategoryForm";
+import Subcategories from "./pages/admin/Subcategories";
+import SubcategoryForm from "./pages/admin/SubcategoryForm";
+import Variants from "./pages/admin/Variants";
+import VariantForm from "./pages/admin/VariantForm";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
@@ -61,6 +66,37 @@ const App = () => (
               <CategoryForm />
             </AuthCheck>
           } />
+          <Route path="/admin/subcategories" element={
+            <AuthCheck requireAdmin={true}>
+              <Subcategories />
+            </AuthCheck>
+          } />
+          <Route path="/admin/subcategories/new" element={
+            <AuthCheck requireAdmin={true}>
+              <SubcategoryForm />
+            </AuthCheck>
+          } />
+          <Route path="/admin/subcategories/edit/:id" element={
+            <AuthCheck requireAdmin={true}>
+              <SubcategoryForm />
+            </AuthCheck>
+          } />
+          <Route path="/admin/variants" element={
+            <AuthCheck requireAdmin={true}>
+              <Variants />
+            </AuthCheck>
+          } />
+          <Route path="/admin/variants/new" element={
+            <AuthCheck requireAdmin={true}>
+              <VariantForm />
+            </AuthCheck>
+          } />
+          <Route path="/admin/variants/edit/:id" element={
+            <AuthCheck requireAdmin={true}>
+              <VariantForm />
+            </AuthCheck>
+          } />
+          <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
           <Route path="/admin/content" element={
             <AuthCheck requireAdmin={true}>
               <Content />

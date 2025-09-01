@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   Package, 
   FolderOpen, 
+  Layers,
+  Shuffle,
   FileText, 
   Settings, 
   Users, 
@@ -22,6 +24,8 @@ const Dashboard = () => {
   const [counts, setCounts] = useState({
     products: 0,
     categories: 0,
+    subcategories: 0,
+    variants: 0,
     content: 0,
     settings: 0
   });
@@ -29,9 +33,11 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [productsResult, categoriesResult, contentResult, settingsResult] = await Promise.all([
+        const [productsResult, categoriesResult, subcategoriesResult, variantsResult, contentResult, settingsResult] = await Promise.all([
           supabase.from('products').select('id', { count: 'exact', head: true }),
           supabase.from('categories').select('id', { count: 'exact', head: true }),
+          supabase.from('subcategories').select('id', { count: 'exact', head: true }),
+          supabase.from('product_variants').select('id', { count: 'exact', head: true }),
           supabase.from('site_content').select('id', { count: 'exact', head: true }),
           supabase.from('site_settings').select('id', { count: 'exact', head: true })
         ]);
@@ -39,6 +45,8 @@ const Dashboard = () => {
         setCounts({
           products: productsResult.count || 0,
           categories: categoriesResult.count || 0,
+          subcategories: subcategoriesResult.count || 0,
+          variants: variantsResult.count || 0,
           content: contentResult.count || 0,
           settings: settingsResult.count || 0
         });
@@ -76,6 +84,30 @@ const Dashboard = () => {
       ]
     },
     {
+      title: 'Subcategorías',
+      description: 'Gestionar subcategorías dentro de cada categoría',
+      icon: <Layers className="h-8 w-8" />,
+      href: '/admin/subcategories',
+      color: 'bg-primary/10 text-primary',
+      count: counts.subcategories.toString(),
+      actions: [
+        { label: 'Ver todas', href: '/admin/subcategories', icon: <Eye className="h-4 w-4" /> },
+        { label: 'Agregar', href: '/admin/subcategories/new', icon: <Plus className="h-4 w-4" /> }
+      ]
+    },
+    {
+      title: 'Variantes',
+      description: 'Administrar variantes de productos (Niño, Niña, etc.)',
+      icon: <Shuffle className="h-8 w-8" />,
+      href: '/admin/variants',
+      color: 'bg-farfalla-teal/10 text-farfalla-teal',
+      count: counts.variants.toString(),
+      actions: [
+        { label: 'Ver todas', href: '/admin/variants', icon: <Eye className="h-4 w-4" /> },
+        { label: 'Agregar', href: '/admin/variants/new', icon: <Plus className="h-4 w-4" /> }
+      ]
+    },
+    {
       title: 'Contenido del Sitio',
       description: 'Editar secciones y contenido de la página',
       icon: <FileText className="h-8 w-8" />,
@@ -103,8 +135,8 @@ const Dashboard = () => {
   const stats = [
     { label: 'Productos Activos', value: counts.products.toString(), change: '+3 este mes' },
     { label: 'Categorías', value: counts.categories.toString(), change: 'Sin cambios' },
-    { label: 'Secciones de Contenido', value: counts.content.toString(), change: '+2 actualizadas' },
-    { label: 'Configuraciones', value: counts.settings.toString(), change: '5 modificadas' }
+    { label: 'Subcategorías', value: counts.subcategories.toString(), change: '+1 nueva' },
+    { label: 'Variantes', value: counts.variants.toString(), change: '+5 agregadas' }
   ];
 
   return (
@@ -217,9 +249,15 @@ const Dashboard = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/admin/categories/new">
+                  <Link to="/admin/subcategories/new">
                     <Plus className="h-4 w-4 mr-2" />
-                    Nueva Categoría
+                    Nueva Subcategoría
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/admin/variants/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nueva Variante
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
