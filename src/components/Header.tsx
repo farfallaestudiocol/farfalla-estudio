@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
@@ -58,41 +57,34 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex">
-            <NavigationMenu>
-              <NavigationMenuList className="space-x-2">
-                {visibleCategories.map((category) => (
-                  <NavigationMenuItem key={category.id}>
-                    <NavigationMenuLink
-                      href={`/categoria/${category.slug}`}
-                      className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200 px-3 py-2 rounded-md"
-                    >
-                      {category.name}
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                ))}
-                {hiddenCategories.length > 0 && (
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-farfalla-ink hover:text-primary font-inter font-medium">
-                      Más <ChevronDown className="ml-1 h-3 w-3" />
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="grid gap-1 p-2 w-48">
-                        {hiddenCategories.map((category) => (
-                          <NavigationMenuLink
-                            key={category.id}
-                            href={`/categoria/${category.slug}`}
-                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                          >
-                            <div className="text-sm font-medium leading-none">{category.name}</div>
-                          </NavigationMenuLink>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                )}
-              </NavigationMenuList>
-            </NavigationMenu>
+          <nav className="hidden md:flex items-center space-x-6">
+            {visibleCategories.map((category) => (
+              <a
+                key={category.id}
+                href={`/categoria/${category.slug}`}
+                className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200"
+              >
+                {category.name}
+              </a>
+            ))}
+            {hiddenCategories.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-farfalla-ink hover:text-primary font-inter font-medium p-0 h-auto">
+                    Más <ChevronDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="z-50 bg-background">
+                  {hiddenCategories.map((category) => (
+                    <DropdownMenuItem key={category.id} asChild>
+                      <a href={`/categoria/${category.slug}`} className="w-full">
+                        {category.name}
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
 
           {/* Search Bar - Desktop */}
