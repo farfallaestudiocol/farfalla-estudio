@@ -132,33 +132,36 @@ export function AdminSidebar() {
               {hierarchyItems.map((item) => (
                 <Collapsible key={item.title} defaultOpen={isGroupActive(item)}>
                   <SidebarMenuItem>
-                    <CollapsibleTrigger className="w-full">
-                      <SidebarMenuButton 
-                        className="w-full justify-between" 
-                        isActive={isActive(item.url)}
-                      >
-                        <div className="flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <div className="flex w-full">
+                        <SidebarMenuButton 
+                          className="flex-1 justify-start" 
+                          isActive={isActive(item.url)}
+                          onClick={() => navigate(item.url)}
+                        >
                           <item.icon className="size-4" />
                           <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
-                        </div>
-                        <ChevronRight className={`size-4 transition-transform group-data-[state=open]:rotate-90 ${collapsed ? 'hidden' : ''}`} />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent className={collapsed ? 'hidden' : ''}>
-                      <SidebarMenuSub>
-                        {item.children.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton 
-                              isActive={isActive(subItem.url)}
-                              onClick={() => navigate(subItem.url)}
-                            >
-                              <span>{subItem.title}</span>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
+                        </SidebarMenuButton>
+                        <CollapsibleTrigger className={`p-2 hover:bg-accent ${collapsed ? 'hidden' : ''}`}>
+                          <ChevronRight className="size-4 transition-transform group-data-[state=open]:rotate-90" />
+                        </CollapsibleTrigger>
+                      </div>
+                      
+                      <CollapsibleContent className={collapsed ? 'hidden' : ''}>
+                        <SidebarMenuSub>
+                          {item.children.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton 
+                                isActive={isActive(subItem.url)}
+                                onClick={() => navigate(subItem.url)}
+                              >
+                                <span>{subItem.title}</span>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </div>
                   </SidebarMenuItem>
                 </Collapsible>
               ))}
