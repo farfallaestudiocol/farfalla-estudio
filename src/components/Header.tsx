@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount] = useState(3); // Mock cart count
+  const { user, profile, signOut } = useAuth();
 
   const navigation = [
     { name: "Invitaciones", href: "/categoria/invitaciones" },
@@ -61,9 +64,44 @@ const Header = () => {
             </Button>
 
             {/* User Account */}
-            <Button variant="ghost" size="icon" className="text-farfalla-ink hover:text-primary">
-              <User className="h-5 w-5" />
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-farfalla-ink hover:text-primary">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className="px-2 py-1.5 text-sm">
+                    <div className="font-medium">{profile?.full_name || "Usuario"}</div>
+                    <div className="text-muted-foreground">{user.email}</div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  {profile?.role === 'admin' && (
+                    <>
+                      <DropdownMenuItem onClick={() => window.location.href = '/admin'}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Panel Admin
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-farfalla-ink hover:text-primary"
+                onClick={() => window.location.href = '/auth'}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            )}
 
             {/* Shopping Cart */}
             <Button variant="ghost" size="icon" className="relative text-farfalla-ink hover:text-primary">
