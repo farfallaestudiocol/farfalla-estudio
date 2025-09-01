@@ -10,7 +10,8 @@ import {
   Settings, 
   BarChart3,
   ChevronRight,
-  Home
+  Home,
+  ShoppingCart
 } from 'lucide-react';
 
 import {
@@ -69,6 +70,11 @@ const hierarchyItems = [
 ];
 
 const managementItems = [
+  {
+    title: "Órdenes",
+    url: "/admin/orders",
+    icon: ShoppingCart
+  },
   {
     title: "Contenido del Sitio",
     url: "/admin/content",

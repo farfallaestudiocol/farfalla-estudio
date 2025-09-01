@@ -72,6 +72,7 @@ import Subcategories from "./pages/admin/Subcategories";
 import SubcategoryForm from "./pages/admin/SubcategoryForm";
 import Variants from "./pages/admin/Variants";
 import VariantForm from "./pages/admin/VariantForm";
+import AdminOrders from "./pages/admin/Orders";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
@@ -108,6 +109,7 @@ const App = () => (
                         <Route path="variants" element={<Variants />} />
                         <Route path="variants/new" element={<VariantForm />} />
                         <Route path="variants/edit/:id" element={<VariantForm />} />
+                        <Route path="orders" element={<AdminOrders />} />
                         <Route path="content" element={<Content />} />
                         <Route path="settings" element={<Settings />} />
                       </Routes>
