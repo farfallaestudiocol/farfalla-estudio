@@ -22,10 +22,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {/* Header */}
           <header className="sticky top-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-border">
             <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
+              <SidebarTrigger className="p-2">
+                <Menu className="h-5 w-5" />
               </SidebarTrigger>
               
               <div className="flex-1" />
