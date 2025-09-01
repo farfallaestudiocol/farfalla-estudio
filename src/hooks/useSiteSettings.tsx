@@ -38,7 +38,7 @@ const defaultSettings: SiteSettings = {
   wompi_environment: 'test',
   company_name: 'Farfalla Estudio',
   company_logo_url: '',
-  company_description: 'Tu destino para productos de belleza de alta calidad. Descubre tu mejor versión con nuestra selección cuidadosamente curada.',
+  company_description: 'Artículos personalizados hechos con el corazón',
   contact_email: 'hola@farfallaestudio.co',
   contact_phone: '+57 300 123 4567',
   contact_city: 'Bogotá',
