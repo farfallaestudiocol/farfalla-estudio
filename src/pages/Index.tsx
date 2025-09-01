@@ -159,31 +159,59 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300">
-              <div className="w-16 h-16 bg-farfalla-teal/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-farfalla-teal/20 transition-colors">
-                <Sparkles className="h-8 w-8 text-farfalla-teal" />
-              </div>
-              <h3 className="text-xl font-poppins font-semibold text-farfalla-ink mb-3">Invitaciones</h3>
-              <p className="text-muted-foreground">Diseños únicos para bodas, quinceañeros y eventos especiales</p>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="farfalla-card p-8 animate-pulse">
+                  <div className="w-16 h-16 bg-muted rounded-2xl mx-auto mb-6"></div>
+                  <div className="h-6 bg-muted rounded w-3/4 mx-auto mb-3"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                </div>
+              ))}
             </div>
+          ) : categories.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {categories.map((category, index) => {
+                const getIcon = (name: string) => {
+                  if (name.toLowerCase().includes('invitacion')) return <Sparkles className="h-8 w-8 text-farfalla-teal" />;
+                  if (name.toLowerCase().includes('decoracion')) return <Heart className="h-8 w-8 text-farfalla-pink" />;
+                  if (name.toLowerCase().includes('recuerdo')) return <Leaf className="h-8 w-8 text-farfalla-teal" />;
+                  if (name.toLowerCase().includes('papeleria')) return <Scissors className="h-8 w-8 text-farfalla-pink" />;
+                  return <Gift className="h-8 w-8 text-farfalla-teal" />;
+                };
+                
+                const getColorClass = (index: number) => {
+                  const colors = ['bg-farfalla-teal/10', 'bg-farfalla-pink/10'];
+                  return colors[index % colors.length];
+                };
+                
+                const getHoverColorClass = (index: number) => {
+                  const colors = ['group-hover:bg-farfalla-teal/20', 'group-hover:bg-farfalla-pink/20'];
+                  return colors[index % colors.length];
+                };
 
-            <div className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300">
-              <div className="w-16 h-16 bg-farfalla-pink/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-farfalla-pink/20 transition-colors">
-                <Heart className="h-8 w-8 text-farfalla-pink" />
-              </div>
-              <h3 className="text-xl font-poppins font-semibold text-farfalla-ink mb-3">Decoración</h3>
-              <p className="text-muted-foreground">Flores de papel y elementos decorativos artesanales</p>
+                return (
+                  <div key={category.id} className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300">
+                    <div className={`w-16 h-16 ${getColorClass(index)} rounded-2xl flex items-center justify-center mx-auto mb-6 ${getHoverColorClass(index)} transition-colors`}>
+                      {getIcon(category.name)}
+                    </div>
+                    <h3 className="text-xl font-poppins font-semibold text-farfalla-ink mb-3">{category.name}</h3>
+                    <p className="text-muted-foreground">{category.description || `Productos de ${category.name.toLowerCase()} personalizados`}</p>
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300">
-              <div className="w-16 h-16 bg-farfalla-teal/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-farfalla-teal/20 transition-colors">
-                <Leaf className="h-8 w-8 text-farfalla-teal" />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              <div className="farfalla-card p-8 text-center">
+                <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Gift className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-poppins font-semibold text-farfalla-ink mb-3">Próximamente</h3>
+                <p className="text-muted-foreground">Nuevas categorías de productos estarán disponibles pronto</p>
               </div>
-              <h3 className="text-xl font-poppins font-semibold text-farfalla-ink mb-3">Recuerdos</h3>
-              <p className="text-muted-foreground">Álbumes y libros personalizados para guardar tus memorias</p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
