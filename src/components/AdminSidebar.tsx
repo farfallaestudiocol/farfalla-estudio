@@ -104,7 +104,7 @@ export function AdminSidebar() {
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
                       <BarChart3 className="size-4" />
                     </div>
-                    {!collapsed && <span className="font-semibold">Dashboard</span>}
+                    <span className={`font-semibold ${collapsed ? 'hidden' : ''}`}>Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -173,7 +173,7 @@ export function AdminSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="size-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -190,7 +190,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton asChild>
                   <Link to="/" className="flex items-center gap-2">
                     <Home className="size-4" />
-                    {!collapsed && <span>Volver al Sitio</span>}
+                    <span className={collapsed ? 'hidden' : ''}>Volver al Sitio</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
