@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, 
   Save,
   Settings as SettingsIcon,
-  ArrowLeft
+  Truck,
+  DollarSign,
+  ShoppingBag
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface SiteSetting {
   id: string;
@@ -30,6 +35,8 @@ const Settings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSettings, setFilteredSettings] = useState<SiteSetting[]>([]);
   const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const { settings: siteSettings, refreshSettings } = useSiteSettings();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchSettings();
@@ -74,7 +81,35 @@ const Settings = () => {
     }
   };
 
-  const saveSetting = async (settingId: string) => {
+  const saveSetting = async (settingKey: string, value: string | boolean | number) => {
+    try {
+      const stringValue = typeof value === 'boolean' ? value.toString() : value.toString();
+      
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ setting_value: stringValue })
+        .eq('setting_key', settingKey);
+
+      if (error) throw error;
+
+      // Refresh site settings
+      await refreshSettings();
+
+      toast({
+        title: 'Éxito',
+        description: 'Configuración guardada correctamente',
+      });
+    } catch (error) {
+      console.error('Error saving setting:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo guardar la configuración',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const saveSettingById = async (settingId: string) => {
     try {
       const { error } = await supabase
         .from('site_settings')
@@ -213,87 +248,266 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen farfalla-section-gradient">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
-                Configuración del Sitio
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Ajusta los parámetros generales del sitio web
-              </p>
-            </div>
-            <Button onClick={saveAllSettings} className="farfalla-btn-primary">
-              <Save className="h-4 w-4 mr-2" />
-              Guardar Todo
-            </Button>
-          </div>
+          <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
+            Configuración del Sitio
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Ajusta los parámetros generales del sitio web
+          </p>
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar configuraciones..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+        <Tabs defaultValue="ecommerce" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ecommerce" className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              E-commerce
+            </TabsTrigger>
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <SettingsIcon className="h-4 w-4" />
+              General
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Settings */}
-        <div className="space-y-4">
-          {filteredSettings.map((setting) => (
-            <Card key={setting.id} className="farfalla-card">
+          {/* E-commerce Settings */}
+          <TabsContent value="ecommerce" className="space-y-6">
+            {/* Shipping Configuration */}
+            <Card className="farfalla-card">
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-poppins text-farfalla-ink">
-                      {formatSettingKey(setting.setting_key)}
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      {setting.description || `Configuración: ${setting.setting_key}`}
-                    </CardDescription>
+                <CardTitle className="flex items-center gap-2 text-farfalla-ink">
+                  <Truck className="h-5 w-5" />
+                  Configuración de Envío
+                </CardTitle>
+                <CardDescription>
+                  Configura los parámetros de envío y envío gratis
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Shipping Enabled */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="shipping_enabled">Habilitar Envío</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Activar el cálculo de costos de envío
+                    </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => saveSetting(setting.id)}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
+                  <Switch
+                    id="shipping_enabled"
+                    checked={siteSettings?.shipping_enabled || false}
+                    onCheckedChange={(checked) => saveSetting('shipping_enabled', checked)}
+                  />
                 </div>
+
+                {siteSettings?.shipping_enabled && (
+                  <>
+                    <Separator />
+                    
+                    {/* Shipping Cost */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="shipping_cost">Costo de Envío (COP)</Label>
+                        <Input
+                          id="shipping_cost"
+                          type="number"
+                          value={siteSettings?.shipping_cost || 0}
+                          onChange={(e) => saveSetting('shipping_cost', parseInt(e.target.value) || 0)}
+                          placeholder="15000"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Costo estándar de envío en pesos colombianos
+                        </p>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Free Shipping */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="free_shipping_enabled">Envío Gratis</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Ofrecer envío gratis a partir de un monto mínimo
+                        </p>
+                      </div>
+                      <Switch
+                        id="free_shipping_enabled"
+                        checked={siteSettings?.free_shipping_enabled || false}
+                        onCheckedChange={(checked) => saveSetting('free_shipping_enabled', checked)}
+                      />
+                    </div>
+
+                    {siteSettings?.free_shipping_enabled && (
+                      <div className="space-y-2">
+                        <Label htmlFor="free_shipping_minimum">Monto Mínimo para Envío Gratis (COP)</Label>
+                        <Input
+                          id="free_shipping_minimum"
+                          type="number"
+                          value={siteSettings?.free_shipping_minimum || 0}
+                          onChange={(e) => saveSetting('free_shipping_minimum', parseInt(e.target.value) || 0)}
+                          placeholder="150000"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Compras superiores a este monto tendrán envío gratis
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Tax Configuration */}
+            <Card className="farfalla-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-farfalla-ink">
+                  <DollarSign className="h-5 w-5" />
+                  Configuración de Impuestos
+                </CardTitle>
+                <CardDescription>
+                  Configura el IVA y otros impuestos
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Tax Enabled */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="tax_enabled">Habilitar IVA</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Calcular y mostrar impuestos en el checkout
+                    </p>
+                  </div>
+                  <Switch
+                    id="tax_enabled"
+                    checked={siteSettings?.tax_enabled || false}
+                    onCheckedChange={(checked) => saveSetting('tax_enabled', checked)}
+                  />
+                </div>
+
+                {siteSettings?.tax_enabled && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <Label htmlFor="tax_rate">Tasa de IVA (%)</Label>
+                      <Input
+                        id="tax_rate"
+                        type="number"
+                        step="0.01"
+                        value={(siteSettings?.tax_rate || 0) * 100}
+                        onChange={(e) => saveSetting('tax_rate', (parseFloat(e.target.value) || 0) / 100)}
+                        placeholder="19"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Tasa de IVA como porcentaje (ej: 19 para 19%)
+                      </p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Currency Configuration */}
+            <Card className="farfalla-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-farfalla-ink">
+                  <DollarSign className="h-5 w-5" />
+                  Moneda
+                </CardTitle>
+                <CardDescription>
+                  Configura la moneda del sitio
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Label htmlFor={setting.id}>
-                    {formatSettingKey(setting.setting_key)}
-                  </Label>
-                  {getInputComponent(setting)}
+                  <Label htmlFor="currency">Código de Moneda</Label>
+                  <Input
+                    id="currency"
+                    value={siteSettings?.currency || 'COP'}
+                    onChange={(e) => saveSetting('currency', e.target.value)}
+                    placeholder="COP"
+                    maxLength={3}
+                  />
                   <p className="text-xs text-muted-foreground">
-                    Tipo: {setting.setting_type} • Clave: {setting.setting_key}
+                    Código ISO de la moneda (ej: COP, USD, EUR)
                   </p>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          </TabsContent>
 
-        {filteredSettings.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <SettingsIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-farfalla-ink mb-2">
-              No se encontraron configuraciones
-            </h3>
-            <p className="text-muted-foreground">
-              {searchTerm ? 'Intenta con otros términos de búsqueda' : 'No hay configuraciones disponibles'}
-            </p>
-          </div>
-        )}
+          {/* General Settings */}
+          <TabsContent value="general" className="space-y-6">
+            {/* Search */}
+            <div className="mb-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar configuraciones..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button onClick={saveAllSettings} className="farfalla-btn-primary">
+                  <Save className="h-4 w-4 mr-2" />
+                  Guardar Todo
+                </Button>
+              </div>
+            </div>
+
+            {/* All Settings */}
+            <div className="space-y-4">
+              {filteredSettings.map((setting) => (
+                <Card key={setting.id} className="farfalla-card">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-poppins text-farfalla-ink">
+                          {formatSettingKey(setting.setting_key)}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {setting.description || `Configuración: ${setting.setting_key}`}
+                        </CardDescription>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => saveSettingById(setting.id)}
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Label htmlFor={setting.id}>
+                        {formatSettingKey(setting.setting_key)}
+                      </Label>
+                      {getInputComponent(setting)}
+                      <p className="text-xs text-muted-foreground">
+                        Tipo: {setting.setting_type} • Clave: {setting.setting_key}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {filteredSettings.length === 0 && !loading && (
+              <div className="text-center py-12">
+                <SettingsIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-farfalla-ink mb-2">
+                  No se encontraron configuraciones
+                </h3>
+                <p className="text-muted-foreground">
+                  {searchTerm ? 'Intenta con otros términos de búsqueda' : 'No hay configuraciones disponibles'}
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

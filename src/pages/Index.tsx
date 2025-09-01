@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -38,6 +39,18 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { toggleWishlist } = useWishlist();
+  const { settings } = useSiteSettings();
+
+  const formatPrice = (price: number) => {
+    const currency = settings?.currency || 'COP';
+    const locale = currency === 'COP' ? 'es-CO' : 'es-ES';
+    
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   useEffect(() => {
     fetchData();
@@ -281,23 +294,29 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 farfalla-section-overlay">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="farfalla-glass p-8 md:p-12 text-center farfalla-glow">
-            <Truck className="h-16 w-16 text-farfalla-teal mx-auto mb-6" />
-            <h2 className="text-2xl md:text-3xl font-poppins font-bold text-farfalla-ink mb-4">
-              Envío Gratis en Compras Superiores a $150.000
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Recibe tus creaciones artesanales sin costo adicional. Entregas cuidadosas para preservar cada detalle.
-            </p>
-            <Button className="farfalla-btn-primary">
-              Ver Creaciones
-            </Button>
-          </div>
-        </div>
-      </section>
+            {/* CTA Section */}
+            <section className="py-16 farfalla-section-overlay">
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="farfalla-glass p-8 md:p-12 text-center farfalla-glow">
+                  <Truck className="h-16 w-16 text-farfalla-teal mx-auto mb-6" />
+                  <h2 className="text-2xl md:text-3xl font-poppins font-bold text-farfalla-ink mb-4">
+                    {settings?.free_shipping_enabled && settings?.free_shipping_minimum 
+                      ? `Envío Gratis en Compras Superiores a ${formatPrice(settings.free_shipping_minimum)}`
+                      : 'Recibe tus creaciones con el mejor cuidado'
+                    }
+                  </h2>
+                  <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    {settings?.free_shipping_enabled && settings?.free_shipping_minimum
+                      ? 'Recibe tus creaciones artesanales sin costo adicional. Entregas cuidadosas para preservar cada detalle.'
+                      : 'Entregas cuidadosas para preservar cada detalle de tus creaciones artesanales.'
+                    }
+                  </p>
+                  <Button className="farfalla-btn-primary">
+                    Ver Creaciones
+                  </Button>
+                </div>
+              </div>
+            </section>
 
       <Footer />
     </div>

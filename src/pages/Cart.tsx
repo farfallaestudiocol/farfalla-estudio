@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -27,17 +28,39 @@ const Cart = () => {
     getCartTotal,
     getCartCount 
   } = useCart();
+  
+  const { settings } = useSiteSettings();
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    const currency = settings?.currency || 'COP';
+    const locale = currency === 'COP' ? 'es-CO' : 'es-ES';
+    
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'COP',
+      currency,
       minimumFractionDigits: 0,
     }).format(price);
   };
 
-  const shipping = getCartTotal() >= 150000 ? 0 : 15000;
-  const tax = Math.round(getCartTotal() * 0.19); // 19% IVA
+  // Calculate shipping based on settings
+  const calculateShipping = () => {
+    if (!settings?.shipping_enabled) return 0;
+    if (!settings?.free_shipping_enabled) return settings?.shipping_cost || 0;
+    
+    const cartTotal = getCartTotal();
+    const freeShippingMin = settings?.free_shipping_minimum || 0;
+    
+    return cartTotal >= freeShippingMin ? 0 : (settings?.shipping_cost || 0);
+  };
+
+  // Calculate tax based on settings
+  const calculateTax = () => {
+    if (!settings?.tax_enabled) return 0;
+    return Math.round(getCartTotal() * (settings?.tax_rate || 0));
+  };
+
+  const shipping = calculateShipping();
+  const tax = calculateTax();
   const finalTotal = getCartTotal() + shipping + tax;
 
   if (isLoading) {
@@ -210,28 +233,32 @@ const Cart = () => {
                       <span>{formatPrice(getCartTotal())}</span>
                     </div>
 
-                    <div className="flex justify-between">
-                      <span>Envío</span>
-                      <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
-                        {shipping === 0 ? 'Gratis' : formatPrice(shipping)}
-                      </span>
-                    </div>
+                    {settings?.shipping_enabled && (
+                      <div className="flex justify-between">
+                        <span>Envío</span>
+                        <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
+                          {shipping === 0 ? 'Gratis' : formatPrice(shipping)}
+                        </span>
+                      </div>
+                    )}
 
-                    <div className="flex justify-between">
-                      <span>IVA (19%)</span>
-                      <span>{formatPrice(tax)}</span>
-                    </div>
+                    {settings?.tax_enabled && tax > 0 && (
+                      <div className="flex justify-between">
+                        <span>IVA ({Math.round((settings?.tax_rate || 0) * 100)}%)</span>
+                        <span>{formatPrice(tax)}</span>
+                      </div>
+                    )}
 
-                    {shipping === 0 && (
+                    {settings?.free_shipping_enabled && shipping === 0 && getCartTotal() >= (settings?.free_shipping_minimum || 0) && (
                       <div className="flex items-center gap-2 text-sm text-green-600">
                         <Truck className="h-4 w-4" />
                         <span>¡Envío gratis aplicado!</span>
                       </div>
                     )}
 
-                    {shipping > 0 && (
+                    {settings?.free_shipping_enabled && shipping > 0 && (
                       <div className="text-sm text-muted-foreground">
-                        Agrega {formatPrice(150000 - getCartTotal())} más para envío gratis
+                        Agrega {formatPrice((settings?.free_shipping_minimum || 0) - getCartTotal())} más para envío gratis
                       </div>
                     )}
 
