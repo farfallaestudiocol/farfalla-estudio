@@ -100,7 +100,7 @@ export function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild size="lg" isActive={currentPath === "/admin"}>
-                  <Link to="/admin">
+                  <Link to="/admin" className="flex items-center gap-2">
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
                       <BarChart3 className="size-4" />
                     </div>
@@ -171,7 +171,7 @@ export function AdminSidebar() {
               {managementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <Link to={item.url}>
+                    <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="size-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </Link>
@@ -188,7 +188,7 @@ export function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to="/">
+                  <Link to="/" className="flex items-center gap-2">
                     <Home className="size-4" />
                     {!collapsed && <span>Volver al Sitio</span>}
                   </Link>

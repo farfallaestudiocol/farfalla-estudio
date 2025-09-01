@@ -78,11 +78,11 @@ const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="z-50 bg-background">
                   {hiddenCategories.map((category) => (
-                    <DropdownMenuItem key={category.id} asChild>
-                      <a href={`/categoria/${category.slug}`} className="w-full">
-                        {category.name}
-                      </a>
-                    </DropdownMenuItem>
+                      <DropdownMenuItem key={category.id} asChild>
+                        <a href={`/categoria/${category.slug}`} className="w-full cursor-pointer">
+                          {category.name}
+                        </a>
+                      </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -139,16 +139,26 @@ const Header = () => {
                   <DropdownMenuSeparator />
                   {profile?.role === 'admin' && (
                     <>
-                      <DropdownMenuItem onClick={() => window.location.href = '/admin'}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Panel Admin</span>
+                      <DropdownMenuItem asChild>
+                        <button 
+                          onClick={() => window.location.href = '/admin'}
+                          className="flex items-center w-full px-2 py-1.5 text-left"
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Panel Admin</span>
+                        </button>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar Sesión</span>
+                  <DropdownMenuItem asChild>
+                    <button 
+                      onClick={signOut}
+                      className="flex items-center w-full px-2 py-1.5 text-left"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Cerrar Sesión</span>
+                    </button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
