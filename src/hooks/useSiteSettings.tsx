@@ -10,6 +10,15 @@ interface SiteSettings {
   tax_rate: number;
   currency: string;
   wompi_environment: string;
+  company_name: string;
+  company_logo_url: string;
+  company_description: string;
+  contact_email: string;
+  contact_phone: string;
+  contact_city: string;
+  contact_address: string;
+  social_instagram: string;
+  social_facebook: string;
 }
 
 interface SiteSettingsContextType {
@@ -27,6 +36,15 @@ const defaultSettings: SiteSettings = {
   tax_rate: 0.19,
   currency: 'COP',
   wompi_environment: 'test',
+  company_name: 'Farfalla Estudio',
+  company_logo_url: '',
+  company_description: 'Tu destino para productos de belleza de alta calidad. Descubre tu mejor versión con nuestra selección cuidadosamente curada.',
+  contact_email: 'hola@farfallaestudio.co',
+  contact_phone: '+57 300 123 4567',
+  contact_city: 'Bogotá',
+  contact_address: 'Bogotá, Colombia',
+  social_instagram: 'https://instagram.com/farfallaestudio',
+  social_facebook: 'https://facebook.com/farfallaestudio',
 };
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
@@ -48,7 +66,16 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'tax_enabled',
           'tax_rate',
           'currency',
-          'wompi_environment'
+          'wompi_environment',
+          'company_name',
+          'company_logo_url',
+          'company_description',
+          'contact_email',
+          'contact_phone',
+          'contact_city',
+          'contact_address',
+          'social_instagram',
+          'social_facebook'
         ]);
 
       if (error) throw error;
