@@ -71,8 +71,9 @@ const Header = () => {
             {hiddenCategories.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-muted-foreground hover:text-primary font-inter font-medium p-0 h-auto">
-                    Más <ChevronDown className="ml-1 h-3 w-3" />
+                  <Button variant="ghost" className="text-muted-foreground hover:text-primary font-inter font-medium p-0 h-auto flex items-center">
+                    <span>Más</span>
+                    <ChevronDown className="ml-1 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="z-50 bg-background">
@@ -140,14 +141,14 @@ const Header = () => {
                     <>
                       <DropdownMenuItem onClick={() => window.location.href = '/admin'}>
                         <Settings className="mr-2 h-4 w-4" />
-                        Panel Admin
+                        <span>Panel Admin</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
                   )}
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    Cerrar Sesión
+                    <span>Cerrar Sesión</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
