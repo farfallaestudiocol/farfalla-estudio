@@ -50,6 +50,53 @@ export type Database = {
         }
         Relationships: []
       }
+      product_variants: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number | null
+          product_id: string
+          sku: string | null
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          product_id: string
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          product_id?: string
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_id: string | null
@@ -68,6 +115,7 @@ export type Database = {
           sku: string | null
           slug: string
           stock_quantity: number | null
+          subcategory_id: string | null
           tags: string[] | null
           updated_at: string
         }
@@ -88,6 +136,7 @@ export type Database = {
           sku?: string | null
           slug: string
           stock_quantity?: number | null
+          subcategory_id?: string | null
           tags?: string[] | null
           updated_at?: string
         }
@@ -108,6 +157,7 @@ export type Database = {
           sku?: string | null
           slug?: string
           stock_quantity?: number | null
+          subcategory_id?: string | null
           tags?: string[] | null
           updated_at?: string
         }
@@ -117,6 +167,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
@@ -225,6 +282,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
