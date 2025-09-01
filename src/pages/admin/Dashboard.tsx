@@ -230,9 +230,9 @@ const Dashboard = () => {
                         size="sm"
                         className="w-full justify-start text-xs"
                       >
-                        <Link to={action.href}>
+                        <Link to={action.href} className="flex items-center gap-1">
                           {action.icon}
-                          {action.label}
+                          <span>{action.label}</span>
                         </Link>
                       </Button>
                     ))}
@@ -284,9 +284,9 @@ const Dashboard = () => {
                         size="sm"
                         className="flex items-center gap-2"
                       >
-                        <Link to={action.href}>
+                        <Link to={action.href} className="flex items-center gap-2">
                           {action.icon}
-                          {action.label}
+                          <span>{action.label}</span>
                         </Link>
                       </Button>
                     ))}
@@ -311,33 +311,33 @@ const Dashboard = () => {
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 <Button asChild className="farfalla-btn-primary">
-                  <Link to="/admin/products/new">
+                  <Link to="/admin/products/new" className="flex items-center">
                     <Plus className="h-4 w-4 mr-2" />
-                    Nuevo Producto
+                    <span>Nuevo Producto</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/admin/subcategories/new">
+                  <Link to="/admin/subcategories/new" className="flex items-center">
                     <Plus className="h-4 w-4 mr-2" />
-                    Nueva Subcategoría
+                    <span>Nueva Subcategoría</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/admin/variants/new">
+                  <Link to="/admin/variants/new" className="flex items-center">
                     <Plus className="h-4 w-4 mr-2" />
-                    Nueva Variante
+                    <span>Nueva Variante</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/admin/content">
+                  <Link to="/admin/content" className="flex items-center">
                     <Edit className="h-4 w-4 mr-2" />
-                    Editar Contenido
+                    <span>Editar Contenido</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/">
+                  <Link to="/" className="flex items-center">
                     <Eye className="h-4 w-4 mr-2" />
-                    Ver Sitio Web
+                    <span>Ver Sitio Web</span>
                   </Link>
                 </Button>
               </div>
