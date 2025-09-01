@@ -83,36 +83,28 @@ const Footer = () => {
 
             {/* Social Media */}
             <div className="flex gap-3 mt-6">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-primary"
-                asChild
+              <a 
+                href="https://instagram.com/farfallaestudio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
               >
-                <a href="https://instagram.com/farfallaestudio" target="_blank" rel="noopener noreferrer">
-                  <Instagram className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-primary"
-                asChild
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a 
+                href="https://facebook.com/farfallaestudio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
               >
-                <a href="https://facebook.com/farfallaestudio" target="_blank" rel="noopener noreferrer">
-                  <Facebook className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-primary"
-                asChild
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a 
+                href="mailto:hola@farfallaestudio.co"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
               >
-                <a href="mailto:hola@farfallaestudio.co">
-                  <Mail className="h-5 w-5" />
-                </a>
-              </Button>
+                <Mail className="h-5 w-5" />
+              </a>
             </div>
           </div>
 

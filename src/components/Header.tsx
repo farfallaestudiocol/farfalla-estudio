@@ -78,10 +78,12 @@ const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="z-50 bg-background">
                   {hiddenCategories.map((category) => (
-                      <DropdownMenuItem key={category.id} asChild>
-                        <a href={`/categoria/${category.slug}`} className="w-full cursor-pointer">
-                          {category.name}
-                        </a>
+                      <DropdownMenuItem 
+                        key={category.id} 
+                        className="w-full cursor-pointer"
+                        onSelect={() => window.location.href = `/categoria/${category.slug}`}
+                      >
+                        {category.name}
                       </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -139,26 +141,22 @@ const Header = () => {
                   <DropdownMenuSeparator />
                   {profile?.role === 'admin' && (
                     <>
-                      <DropdownMenuItem asChild>
-                        <button 
-                          onClick={() => window.location.href = '/admin'}
-                          className="flex items-center w-full px-2 py-1.5 text-left"
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Panel Admin</span>
-                        </button>
+                      <DropdownMenuItem 
+                        className="flex items-center w-full cursor-pointer"
+                        onSelect={() => window.location.href = '/admin'}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Panel Admin</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem asChild>
-                    <button 
-                      onClick={signOut}
-                      className="flex items-center w-full px-2 py-1.5 text-left"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </button>
+                  <DropdownMenuItem 
+                    className="flex items-center w-full cursor-pointer"
+                    onSelect={signOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -202,9 +202,9 @@ const ProductDetail = () => {
             <p className="text-muted-foreground mb-6">
               El producto que buscas no está disponible o no existe.
             </p>
-            <Button asChild className="farfalla-btn-primary">
-              <Link to="/">Volver al inicio</Link>
-            </Button>
+            <Link to="/" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+              Volver al inicio
+            </Link>
           </div>
         </div>
         <Footer />
