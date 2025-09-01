@@ -183,9 +183,9 @@ const SubcategoryForm = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Button asChild variant="outline" size="sm">
-              <Link to="/admin/subcategories">
+              <Link to="/admin/subcategories" className="flex items-center">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver a Subcategorías
+                <span>Volver a Subcategorías</span>
               </Link>
             </Button>
           </div>

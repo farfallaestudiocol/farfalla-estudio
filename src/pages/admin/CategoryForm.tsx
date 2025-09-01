@@ -162,9 +162,9 @@ const CategoryForm = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Button asChild variant="outline" size="sm">
-              <Link to="/admin/categories">
+              <Link to="/admin/categories" className="flex items-center">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver a Categorías
+                <span>Volver a Categorías</span>
               </Link>
             </Button>
           </div>

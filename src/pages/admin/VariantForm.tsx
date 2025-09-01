@@ -174,9 +174,9 @@ const VariantForm = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Button asChild variant="outline" size="sm">
-              <Link to="/admin/variants">
+              <Link to="/admin/variants" className="flex items-center">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver a Variantes
+                <span>Volver a Variantes</span>
               </Link>
             </Button>
           </div>

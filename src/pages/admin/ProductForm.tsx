@@ -249,9 +249,9 @@ const ProductForm = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Button asChild variant="outline" size="sm">
-              <Link to="/admin/products">
+              <Link to="/admin/products" className="flex items-center">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver a Productos
+                <span>Volver a Productos</span>
               </Link>
             </Button>
           </div>
