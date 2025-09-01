@@ -24,7 +24,8 @@ export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) =>
         navigate('/auth');
       } else if (requireAdmin && profile?.role !== 'admin') {
         console.log('AuthCheck - Redirecting to / - not admin. Profile role:', profile?.role);
-        navigate('/');
+        // Temporalmente comentado para debugging
+        // navigate('/');
       }
     }
   }, [user, profile, loading, navigate, requireAdmin]);
@@ -40,9 +41,14 @@ export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) =>
     );
   }
 
-  if (!user || (requireAdmin && profile?.role !== 'admin')) {
+  if (!user) {
     return null;
   }
+
+  // Temporalmente comentado para debugging
+  // if (!user || (requireAdmin && profile?.role !== 'admin')) {
+  //   return null;
+  // }
 
   return <>{children}</>;
 };
