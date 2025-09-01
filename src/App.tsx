@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthCheck } from "@/components/AuthCheck";
+import { AdminLayout } from "@/components/AdminLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CategoryPage from "./pages/CategoryPage";
@@ -32,83 +33,31 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={
+          <Route path="/admin/*" element={
             <AuthCheck requireAdmin={true}>
-              <Dashboard />
-            </AuthCheck>
-          } />
-          <Route path="/admin/products" element={
-            <AuthCheck requireAdmin={true}>
-              <Products />
-            </AuthCheck>
-          } />
-          <Route path="/admin/products/new" element={
-            <AuthCheck requireAdmin={true}>
-              <ProductForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/products/edit/:id" element={
-            <AuthCheck requireAdmin={true}>
-              <ProductForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/categories" element={
-            <AuthCheck requireAdmin={true}>
-              <Categories />
-            </AuthCheck>
-          } />
-          <Route path="/admin/categories/new" element={
-            <AuthCheck requireAdmin={true}>
-              <CategoryForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/categories/edit/:id" element={
-            <AuthCheck requireAdmin={true}>
-              <CategoryForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/subcategories" element={
-            <AuthCheck requireAdmin={true}>
-              <Subcategories />
-            </AuthCheck>
-          } />
-          <Route path="/admin/subcategories/new" element={
-            <AuthCheck requireAdmin={true}>
-              <SubcategoryForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/subcategories/edit/:id" element={
-            <AuthCheck requireAdmin={true}>
-              <SubcategoryForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/variants" element={
-            <AuthCheck requireAdmin={true}>
-              <Variants />
-            </AuthCheck>
-          } />
-          <Route path="/admin/variants/new" element={
-            <AuthCheck requireAdmin={true}>
-              <VariantForm />
-            </AuthCheck>
-          } />
-          <Route path="/admin/variants/edit/:id" element={
-            <AuthCheck requireAdmin={true}>
-              <VariantForm />
+              <AdminLayout>
+                <Routes>
+                  <Route index element={<Dashboard />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="products/new" element={<ProductForm />} />
+                  <Route path="products/edit/:id" element={<ProductForm />} />
+                  <Route path="categories" element={<Categories />} />
+                  <Route path="categories/new" element={<CategoryForm />} />
+                  <Route path="categories/edit/:id" element={<CategoryForm />} />
+                  <Route path="subcategories" element={<Subcategories />} />
+                  <Route path="subcategories/new" element={<SubcategoryForm />} />
+                  <Route path="subcategories/edit/:id" element={<SubcategoryForm />} />
+                  <Route path="variants" element={<Variants />} />
+                  <Route path="variants/new" element={<VariantForm />} />
+                  <Route path="variants/edit/:id" element={<VariantForm />} />
+                  <Route path="content" element={<Content />} />
+                  <Route path="settings" element={<Settings />} />
+                </Routes>
+              </AdminLayout>
             </AuthCheck>
           } />
           <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
           <Route path="/producto/:productSlug" element={<ProductDetail />} />
-          <Route path="/admin/content" element={
-            <AuthCheck requireAdmin={true}>
-              <Content />
-            </AuthCheck>
-          } />
-          <Route path="/admin/settings" element={
-            <AuthCheck requireAdmin={true}>
-              <Settings />
-            </AuthCheck>
-          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

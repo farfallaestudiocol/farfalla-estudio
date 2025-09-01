@@ -58,22 +58,11 @@ const Dashboard = () => {
     fetchCounts();
   }, []);
 
-  const adminCards = [
-    {
-      title: 'Productos',
-      description: 'Gestionar productos y su información',
-      icon: <Package className="h-8 w-8" />,
-      href: '/admin/products',
-      color: 'bg-farfalla-teal/10 text-farfalla-teal',
-      count: counts.products.toString(),
-      actions: [
-        { label: 'Ver todos', href: '/admin/products', icon: <Eye className="h-4 w-4" /> },
-        { label: 'Agregar', href: '/admin/products/new', icon: <Plus className="h-4 w-4" /> }
-      ]
-    },
+  // Reorganizar las tarjetas siguiendo la jerarquía
+  const hierarchyCards = [
     {
       title: 'Categorías',
-      description: 'Administrar categorías de productos',
+      description: 'Base de la jerarquía - Organización principal de productos',
       icon: <FolderOpen className="h-8 w-8" />,
       href: '/admin/categories',
       color: 'bg-farfalla-pink/10 text-farfalla-pink',
@@ -81,11 +70,12 @@ const Dashboard = () => {
       actions: [
         { label: 'Ver todas', href: '/admin/categories', icon: <Eye className="h-4 w-4" /> },
         { label: 'Agregar', href: '/admin/categories/new', icon: <Plus className="h-4 w-4" /> }
-      ]
+      ],
+      step: '1'
     },
     {
       title: 'Subcategorías',
-      description: 'Gestionar subcategorías dentro de cada categoría',
+      description: 'Segundo nivel - Subdivisions dentro de cada categoría',
       icon: <Layers className="h-8 w-8" />,
       href: '/admin/subcategories',
       color: 'bg-primary/10 text-primary',
@@ -93,11 +83,25 @@ const Dashboard = () => {
       actions: [
         { label: 'Ver todas', href: '/admin/subcategories', icon: <Eye className="h-4 w-4" /> },
         { label: 'Agregar', href: '/admin/subcategories/new', icon: <Plus className="h-4 w-4" /> }
-      ]
+      ],
+      step: '2'
+    },
+    {
+      title: 'Productos',
+      description: 'Tercer nivel - Productos principales dentro de las subcategorías',
+      icon: <Package className="h-8 w-8" />,
+      href: '/admin/products',
+      color: 'bg-farfalla-teal/10 text-farfalla-teal',
+      count: counts.products.toString(),
+      actions: [
+        { label: 'Ver todos', href: '/admin/products', icon: <Eye className="h-4 w-4" /> },
+        { label: 'Agregar', href: '/admin/products/new', icon: <Plus className="h-4 w-4" /> }
+      ],
+      step: '3'
     },
     {
       title: 'Variantes',
-      description: 'Administrar variantes de productos (Niño, Niña, etc.)',
+      description: 'Cuarto nivel - Variaciones específicas de cada producto',
       icon: <Shuffle className="h-8 w-8" />,
       href: '/admin/variants',
       color: 'bg-farfalla-teal/10 text-farfalla-teal',
@@ -105,8 +109,12 @@ const Dashboard = () => {
       actions: [
         { label: 'Ver todas', href: '/admin/variants', icon: <Eye className="h-4 w-4" /> },
         { label: 'Agregar', href: '/admin/variants/new', icon: <Plus className="h-4 w-4" /> }
-      ]
-    },
+      ],
+      step: '4'
+    }
+  ];
+
+  const managementCards = [
     {
       title: 'Contenido del Sitio',
       description: 'Editar secciones y contenido de la página',
@@ -140,22 +148,17 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen farfalla-section-gradient">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
-                Panel de Administración
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Bienvenido/a, {profile?.full_name || profile?.email}
-              </p>
-            </div>
-            <Badge className="farfalla-badge-nuevo">
-              Administrador
-            </Badge>
+          <div>
+            <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
+              Panel de Administración
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Gestiona tu tienda siguiendo la jerarquía: Categorías → Subcategorías → Productos → Variantes
+            </p>
           </div>
         </div>
 
@@ -183,50 +186,115 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Admin Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {adminCards.map((card, index) => (
-            <Card key={index} className="farfalla-card hover:shadow-xl transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
+        {/* Hierarchy Cards */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-2">
+            Jerarquía de Productos
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Sigue este orden para organizar tu inventario correctamente
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {hierarchyCards.map((card, index) => (
+              <Card key={index} className="farfalla-card hover:shadow-xl transition-all duration-300 group relative">
+                {/* Step Number */}
+                <div className="absolute -top-3 -left-3 w-8 h-8 bg-farfalla-teal text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  {card.step}
+                </div>
+                
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col items-center text-center space-y-3">
                     <div className={`p-3 rounded-xl ${card.color}`}>
                       {card.icon}
                     </div>
                     <div>
-                      <CardTitle className="text-xl font-poppins text-farfalla-ink">
+                      <CardTitle className="text-lg font-poppins text-farfalla-ink">
                         {card.title}
                       </CardTitle>
-                      <CardDescription className="mt-1">
+                      <CardDescription className="mt-1 text-xs">
                         {card.description}
-                        </CardDescription>
+                      </CardDescription>
                     </div>
+                    <Badge variant="outline" className="text-xs">
+                      {card.count} elementos
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {card.count}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {card.actions.map((action, actionIndex) => (
-                    <Button
-                      key={actionIndex}
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <Link to={action.href}>
-                        {action.icon}
-                        {action.label}
-                      </Link>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex flex-col gap-2">
+                    {card.actions.map((action, actionIndex) => (
+                      <Button
+                        key={actionIndex}
+                        asChild
+                        variant={actionIndex === 0 ? "outline" : "ghost"}
+                        size="sm"
+                        className="w-full justify-start text-xs"
+                      >
+                        <Link to={action.href}>
+                          {action.icon}
+                          {action.label}
+                        </Link>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Management Cards */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-2">
+            Gestión del Sitio
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Herramientas para administrar el contenido y configuración
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {managementCards.map((card, index) => (
+              <Card key={index} className="farfalla-card hover:shadow-xl transition-all duration-300 group">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4">
+                      <div className={`p-3 rounded-xl ${card.color}`}>
+                        {card.icon}
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-poppins text-farfalla-ink">
+                          {card.title}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {card.description}
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {card.count}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {card.actions.map((action, actionIndex) => (
+                      <Button
+                        key={actionIndex}
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Link to={action.href}>
+                          {action.icon}
+                          {action.label}
+                        </Link>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Quick Actions */}
