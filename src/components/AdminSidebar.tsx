@@ -168,11 +168,16 @@ export function AdminSidebar() {
                     isActive={isActive(item.url)}
                     onClick={() => {
                       console.log('Navegando a:', item.url);
-                      try {
-                        navigate(item.url);
-                      } catch (error) {
-                        console.error('Navigate failed:', error);
+                      if (item.title === 'Órdenes') {
+                        // Forzar navegación directa para órdenes
                         window.location.href = item.url;
+                      } else {
+                        try {
+                          navigate(item.url);
+                        } catch (error) {
+                          console.error('Navigate failed:', error);
+                          window.location.href = item.url;
+                        }
                       }
                       setOpenMobile(false);
                     }}
