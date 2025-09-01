@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import WompiWidget from '@/components/WompiWidget';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -30,6 +32,7 @@ const Cart = () => {
   } = useCart();
   
   const { settings } = useSiteSettings();
+  const { user, profile } = useAuth();
 
   const formatPrice = (price: number) => {
     const currency = settings?.currency || 'COP';
@@ -270,10 +273,23 @@ const Cart = () => {
                     </div>
                   </div>
 
-                  <Button className="farfalla-btn-primary w-full mt-6">
-                    <Package className="h-5 w-5 mr-2" />
-                    Proceder al Pago
-                  </Button>
+                  {/* Wompi Payment Widget */}
+                  <div className="mt-6">
+                    <WompiWidget 
+                      amount={finalTotal}
+                      currency={settings?.currency || 'COP'}
+                      customerEmail={user?.email || ''}
+                      customerName={profile?.full_name}
+                      onSuccess={(result) => {
+                        console.log('Payment successful:', result);
+                        // Clear cart on successful payment
+                        clearCart();
+                      }}
+                      onError={(error) => {
+                        console.log('Payment error:', error);
+                      }}
+                    />
+                  </div>
 
                   <div className="mt-4 text-xs text-muted-foreground text-center">
                     Pago seguro con Wompi

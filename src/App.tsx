@@ -60,6 +60,7 @@ import Auth from "./pages/Auth";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import PaymentResult from "./pages/PaymentResult";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
@@ -114,6 +115,7 @@ const App = () => (
                 <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
                 <Route path="/producto/:productSlug" element={<ProductDetail />} />
                 <Route path="/carrito" element={<Cart />} />
+                <Route path="/payment-result" element={<PaymentResult />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -452,6 +452,43 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Wompi Configuration */}
+            <Card className="farfalla-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-farfalla-ink">
+                  <DollarSign className="h-5 w-5" />
+                  Configuración de Wompi
+                </CardTitle>
+                <CardDescription>
+                  Configura el ambiente y parámetros de pago de Wompi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="wompi_environment">Ambiente de Wompi</Label>
+                  <select
+                    id="wompi_environment"
+                    value={siteSettings?.wompi_environment || 'test'}
+                    onChange={(e) => saveSetting('wompi_environment', e.target.value)}
+                    className="w-full p-2 border border-border rounded-md bg-background"
+                  >
+                    <option value="test">Pruebas (Test)</option>
+                    <option value="production">Producción</option>
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona el ambiente de Wompi. Usa 'Pruebas' para desarrollo y testing.
+                  </p>
+                </div>
+                <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                  <p className="font-medium mb-2">Configuración de credenciales:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Las llaves públicas y secretos de integridad se configuran en Supabase Secrets</li>
+                    <li>• Ambiente de pruebas: usa llaves que empiecen con 'pub_test_'</li>
+                    <li>• Ambiente de producción: usa llaves que empiecen con 'pub_prod_'</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* General Settings */}

@@ -9,6 +9,7 @@ interface SiteSettings {
   tax_enabled: boolean;
   tax_rate: number;
   currency: string;
+  wompi_environment: string;
 }
 
 interface SiteSettingsContextType {
@@ -25,6 +26,7 @@ const defaultSettings: SiteSettings = {
   tax_enabled: true,
   tax_rate: 0.19,
   currency: 'COP',
+  wompi_environment: 'test',
 };
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
@@ -45,7 +47,8 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'shipping_cost',
           'tax_enabled',
           'tax_rate',
-          'currency'
+          'currency',
+          'wompi_environment'
         ]);
 
       if (error) throw error;
