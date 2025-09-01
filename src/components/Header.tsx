@@ -1,21 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ShoppingCart, User, Menu, X, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount] = useState(3); // Mock cart count
+  const [categories, setCategories] = useState<Category[]>([]);
   const { user, profile, signOut } = useAuth();
 
-  const navigation = [
-    { name: "Invitaciones", href: "/categoria/invitaciones" },
-    { name: "Decoración", href: "/categoria/decoracion" },
-    { name: "Recuerdos", href: "/categoria/recuerdos" },
-    { name: "Personalizado", href: "/personalizado" },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data: categoriesData } = await supabase
+          .from('categories')
+          .select('id, name, slug')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+
+        if (categoriesData) {
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <header className="bg-background border-b border-border/50 sticky top-0 z-50 backdrop-blur-lg bg-background/95">
@@ -33,13 +54,13 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
+            {categories.map((category) => (
               <a
-                key={item.name}
-                href={item.href}
+                key={category.id}
+                href={`/categoria/${category.slug}`}
                 className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200"
               >
-                {item.name}
+                {category.name}
               </a>
             ))}
           </nav>
@@ -142,14 +163,14 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-background border-t border-border/50">
           <div className="px-4 py-4 space-y-3">
-            {navigation.map((item) => (
+            {categories.map((category) => (
               <a
-                key={item.name}
-                href={item.href}
+                key={category.id}
+                href={`/categoria/${category.slug}`}
                 className="block text-farfalla-ink hover:text-primary font-inter font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {item.name}
+                {category.name}
               </a>
             ))}
           </div>
