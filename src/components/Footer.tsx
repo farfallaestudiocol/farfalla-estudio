@@ -7,26 +7,6 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { settings } = useSiteSettings();
 
-  const footerLinks = {
-    compania: [
-      { name: "Sobre Nosotros", href: "/sobre-nosotros" },
-      { name: "Nuestra Historia", href: "/historia" },
-      { name: "Carreras", href: "/carreras" },
-      { name: "Prensa", href: "/prensa" },
-    ],
-    ayuda: [
-      { name: "Centro de Ayuda", href: "/ayuda" },
-      { name: "Envíos y Devoluciones", href: "/envios" },
-      { name: "Guía de Tallas", href: "/tallas" },
-      { name: "Contacto", href: "/contacto" },
-    ],
-    legal: [
-      { name: "Términos y Condiciones", href: "/terminos" },
-      { name: "Política de Privacidad", href: "/privacidad" },
-      { name: "Política de Cookies", href: "/cookies" },
-      { name: "Política de Devoluciones", href: "/devoluciones" },
-    ],
-  };
 
   return (
     <footer className="bg-farfalla-muted/50 border-t border-border/50">
@@ -57,14 +37,14 @@ const Footer = () => {
         </div>
 
         {/* Main Footer Content */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="py-12 flex justify-center">
           {/* Brand Section */}
-          <div className="lg:col-span-1">
+          <div className="max-w-md text-center">
             {settings?.company_logo_url ? (
               <img 
                 src={settings.company_logo_url} 
                 alt={settings.company_name || "Logo"} 
-                className="h-12 mb-4"
+                className="h-12 mb-4 mx-auto"
               />
             ) : (
               <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4">
@@ -78,13 +58,13 @@ const Footer = () => {
             {/* Contact Info */}
             <div className="space-y-3 text-sm">
               {settings?.contact_address && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span>{settings.contact_address}</span>
                 </div>
               )}
               {settings?.contact_phone && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Phone className="h-4 w-4 text-primary" />
                   <a 
                     href={`https://wa.me/${settings.contact_phone.replace(/\s|\+|-|\(|\)/g, '')}`}
@@ -97,7 +77,7 @@ const Footer = () => {
                 </div>
               )}
               {settings?.contact_email && (
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4 text-primary" />
                   <a 
                     href={`mailto:${settings.contact_email}`}
@@ -110,7 +90,7 @@ const Footer = () => {
             </div>
 
             {/* Social Media */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex justify-center gap-3 mt-6">
               {settings?.social_instagram && (
                 <a 
                   href={settings.social_instagram} 
@@ -140,57 +120,6 @@ const Footer = () => {
                 </a>
               )}
             </div>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h4 className="font-poppins font-semibold text-farfalla-ink mb-4">Compañía</h4>
-            <ul className="space-y-3">
-              {footerLinks.compania.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-muted-foreground hover:text-primary transition-colors font-inter"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Help Links */}
-          <div>
-            <h4 className="font-poppins font-semibold text-farfalla-ink mb-4">Ayuda</h4>
-            <ul className="space-y-3">
-              {footerLinks.ayuda.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-muted-foreground hover:text-primary transition-colors font-inter"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h4 className="font-poppins font-semibold text-farfalla-ink mb-4">Legal</h4>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-muted-foreground hover:text-primary transition-colors font-inter"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
