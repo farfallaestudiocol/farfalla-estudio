@@ -48,12 +48,13 @@ interface Order {
 }
 
 export default function AdminOrders() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   
   console.log('AdminOrders component loaded');
   console.log('User:', user?.email);
   console.log('IsAdmin:', isAdmin);
+  console.log('Loading:', loading);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,12 +123,28 @@ export default function AdminOrders() {
   };
 
   useEffect(() => {
+    // Don't do anything while still loading auth
+    if (loading) return;
+    
     if (!user) {
       navigate('/admin');
       return;
     }
     fetchOrders();
-  }, [user, navigate, statusFilter, paymentStatusFilter]);
+  }, [user, loading, navigate, statusFilter, paymentStatusFilter]);
+
+  // Show loading while auth is loading
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const formatPrice = (price: number, currency: string = 'COP') => {
     return new Intl.NumberFormat('es-CO', {
@@ -194,10 +211,6 @@ export default function AdminOrders() {
     
     return matchesSearch;
   });
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="space-y-6">
