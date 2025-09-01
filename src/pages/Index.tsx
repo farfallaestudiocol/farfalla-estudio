@@ -101,7 +101,7 @@ const Index = () => {
             </Badge>
             <h1 className="text-4xl md:text-6xl font-poppins font-bold text-white mb-6 leading-tight animate-in slide-in-from-bottom-6 duration-1000">
               Creaciones únicas
-              <span className="text-farfalla-pink block">hechas a mano</span>
+              <span className="text-white block">hechas a mano</span>
             </h1>
             <p className="text-xl text-white/90 mb-8 max-w-2xl animate-in slide-in-from-bottom-8 duration-1000 delay-200 mx-auto">
               Manualidades en papel personalizadas para tus momentos especiales. Cada pieza es única y creada especialmente para ti.
