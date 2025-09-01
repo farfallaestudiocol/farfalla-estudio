@@ -8,10 +8,10 @@ const Header = () => {
   const [cartCount] = useState(3); // Mock cart count
 
   const navigation = [
-    { name: "Skincare", href: "/categoria/skincare" },
-    { name: "Maquillaje", href: "/categoria/maquillaje" },
-    { name: "Combos", href: "/combos" },
-    { name: "Promociones", href: "/promos" },
+    { name: "Invitaciones", href: "/categoria/invitaciones" },
+    { name: "Decoración", href: "/categoria/decoracion" },
+    { name: "Recuerdos", href: "/categoria/recuerdos" },
+    { name: "Personalizado", href: "/personalizado" },
   ];
 
   return (
@@ -21,9 +21,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl md:text-3xl font-poppins font-bold text-farfalla-ink">
-              Farfalla <span className="text-farfalla-pink">Estudio</span>
-            </h1>
+            <img 
+              src="/lovable-uploads/f9953d83-e6cc-4f4f-85ac-c7a1f7220021.png" 
+              alt="Farfalla Estudio - Manualidades en papel personalizadas"
+              className="h-12 md:h-16 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}
