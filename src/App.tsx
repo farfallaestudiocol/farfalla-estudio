@@ -8,7 +8,9 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import ProductForm from "./pages/admin/ProductForm";
 import Categories from "./pages/admin/Categories";
+import CategoryForm from "./pages/admin/CategoryForm";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
@@ -34,9 +36,29 @@ const App = () => (
               <Products />
             </AuthCheck>
           } />
+          <Route path="/admin/products/new" element={
+            <AuthCheck requireAdmin={true}>
+              <ProductForm />
+            </AuthCheck>
+          } />
+          <Route path="/admin/products/edit/:id" element={
+            <AuthCheck requireAdmin={true}>
+              <ProductForm />
+            </AuthCheck>
+          } />
           <Route path="/admin/categories" element={
             <AuthCheck requireAdmin={true}>
               <Categories />
+            </AuthCheck>
+          } />
+          <Route path="/admin/categories/new" element={
+            <AuthCheck requireAdmin={true}>
+              <CategoryForm />
+            </AuthCheck>
+          } />
+          <Route path="/admin/categories/edit/:id" element={
+            <AuthCheck requireAdmin={true}>
+              <CategoryForm />
             </AuthCheck>
           } />
           <Route path="/admin/content" element={

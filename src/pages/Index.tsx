@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -5,49 +7,63 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles, Heart, Leaf, Truck, Shield, Gift, Scissors } from "lucide-react";
 import heroImage from "@/assets/hero-crafting.jpg";
-import productInvitations from "@/assets/product-invitations.jpg";
-import productFlowers from "@/assets/product-flowers.jpg";
-import productAlbum from "@/assets/product-album.jpg";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  compare_price?: number;
+  images: string[];
+  rating: number;
+  review_count: number;
+  is_featured: boolean;
+  is_active: boolean;
+  short_description?: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  is_active: boolean;
+  display_order: number;
+}
 
 const Index = () => {
-  const featuredProducts = [
-    {
-      id: "1",
-      name: "Invitaciones de Boda Personalizadas",
-      price: 45000,
-      comparePrice: 60000,
-      image: productInvitations,
-      rating: 4.9,
-      reviewCount: 85,
-      badge: { text: "25% OFF", type: "promo" as const }
-    },
-    {
-      id: "2", 
-      name: "Ramo de Flores de Papel",
-      price: 120000,
-      comparePrice: 150000,
-      image: productFlowers,
-      rating: 4.8,
-      reviewCount: 67,
-      badge: { text: "ENVÍO GRATIS", type: "envio" as const }
-    },
-    {
-      id: "3",
-      name: "Álbum de Recuerdos Artesanal",
-      price: 85000,
-      image: productAlbum,
-      rating: 4.7,
-      reviewCount: 42,
-      badge: { text: "NUEVO", type: "nuevo" as const }
-    }
-  ];
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = [
-    { name: "Invitaciones", count: "24 diseños", color: "bg-farfalla-teal" },
-    { name: "Decoración", count: "38 productos", color: "bg-farfalla-pink" },
-    { name: "Recuerdos", count: "16 productos", color: "bg-farfalla-teal-700" },
-    { name: "Papelería", count: "12 productos", color: "bg-primary" },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      // Fetch featured products
+      const { data: products } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .eq('is_featured', true)
+        .limit(6);
+
+      // Fetch active categories
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+
+      setFeaturedProducts(products || []);
+      setCategories(categoriesData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const benefits = [
     {
@@ -182,17 +198,50 @@ const Index = () => {
               Nuestras piezas más populares, cada una hecha con amor y dedicación
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProducts.map((product, index) => (
-              <div key={product.id} className="animate-fade-in" style={{animationDelay: `${index * 200}ms`}}>
-                <ProductCard
-                  {...product}
-                  onAddToCart={() => console.log(`Adding ${product.name} to cart`)}
-                  onToggleWishlist={() => console.log(`Toggling wishlist for ${product.name}`)}
-                />
-              </div>
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="farfalla-card animate-pulse">
+                  <div className="h-48 sm:h-56 bg-muted rounded-xl mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredProducts.map((product, index) => (
+                <div key={product.id} className="animate-fade-in" style={{animationDelay: `${index * 200}ms`}}>
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    comparePrice={product.compare_price}
+                    image={product.images[0] || '/placeholder.svg'}
+                    rating={product.rating}
+                    reviewCount={product.review_count}
+                    badge={
+                      product.compare_price 
+                        ? { text: `${Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}% OFF`, type: "promo" as const }
+                        : undefined
+                    }
+                    onAddToCart={() => console.log(`Adding ${product.name} to cart`)}
+                    onToggleWishlist={() => console.log(`Toggling wishlist for ${product.name}`)}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-6">
+                No hay productos destacados disponibles en este momento.
+              </p>
+            </div>
+          )}
+
           <div className="text-center mt-12">
             <Button className="farfalla-btn-primary">
               Ver Todas las Creaciones
