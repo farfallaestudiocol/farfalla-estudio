@@ -63,7 +63,7 @@ const Header = () => {
               <a
                 key={category.id}
                 href={`/categoria/${category.slug}`}
-                className="text-farfalla-ink hover:text-primary font-inter font-medium transition-colors duration-200"
+                className="text-muted-foreground hover:text-primary font-inter font-medium transition-colors duration-200"
               >
                 {category.name}
               </a>
@@ -71,7 +71,7 @@ const Header = () => {
             {hiddenCategories.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-farfalla-ink hover:text-primary font-inter font-medium p-0 h-auto">
+                  <Button variant="ghost" className="text-muted-foreground hover:text-primary font-inter font-medium p-0 h-auto">
                     Más <ChevronDown className="ml-1 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -205,7 +205,7 @@ const Header = () => {
               <a
                 key={category.id}
                 href={`/categoria/${category.slug}`}
-                className="block text-farfalla-ink hover:text-primary font-inter font-medium py-2"
+                className="block text-muted-foreground hover:text-primary font-inter font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {category.name}
