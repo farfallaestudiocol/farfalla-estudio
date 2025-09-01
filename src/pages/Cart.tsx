@@ -287,7 +287,7 @@ const Cart = () => {
                       </Label>
                       <Textarea
                         id="order-notes"
-                        placeholder="Ej: Sin cebolla, entregar en portería, llamar antes de llegar..."
+                        placeholder="Indícanos que personalización deseas para tus productos"
                         value={orderNotes}
                         onChange={(e) => setOrderNotes(e.target.value)}
                         rows={3}
