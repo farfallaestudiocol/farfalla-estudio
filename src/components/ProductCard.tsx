@@ -1,10 +1,12 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 interface ProductCardProps {
   id: string;
   name: string;
+  slug?: string;
   price: number;
   comparePrice?: number;
   image: string;
@@ -20,7 +22,9 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
+  id,
   name,
+  slug,
   price,
   comparePrice,
   image,
@@ -43,8 +47,10 @@ const ProductCard = ({
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
     : 0;
 
+  const productUrl = slug ? `/producto/${slug}` : `/producto/${id}`;
+
   return (
-    <div className="farfalla-card group cursor-pointer">
+    <Link to={productUrl} className="farfalla-card group cursor-pointer block">
       {/* Product Image */}
       <div className="relative overflow-hidden rounded-xl mb-4">
         <img
@@ -149,7 +155,7 @@ const ProductCard = ({
           Envío gratis desde $150.000
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

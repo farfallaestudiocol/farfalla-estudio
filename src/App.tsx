@@ -7,6 +7,7 @@ import { AuthCheck } from "@/components/AuthCheck";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CategoryPage from "./pages/CategoryPage";
+import ProductDetail from "./pages/ProductDetail";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
@@ -97,6 +98,7 @@ const App = () => (
             </AuthCheck>
           } />
           <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
+          <Route path="/producto/:productSlug" element={<ProductDetail />} />
           <Route path="/admin/content" element={
             <AuthCheck requireAdmin={true}>
               <Content />
