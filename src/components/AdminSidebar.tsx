@@ -33,38 +33,38 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const hierarchyItems = [
   {
     title: "Categorías",
-    url: "/admin/categories",
+    url: "categories",
     icon: FolderOpen,
     children: [
-      { title: "Ver todas", url: "/admin/categories" },
-      { title: "Agregar categoría", url: "/admin/categories/new" },
+      { title: "Ver todas", url: "categories" },
+      { title: "Agregar categoría", url: "categories/new" },
     ]
   },
   {
     title: "Subcategorías", 
-    url: "/admin/subcategories",
+    url: "subcategories",
     icon: Layers,
     children: [
-      { title: "Ver todas", url: "/admin/subcategories" },
-      { title: "Agregar subcategoría", url: "/admin/subcategories/new" },
+      { title: "Ver todas", url: "subcategories" },
+      { title: "Agregar subcategoría", url: "subcategories/new" },
     ]
   },
   {
     title: "Productos",
-    url: "/admin/products", 
+    url: "products", 
     icon: Package,
     children: [
-      { title: "Ver todos", url: "/admin/products" },
-      { title: "Agregar producto", url: "/admin/products/new" },
+      { title: "Ver todos", url: "products" },
+      { title: "Agregar producto", url: "products/new" },
     ]
   },
   {
     title: "Variantes",
-    url: "/admin/variants",
+    url: "variants",
     icon: Shuffle, 
     children: [
-      { title: "Ver todas", url: "/admin/variants" },
-      { title: "Agregar variante", url: "/admin/variants/new" },
+      { title: "Ver todas", url: "variants" },
+      { title: "Agregar variante", url: "variants/new" },
     ]
   }
 ];
@@ -72,17 +72,17 @@ const hierarchyItems = [
 const managementItems = [
   {
     title: "Órdenes",
-    url: "/admin/orders",
+    url: "orders",
     icon: ShoppingCart
   },
   {
     title: "Contenido del Sitio",
-    url: "/admin/content",
+    url: "content",
     icon: FileText
   },
   {
     title: "Configuración", 
-    url: "/admin/settings",
+    url: "settings",
     icon: Settings
   }
 ];
@@ -92,8 +92,13 @@ export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  
+  console.log('Current path:', currentPath);
 
-  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
+  const isActive = (path: string) => {
+    if (path === "dashboard" || path === "") return currentPath === "/admin";
+    return currentPath === `/admin/${path}` || currentPath.startsWith(`/admin/${path}/`);
+  };
   const isGroupActive = (item: any) => 
     isActive(item.url) || item.children?.some((child: any) => isActive(child.url));
 
@@ -110,7 +115,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   size="lg" 
                   isActive={currentPath === "/admin"}
-                  onClick={() => navigate("/admin")}
+                  onClick={() => navigate("")}
                 >
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
                     <BarChart3 className="size-4" />
