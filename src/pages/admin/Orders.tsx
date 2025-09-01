@@ -213,88 +213,94 @@ export default function AdminOrders() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Órdenes</h1>
-          <p className="text-muted-foreground">
-            Administra todas las órdenes del sistema
-          </p>
-        </div>
-        <Button onClick={fetchOrders} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Actualizar
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Buscar por número, cliente o email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Estado de orden" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="pending">Pendiente</SelectItem>
-                <SelectItem value="processing">Procesando</SelectItem>
-                <SelectItem value="shipped">Enviado</SelectItem>
-                <SelectItem value="delivered">Entregado</SelectItem>
-                <SelectItem value="cancelled">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Estado de pago" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los pagos</SelectItem>
-                <SelectItem value="pending">Pendiente</SelectItem>
-                <SelectItem value="paid">Pagado</SelectItem>
-                <SelectItem value="failed">Fallido</SelectItem>
-                <SelectItem value="refunded">Reembolsado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Orders Table */}
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay órdenes</h3>
-              <p className="text-muted-foreground">
-                {searchQuery || statusFilter !== 'all' || paymentStatusFilter !== 'all' 
-                  ? 'No se encontraron órdenes con los filtros aplicados'
-                  : 'Aún no hay órdenes en el sistema'
-                }
+    <div className="min-h-screen farfalla-section-gradient">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
+                Gestión de Órdenes
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Administra todas las órdenes del sistema
               </p>
             </div>
+            <Button onClick={fetchOrders} className="farfalla-btn-primary">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualizar
+            </Button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <Card className="farfalla-card mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-farfalla-ink font-poppins">
+              <Filter className="h-5 w-5" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Buscar por número, cliente o email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Estado de orden" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="pending">Pendiente</SelectItem>
+                  <SelectItem value="processing">Procesando</SelectItem>
+                  <SelectItem value="shipped">Enviado</SelectItem>
+                  <SelectItem value="delivered">Entregado</SelectItem>
+                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Estado de pago" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los pagos</SelectItem>
+                  <SelectItem value="pending">Pendiente</SelectItem>
+                  <SelectItem value="paid">Pagado</SelectItem>
+                  <SelectItem value="failed">Fallido</SelectItem>
+                  <SelectItem value="refunded">Reembolsado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Orders Table */}
+        <Card className="farfalla-card">
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="h-8 w-8 animate-spin text-farfalla-teal" />
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-poppins font-semibold text-farfalla-ink mb-2">No hay órdenes</h3>
+                <p className="text-muted-foreground">
+                  {searchQuery || statusFilter !== 'all' || paymentStatusFilter !== 'all' 
+                    ? 'No se encontraron órdenes con los filtros aplicados'
+                    : 'Aún no hay órdenes en el sistema'
+                  }
+                </p>
+              </div>
           ) : (
             <Table>
               <TableHeader>
@@ -355,6 +361,7 @@ export default function AdminOrders() {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/order/${order.id}`)}
+                          className="farfalla-btn-secondary"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -367,6 +374,7 @@ export default function AdminOrders() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
