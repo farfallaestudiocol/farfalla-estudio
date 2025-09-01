@@ -22,31 +22,49 @@ interface Category {
   slug: string;
 }
 
+interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  category_id: string;
+}
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const { user, profile, signOut, isAdmin } = useAuth();
   const { getCartCount } = useCart();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoriesAndSubcategories = async () => {
       try {
-        const { data: categoriesData } = await supabase
-          .from('categories')
-          .select('id, name, slug')
-          .eq('is_active', true)
-          .order('display_order', { ascending: true });
+        const [categoriesResult, subcategoriesResult] = await Promise.all([
+          supabase
+            .from('categories')
+            .select('id, name, slug')
+            .eq('is_active', true)
+            .order('display_order', { ascending: true }),
+          supabase
+            .from('subcategories')
+            .select('id, name, slug, category_id')
+            .eq('is_active', true)
+            .order('name', { ascending: true })
+        ]);
 
-        if (categoriesData) {
-          setCategories(categoriesData);
+        if (categoriesResult.data) {
+          setCategories(categoriesResult.data);
+        }
+        if (subcategoriesResult.data) {
+          setSubcategories(subcategoriesResult.data);
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching categories and subcategories:', error);
       }
     };
 
-    fetchCategories();
+    fetchCategoriesAndSubcategories();
   }, []);
 
   // Split categories for responsive display
@@ -96,6 +114,21 @@ const Header = () => {
                         {category.name}
                       </DropdownMenuItem>
                   ))}
+                  {subcategories.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Especialidades</DropdownMenuLabel>
+                      {subcategories.map((subcategory) => (
+                        <DropdownMenuItem 
+                          key={subcategory.id} 
+                          className="w-full cursor-pointer"
+                          onSelect={() => window.location.href = `/subcategoria/${subcategory.slug}`}
+                        >
+                          {subcategory.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
