@@ -33,38 +33,38 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const hierarchyItems = [
   {
     title: "Categorías",
-    url: "categories",
+    url: "/admin/categories",
     icon: FolderOpen,
     children: [
-      { title: "Ver todas", url: "categories" },
-      { title: "Agregar categoría", url: "categories/new" },
+      { title: "Ver todas", url: "/admin/categories" },
+      { title: "Agregar categoría", url: "/admin/categories/new" },
     ]
   },
   {
     title: "Subcategorías", 
-    url: "subcategories",
+    url: "/admin/subcategories",
     icon: Layers,
     children: [
-      { title: "Ver todas", url: "subcategories" },
-      { title: "Agregar subcategoría", url: "subcategories/new" },
+      { title: "Ver todas", url: "/admin/subcategories" },
+      { title: "Agregar subcategoría", url: "/admin/subcategories/new" },
     ]
   },
   {
     title: "Productos",
-    url: "products", 
+    url: "/admin/products", 
     icon: Package,
     children: [
-      { title: "Ver todos", url: "products" },
-      { title: "Agregar producto", url: "products/new" },
+      { title: "Ver todos", url: "/admin/products" },
+      { title: "Agregar producto", url: "/admin/products/new" },
     ]
   },
   {
     title: "Variantes",
-    url: "variants",
+    url: "/admin/variants",
     icon: Shuffle, 
     children: [
-      { title: "Ver todas", url: "variants" },
-      { title: "Agregar variante", url: "variants/new" },
+      { title: "Ver todas", url: "/admin/variants" },
+      { title: "Agregar variante", url: "/admin/variants/new" },
     ]
   }
 ];
@@ -72,17 +72,17 @@ const hierarchyItems = [
 const managementItems = [
   {
     title: "Órdenes",
-    url: "orders",
+    url: "/admin/orders",
     icon: ShoppingCart
   },
   {
     title: "Contenido del Sitio",
-    url: "content",
+    url: "/admin/content",
     icon: FileText
   },
   {
     title: "Configuración", 
-    url: "settings",
+    url: "/admin/settings",
     icon: Settings
   }
 ];
@@ -95,10 +95,7 @@ export function AdminSidebar() {
   
   console.log('Current path:', currentPath);
 
-  const isActive = (path: string) => {
-    if (path === "dashboard" || path === "") return currentPath === "/admin";
-    return currentPath === `/admin/${path}` || currentPath.startsWith(`/admin/${path}/`);
-  };
+  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
   const isGroupActive = (item: any) => 
     isActive(item.url) || item.children?.some((child: any) => isActive(child.url));
 
@@ -115,7 +112,7 @@ export function AdminSidebar() {
                 <SidebarMenuButton 
                   size="lg" 
                   isActive={currentPath === "/admin"}
-                  onClick={() => navigate("")}
+                  onClick={() => navigate("/admin")}
                 >
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-farfalla-teal text-white">
                     <BarChart3 className="size-4" />
@@ -138,11 +135,14 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     isActive={isActive(item.url)}
-                    onClick={(e) => {
+                    onClick={() => {
                       console.log('Navegando a:', item.url);
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigate(item.url);
+                      try {
+                        navigate(item.url);
+                      } catch (error) {
+                        console.error('Navigate failed:', error);
+                        window.location.href = item.url;
+                      }
                       setOpenMobile(false);
                     }}
                   >
@@ -166,11 +166,14 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     isActive={isActive(item.url)}
-                    onClick={(e) => {
+                    onClick={() => {
                       console.log('Navegando a:', item.url);
-                      e.preventDefault();
-                      e.stopPropagation();
-                      navigate(item.url);
+                      try {
+                        navigate(item.url);
+                      } catch (error) {
+                        console.error('Navigate failed:', error);
+                        window.location.href = item.url;
+                      }
                       setOpenMobile(false);
                     }}
                   >
