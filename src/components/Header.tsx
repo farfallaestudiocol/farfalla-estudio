@@ -14,6 +14,7 @@ interface Category {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [cartCount] = useState(3); // Mock cart count
   const [categories, setCategories] = useState<Category[]>([]);
   const { user, profile, signOut } = useAuth();
@@ -87,8 +88,8 @@ const Header = () => {
             )}
           </nav>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
+          {/* Search Bar - Desktop only */}
+          <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -101,10 +102,25 @@ const Header = () => {
 
           {/* Right Icons */}
           <div className="flex items-center space-x-4">
-            {/* Search Icon - Mobile */}
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Search className="h-5 w-5" />
-            </Button>
+            {/* Search Icon - Mobile & Tablet */}
+            <DropdownMenu open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Search className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 p-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type="search"
+                    placeholder="Buscar productos..."
+                    className="farfalla-input pl-10 w-full"
+                    autoFocus
+                  />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* User Account */}
             {user ? (
