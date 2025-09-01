@@ -5,7 +5,12 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { settings } = useSiteSettings();
+  const { settings, isLoading } = useSiteSettings();
+
+  // Don't render anything if settings are still loading
+  if (isLoading || !settings) {
+    return null;
+  }
 
 
   return (
