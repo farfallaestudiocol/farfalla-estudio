@@ -50,6 +50,10 @@ interface Order {
 export default function AdminOrders() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  
+  console.log('AdminOrders component loaded');
+  console.log('User:', user?.email);
+  console.log('IsAdmin:', isAdmin);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
