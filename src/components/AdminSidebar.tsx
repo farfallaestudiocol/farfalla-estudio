@@ -133,7 +133,10 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     isActive={isActive(item.url)}
-                    onClick={() => {
+                    onClick={(e) => {
+                      console.log('Navegando a:', item.url);
+                      e.preventDefault();
+                      e.stopPropagation();
                       navigate(item.url);
                       setOpenMobile(false);
                     }}
