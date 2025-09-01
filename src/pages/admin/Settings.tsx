@@ -48,6 +48,7 @@ const Settings = () => {
       'shipping_cost', 
       'free_shipping_enabled',
       'free_shipping_minimum',
+      'free_shipping_threshold',  // Added this one
       'tax_enabled',
       'tax_rate',
       'currency'
