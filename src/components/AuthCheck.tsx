@@ -12,12 +12,19 @@ export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) =>
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
+  console.log('AuthCheck - Loading:', loading, 'User:', user?.email, 'Profile:', profile, 'RequireAdmin:', requireAdmin);
+
   useEffect(() => {
     if (!loading) {
+      console.log('AuthCheck effect - User:', user?.email, 'Profile role:', profile?.role, 'RequireAdmin:', requireAdmin);
       if (!user) {
+        console.log('No user found, redirecting to /auth');
         navigate('/auth');
       } else if (requireAdmin && profile?.role !== 'admin') {
+        console.log('Admin required but user role is:', profile?.role, 'redirecting to /');
         navigate('/');
+      } else {
+        console.log('Authentication check passed');
       }
     }
   }, [user, profile, loading, navigate, requireAdmin]);
