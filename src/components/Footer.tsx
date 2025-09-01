@@ -83,14 +83,35 @@ const Footer = () => {
 
             {/* Social Media */}
             <div className="flex gap-3 mt-6">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Instagram className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-primary"
+                asChild
+              >
+                <a href="https://instagram.com/farfallaestudio" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Facebook className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-primary"
+                asChild
+              >
+                <a href="https://facebook.com/farfallaestudio" target="_blank" rel="noopener noreferrer">
+                  <Facebook className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Mail className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-primary"
+                asChild
+              >
+                <a href="mailto:hola@farfallaestudio.co">
+                  <Mail className="h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
