@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -34,6 +36,8 @@ const Index = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const { toggleWishlist } = useWishlist();
 
   useEffect(() => {
     fetchData();
@@ -256,8 +260,6 @@ const Index = () => {
                         ? { text: `${Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}% OFF`, type: "promo" as const }
                         : undefined
                     }
-                    onAddToCart={() => console.log(`Adding ${product.name} to cart`)}
-                    onToggleWishlist={() => console.log(`Toggling wishlist for ${product.name}`)}
                   />
                 </div>
               ))}

@@ -2,9 +2,16 @@ import { useState, useEffect } from "react";
 import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 
 interface Category {
   id: string;
@@ -15,9 +22,9 @@ interface Category {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [cartCount] = useState(3); // Mock cart count
   const [categories, setCategories] = useState<Category[]>([]);
   const { user, profile, signOut } = useAuth();
+  const { getCartCount } = useCart();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -172,11 +179,16 @@ const Header = () => {
             )}
 
             {/* Shopping Cart */}
-            <Button variant="ghost" size="icon" className="relative text-farfalla-ink hover:text-primary">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative text-farfalla-ink hover:text-primary"
+              onClick={() => window.location.href = '/carrito'}
+            >
               <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
+              {getCartCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-farfalla-pink text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-poppins font-medium">
-                  {cartCount}
+                  {getCartCount()}
                 </span>
               )}
             </Button>

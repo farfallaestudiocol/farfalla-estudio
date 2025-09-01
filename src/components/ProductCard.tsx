@@ -2,6 +2,8 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductCardProps {
   id: string;
@@ -14,11 +16,9 @@ interface ProductCardProps {
   reviewCount?: number;
   badge?: {
     text: string;
-    type: "promo" | "envio" | "nuevo";
+    type: "nuevo" | "promo";
   };
-  isWishlisted?: boolean;
-  onAddToCart?: () => void;
-  onToggleWishlist?: () => void;
+  className?: string;
 }
 
 const ProductCard = ({
@@ -31,10 +31,10 @@ const ProductCard = ({
   rating = 4.5,
   reviewCount = 0,
   badge,
-  isWishlisted = false,
-  onAddToCart,
-  onToggleWishlist,
+  className = "",
 }: ProductCardProps) => {
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -63,10 +63,9 @@ const ProductCard = ({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {badge && (
-            <Badge 
+             <Badge 
               className={
                 badge.type === "promo" ? "farfalla-badge-promo" :
-                badge.type === "envio" ? "farfalla-badge-envio" :
                 "bg-farfalla-ink text-white"
               }
             >
@@ -87,21 +86,21 @@ const ProductCard = ({
           className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm hover:bg-white"
           onClick={(e) => {
             e.preventDefault();
-            onToggleWishlist?.();
+            toggleWishlist(id);
           }}
         >
           <Heart 
-            className={`h-4 w-4 ${isWishlisted ? 'fill-farfalla-pink text-farfalla-pink' : 'text-farfalla-ink'}`} 
+            className={`h-4 w-4 ${isInWishlist(id) ? 'fill-farfalla-pink text-farfalla-pink' : 'text-farfalla-ink'}`} 
           />
         </Button>
 
         {/* Quick Add to Cart - appears on hover */}
         <div className="absolute bottom-3 left-3 right-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-          <Button
+          <Button 
             className="farfalla-btn-primary w-full"
             onClick={(e) => {
               e.preventDefault();
-              onAddToCart?.();
+              addToCart(id);
             }}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />

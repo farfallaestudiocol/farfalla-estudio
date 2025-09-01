@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { toast } from '@/hooks/use-toast';
 import { 
   Heart, 
   ShoppingCart, 
@@ -56,13 +58,15 @@ interface Product {
 
 const ProductDetail = () => {
   const { productSlug } = useParams();
+  const { toast } = useToast();
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     if (productSlug) {
@@ -148,21 +152,13 @@ const ProductDetail = () => {
     ? Math.round(((product.compare_price - getCurrentPrice()) / product.compare_price) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    const productInfo = {
-      productId: product?.id,
-      variantId: selectedVariant?.id,
-      quantity,
-      name: product?.name,
-      variantName: selectedVariant?.name,
-      price: getCurrentPrice()
-    };
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    await addToCart(product.id, selectedVariant?.id, quantity);
     
-    console.log('Adding to cart:', productInfo);
-    toast({
-      title: 'Producto agregado',
-      description: `${product?.name}${selectedVariant ? ` - ${selectedVariant.name}` : ''} agregado al carrito`,
-    });
+    // Reset quantity after adding
+    setQuantity(1);
   };
 
   const handleQuantityChange = (change: number) => {
@@ -400,17 +396,17 @@ const ProductDetail = () => {
                 {getCurrentStock() === 0 ? 'Sin stock' : 'Agregar al carrito'}
               </Button>
               
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 className="w-full"
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={() => product && toggleWishlist(product.id)}
               >
                 <Heart 
                   className={`h-5 w-5 mr-2 ${
-                    isWishlisted ? 'fill-farfalla-pink text-farfalla-pink' : ''
+                    product && isInWishlist(product.id) ? 'fill-farfalla-pink text-farfalla-pink' : ''
                   }`} 
                 />
-                {isWishlisted ? 'En lista de deseos' : 'Agregar a lista de deseos'}
+                {product && isInWishlist(product.id) ? 'En lista de deseos' : 'Agregar a lista de deseos'}
               </Button>
             </div>
 
