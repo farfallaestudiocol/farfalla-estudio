@@ -115,6 +115,9 @@ const WompiWidget = ({
         } else if (result.transaction && result.transaction.status === 'ERROR') {
           toast.error('Error en el pago');
           onError?.(result);
+        } else {
+          // Handle redirect flow - user will be redirected to payment-result page
+          console.log('Payment redirect initiated');
         }
         
         setIsLoading(false);

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WompiWidget from '@/components/WompiWidget';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { 
   ShoppingCart, 
   Minus, 
@@ -280,10 +282,56 @@ const Cart = () => {
                       currency={settings?.currency || 'COP'}
                       customerEmail={user?.email || ''}
                       customerName={profile?.full_name}
-                      onSuccess={(result) => {
+                      onSuccess={async (result) => {
                         console.log('Payment successful:', result);
-                        // Clear cart on successful payment
-                        clearCart();
+                        
+                        try {
+                          // Create order with cart items
+                          const orderItems = items.map(item => ({
+                            product_id: item.product.id,
+                            variant_id: item.variant?.id,
+                            quantity: item.quantity,
+                            unit_price: item.variant?.price || item.product.price,
+                            product_name: item.product.name,
+                            variant_name: item.variant?.name,
+                            product_sku: item.variant?.sku || item.product.sku
+                          }));
+
+                          // Create order data
+                          const orderData = {
+                            customer_email: user?.email || '',
+                            customer_name: profile?.full_name || user?.email || '',
+                            customer_phone: '', // TODO: Add phone field to profile
+                            shipping_address: null, // TODO: Implement shipping address
+                            billing_address: null, // TODO: Implement billing address
+                            items: orderItems,
+                            shipping_amount: shipping,
+                            tax_amount: tax,
+                            discount_amount: 0,
+                            currency: settings?.currency || 'COP',
+                            payment_method: 'wompi',
+                            payment_reference: result.transaction?.id || '',
+                            notes: ''
+                          };
+
+                          // Call create order function
+                          const { data: createOrderData } = await supabase.functions.invoke('create-order', {
+                            body: orderData
+                          });
+
+                          if (createOrderData?.success) {
+                            toast.success('¡Pedido creado exitosamente!');
+                            // Clear cart (will be done by the edge function if user is authenticated)
+                            clearCart();
+                            // Redirect to order success page or orders list
+                            window.location.href = '/mis-pedidos';
+                          } else {
+                            toast.error('Error al crear el pedido');
+                          }
+                        } catch (error) {
+                          console.error('Error creating order:', error);
+                          toast.error('Error al procesar el pedido');
+                        }
                       }}
                       onError={(error) => {
                         console.log('Payment error:', error);

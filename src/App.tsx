@@ -61,6 +61,8 @@ import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import PaymentResult from "./pages/PaymentResult";
+import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
@@ -116,6 +118,8 @@ const App = () => (
                 <Route path="/producto/:productSlug" element={<ProductDetail />} />
                 <Route path="/carrito" element={<Cart />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
+                <Route path="/mis-pedidos" element={<Orders />} />
+                <Route path="/pedido/:orderId" element={<OrderDetail />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

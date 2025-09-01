@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown, Package, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -23,7 +26,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const { getCartCount } = useCart();
 
   useEffect(() => {
@@ -146,18 +149,26 @@ const Header = () => {
                     <div className="text-muted-foreground">{user.email}</div>
                   </div>
                   <DropdownMenuSeparator />
-                  {profile?.role === 'admin' && (
+                  <DropdownMenuItem 
+                    className="flex items-center w-full cursor-pointer"
+                    onSelect={() => window.location.href = '/mis-pedidos'}
+                  >
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>Mis Pedidos</span>
+                  </DropdownMenuItem>
+                  {isAdmin && (
                     <>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         className="flex items-center w-full cursor-pointer"
                         onSelect={() => window.location.href = '/admin'}
                       >
-                        <Settings className="mr-2 h-4 w-4" />
+                        <Shield className="mr-2 h-4 w-4" />
                         <span>Panel Admin</span>
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                     </>
                   )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     className="flex items-center w-full cursor-pointer"
                     onSelect={signOut}

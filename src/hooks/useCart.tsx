@@ -9,14 +9,18 @@ interface CartItem {
   variant_id?: string;
   quantity: number;
   product: {
+    id: string;
     name: string;
     price: number;
     images: string[];
     slug: string;
+    sku?: string;
   };
   variant?: {
+    id: string;
     name: string;
     price?: number;
+    sku?: string;
   };
 }
 
@@ -53,14 +57,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .select(`
           *,
           products:product_id (
+            id,
             name,
             price,
             images,
-            slug
+            slug,
+            sku
           ),
           product_variants:variant_id (
+            id,
             name,
-            price
+            price,
+            sku
           )
         `)
         .eq('user_id', user.id);
@@ -73,14 +81,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         variant_id: item.variant_id,
         quantity: item.quantity,
         product: {
+          id: item.products?.id || item.product_id,
           name: item.products?.name || '',
           price: item.products?.price || 0,
           images: item.products?.images || [],
           slug: item.products?.slug || '',
+          sku: item.products?.sku,
         },
         variant: item.product_variants ? {
+          id: item.product_variants.id || item.variant_id || '',
           name: item.product_variants.name || '',
           price: item.product_variants.price,
+          sku: item.product_variants.sku,
         } : undefined,
       }));
 
