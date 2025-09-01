@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Package, 
   FolderOpen, 
@@ -17,6 +19,36 @@ import {
 
 const Dashboard = () => {
   const { profile } = useAuth();
+  const [counts, setCounts] = useState({
+    products: 0,
+    categories: 0,
+    content: 0,
+    settings: 0
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [productsResult, categoriesResult, contentResult, settingsResult] = await Promise.all([
+          supabase.from('products').select('id', { count: 'exact', head: true }),
+          supabase.from('categories').select('id', { count: 'exact', head: true }),
+          supabase.from('site_content').select('id', { count: 'exact', head: true }),
+          supabase.from('site_settings').select('id', { count: 'exact', head: true })
+        ]);
+
+        setCounts({
+          products: productsResult.count || 0,
+          categories: categoriesResult.count || 0,
+          content: contentResult.count || 0,
+          settings: settingsResult.count || 0
+        });
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   const adminCards = [
     {
@@ -25,7 +57,7 @@ const Dashboard = () => {
       icon: <Package className="h-8 w-8" />,
       href: '/admin/products',
       color: 'bg-farfalla-teal/10 text-farfalla-teal',
-      count: '23',
+      count: counts.products.toString(),
       actions: [
         { label: 'Ver todos', href: '/admin/products', icon: <Eye className="h-4 w-4" /> },
         { label: 'Agregar', href: '/admin/products/new', icon: <Plus className="h-4 w-4" /> }
@@ -37,7 +69,7 @@ const Dashboard = () => {
       icon: <FolderOpen className="h-8 w-8" />,
       href: '/admin/categories',
       color: 'bg-farfalla-pink/10 text-farfalla-pink',
-      count: '8',
+      count: counts.categories.toString(),
       actions: [
         { label: 'Ver todas', href: '/admin/categories', icon: <Eye className="h-4 w-4" /> },
         { label: 'Agregar', href: '/admin/categories/new', icon: <Plus className="h-4 w-4" /> }
@@ -49,7 +81,7 @@ const Dashboard = () => {
       icon: <FileText className="h-8 w-8" />,
       href: '/admin/content',
       color: 'bg-primary/10 text-primary',
-      count: '12',
+      count: counts.content.toString(),
       actions: [
         { label: 'Ver contenido', href: '/admin/content', icon: <Eye className="h-4 w-4" /> },
         { label: 'Editar', href: '/admin/content', icon: <Edit className="h-4 w-4" /> }
@@ -61,7 +93,7 @@ const Dashboard = () => {
       icon: <Settings className="h-8 w-8" />,
       href: '/admin/settings',
       color: 'bg-muted text-muted-foreground',
-      count: '15',
+      count: counts.settings.toString(),
       actions: [
         { label: 'Ver configuración', href: '/admin/settings', icon: <Settings className="h-4 w-4" /> }
       ]
@@ -69,10 +101,10 @@ const Dashboard = () => {
   ];
 
   const stats = [
-    { label: 'Productos Activos', value: '23', change: '+3 este mes' },
-    { label: 'Categorías', value: '8', change: 'Sin cambios' },
-    { label: 'Secciones de Contenido', value: '12', change: '+2 actualizadas' },
-    { label: 'Configuraciones', value: '15', change: '5 modificadas' }
+    { label: 'Productos Activos', value: counts.products.toString(), change: '+3 este mes' },
+    { label: 'Categorías', value: counts.categories.toString(), change: 'Sin cambios' },
+    { label: 'Secciones de Contenido', value: counts.content.toString(), change: '+2 actualizadas' },
+    { label: 'Configuraciones', value: counts.settings.toString(), change: '5 modificadas' }
   ];
 
   return (
