@@ -12,11 +12,18 @@ export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) =>
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
+  console.log('AuthCheck - User:', user?.email);
+  console.log('AuthCheck - Profile:', profile);
+  console.log('AuthCheck - Loading:', loading);
+  console.log('AuthCheck - RequireAdmin:', requireAdmin);
+
   useEffect(() => {
     if (!loading) {
       if (!user) {
+        console.log('AuthCheck - Redirecting to /auth - no user');
         navigate('/auth');
       } else if (requireAdmin && profile?.role !== 'admin') {
+        console.log('AuthCheck - Redirecting to / - not admin. Profile role:', profile?.role);
         navigate('/');
       }
     }
