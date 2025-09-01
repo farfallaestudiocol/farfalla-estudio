@@ -187,6 +187,7 @@ export default function AdminOrders() {
   const getPaymentStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { variant: 'secondary' as const, icon: Clock, label: 'Pendiente' },
+      completed: { variant: 'default' as const, icon: CheckCircle, label: 'Completado' },
       paid: { variant: 'default' as const, icon: CheckCircle, label: 'Pagado' },
       failed: { variant: 'destructive' as const, icon: XCircle, label: 'Fallido' },
       refunded: { variant: 'outline' as const, icon: RefreshCw, label: 'Reembolsado' }
@@ -274,6 +275,7 @@ export default function AdminOrders() {
                 <SelectContent>
                   <SelectItem value="all">Todos los pagos</SelectItem>
                   <SelectItem value="pending">Pendiente</SelectItem>
+                  <SelectItem value="completed">Completado</SelectItem>
                   <SelectItem value="paid">Pagado</SelectItem>
                   <SelectItem value="failed">Fallido</SelectItem>
                   <SelectItem value="refunded">Reembolsado</SelectItem>
