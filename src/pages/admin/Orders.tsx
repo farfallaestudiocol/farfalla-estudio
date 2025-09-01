@@ -118,12 +118,12 @@ export default function AdminOrders() {
   };
 
   useEffect(() => {
-    if (!user || !isAdmin) {
+    if (!user) {
       navigate('/admin');
       return;
     }
     fetchOrders();
-  }, [user, isAdmin, navigate, statusFilter, paymentStatusFilter]);
+  }, [user, navigate, statusFilter, paymentStatusFilter]);
 
   const formatPrice = (price: number, currency: string = 'COP') => {
     return new Intl.NumberFormat('es-CO', {
@@ -191,7 +191,7 @@ export default function AdminOrders() {
     return matchesSearch;
   });
 
-  if (!user || !isAdmin) {
+  if (!user) {
     return null;
   }
 
