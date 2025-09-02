@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Grid,
   List,
@@ -62,8 +63,9 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Filters from URL params
-  const selectedSubcategory = searchParams.get('subcategory') || 'all';
+  // Filters from URL params - Modified for multiple subcategories
+  const selectedSubcategoriesParam = searchParams.get('subcategories') || '';
+  const selectedSubcategories = selectedSubcategoriesParam ? selectedSubcategoriesParam.split(',') : [];
   const sortBy = searchParams.get('sort') || 'name';
   const sortOrder = searchParams.get('order') || 'asc';
 
@@ -75,7 +77,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     applyFiltersAndSorting();
-  }, [products, selectedSubcategory, sortBy, sortOrder]);
+  }, [products, selectedSubcategories, sortBy, sortOrder]);
 
   const fetchCategoryData = async () => {
     try {
@@ -130,10 +132,10 @@ const CategoryPage = () => {
   const applyFiltersAndSorting = () => {
     let filtered = [...products];
 
-    // Filter by subcategory
-    if (selectedSubcategory !== 'all') {
+    // Filter by subcategories - Modified for multiple selection
+    if (selectedSubcategories.length > 0) {
       filtered = filtered.filter(product => 
-        product.subcategories?.slug === selectedSubcategory
+        product.subcategories?.slug && selectedSubcategories.includes(product.subcategories.slug)
       );
     }
 
@@ -161,6 +163,30 @@ const CategoryPage = () => {
     });
 
     setFilteredProducts(filtered);
+  };
+
+  const updateSubcategoriesParam = (subcategorySlugs: string[]) => {
+    const params = new URLSearchParams(searchParams);
+    if (subcategorySlugs.length === 0) {
+      params.delete('subcategories');
+    } else {
+      params.set('subcategories', subcategorySlugs.join(','));
+    }
+    setSearchParams(params);
+  };
+
+  const handleSubcategoryChange = (subcategorySlug: string, checked: boolean) => {
+    let newSelected = [...selectedSubcategories];
+    
+    if (checked) {
+      if (!newSelected.includes(subcategorySlug)) {
+        newSelected.push(subcategorySlug);
+      }
+    } else {
+      newSelected = newSelected.filter(slug => slug !== subcategorySlug);
+    }
+    
+    updateSubcategoriesParam(newSelected);
   };
 
   const updateSearchParam = (key: string, value: string) => {
@@ -253,26 +279,46 @@ const CategoryPage = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                {/* Subcategory Filter */}
+                {/* Subcategory Filter - Multiple Selection with Checkboxes */}
                 {subcategories.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Subcategoría</label>
-                    <Select 
-                      value={selectedSubcategory} 
-                      onValueChange={(value) => updateSearchParam('subcategory', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas</SelectItem>
-                        {subcategories.map((sub) => (
-                          <SelectItem key={sub.id} value={sub.slug}>
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Subcategorías</label>
+                      {selectedSubcategories.length > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => updateSubcategoriesParam([])}
+                          className="h-auto p-1 text-xs"
+                        >
+                          Limpiar todo
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border rounded-md p-3 bg-card">
+                      {subcategories.map((sub) => (
+                        <div key={sub.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`subcategory-${sub.id}`}
+                            checked={selectedSubcategories.includes(sub.slug)}
+                            onCheckedChange={(checked) => 
+                              handleSubcategoryChange(sub.slug, checked === true)
+                            }
+                          />
+                          <label
+                            htmlFor={`subcategory-${sub.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
                             {sub.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedSubcategories.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        {selectedSubcategories.length} subcategoría{selectedSubcategories.length !== 1 ? 's' : ''} seleccionada{selectedSubcategories.length !== 1 ? 's' : ''}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -379,15 +425,15 @@ const CategoryPage = () => {
                 No hay productos en esta categoría
               </h3>
               <p className="text-muted-foreground mb-6">
-                {selectedSubcategory !== 'all' 
-                  ? 'Intenta seleccionar otra subcategoría o ver todos los productos'
+                {selectedSubcategories.length > 0 
+                  ? 'Intenta cambiar la selección de subcategorías o ver todos los productos'
                   : 'Pronto agregaremos productos a esta categoría'
                 }
               </p>
-              {selectedSubcategory !== 'all' && (
+              {selectedSubcategories.length > 0 && (
                 <Button 
                   variant="outline" 
-                  onClick={() => updateSearchParam('subcategory', 'all')}
+                  onClick={() => updateSubcategoriesParam([])}
                 >
                   Ver todos los productos
                 </Button>
