@@ -63,9 +63,18 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Filters from URL params - Modified for multiple subcategories
+  // Filters from URL params - Support both old and new formats
   const selectedSubcategoriesParam = searchParams.get('subcategories') || '';
-  const selectedSubcategories = selectedSubcategoriesParam ? selectedSubcategoriesParam.split(',') : [];
+  const oldSubcategoryParam = searchParams.get('subcategory');
+  
+  // Combine both old single selection and new multiple selection
+  let selectedSubcategories: string[] = [];
+  if (selectedSubcategoriesParam) {
+    selectedSubcategories = selectedSubcategoriesParam.split(',');
+  } else if (oldSubcategoryParam && oldSubcategoryParam !== 'all') {
+    selectedSubcategories = [oldSubcategoryParam];
+  }
+  
   const sortBy = searchParams.get('sort') || 'name';
   const sortOrder = searchParams.get('order') || 'asc';
 
@@ -200,10 +209,11 @@ const CategoryPage = () => {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-CO', {
       style: 'currency',
-      currency: 'EUR'
-    }).format(price / 100);
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(price);
   };
 
   if (loading) {
@@ -408,6 +418,7 @@ const CategoryPage = () => {
                   <ProductCard 
                     id={product.id}
                     name={product.name}
+                    slug={product.slug}
                     price={product.price}
                     comparePrice={product.compare_price}
                     image={product.images?.[0] || '/placeholder.svg'}
