@@ -104,7 +104,7 @@ const Header = () => {
                     <ChevronDown className="ml-1 h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="z-50 bg-background">
+                <DropdownMenuContent align="end" className="z-50">
                   {hiddenCategories.map((category) => (
                       <DropdownMenuItem 
                         key={category.id} 
