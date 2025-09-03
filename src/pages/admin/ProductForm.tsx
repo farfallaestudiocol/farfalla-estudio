@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, Loader2, Plus, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 
 interface Category {
   id: string;
@@ -42,6 +43,7 @@ const ProductForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newImage, setNewImage] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [processingImage, setProcessingImage] = useState(false);
   
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -140,18 +142,6 @@ const ProductForm = () => {
       .replace(/^-+|-+$/g, '');
   };
 
-  const convertGoogleDriveUrl = (url: string) => {
-    // Convert Google Drive sharing URL to direct image URL
-    const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-    const match = url.match(driveRegex);
-    
-    if (match) {
-      const fileId = match[1];
-      return `https://drive.google.com/uc?id=${fileId}`;
-    }
-    
-    return url;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +152,6 @@ const ProductForm = () => {
         ...formData,
         slug: formData.slug || generateSlug(formData.name),
         category_id: formData.category_id || null,
-        images: formData.images.map(convertGoogleDriveUrl),
       };
 
       if (isEditing) {
@@ -211,14 +200,35 @@ const ProductForm = () => {
     }));
   };
 
-  const addImage = () => {
+  const addImage = async () => {
     if (newImage.trim()) {
-      const convertedUrl = convertGoogleDriveUrl(newImage.trim());
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, convertedUrl]
-      }));
-      setNewImage('');
+      setProcessingImage(true);
+      try {
+        const convertedUrl = await convertGoogleDriveUrlToBase64(newImage.trim());
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, convertedUrl]
+        }));
+        setNewImage('');
+        
+        // Show success message if it was a Google Drive URL
+        const isDriveUrl = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/.test(newImage.trim());
+        if (isDriveUrl) {
+          toast({
+            title: 'Imagen convertida',
+            description: 'La imagen de Google Drive se ha convertido correctamente',
+          });
+        }
+      } catch (error) {
+        console.error('Error processing image:', error);
+        toast({
+          title: 'Error',
+          description: 'No se pudo procesar la imagen. Verifica que el enlace sea válido.',
+          variant: 'destructive',
+        });
+      } finally {
+        setProcessingImage(false);
+      }
     }
   };
 
@@ -443,8 +453,12 @@ const ProductForm = () => {
                     placeholder="https://ejemplo.com/imagen.jpg"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
                   />
-                  <Button type="button" onClick={addImage} variant="outline">
-                    <Plus className="h-4 w-4" />
+                  <Button type="button" onClick={addImage} variant="outline" disabled={processingImage}>
+                    {processingImage ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
