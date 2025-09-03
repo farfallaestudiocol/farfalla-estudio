@@ -108,6 +108,19 @@ const SubcategoryForm = () => {
       .replace(/^-+|-+$/g, '');
   };
 
+  const convertGoogleDriveUrl = (url: string) => {
+    // Convert Google Drive sharing URL to direct image URL
+    const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+    const match = url.match(driveRegex);
+    
+    if (match) {
+      const fileId = match[1];
+      return `https://drive.google.com/uc?id=${fileId}`;
+    }
+    
+    return url;
+  };
+
   const handleNameChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -136,7 +149,7 @@ const SubcategoryForm = () => {
         slug: formData.slug || generateSlug(formData.name),
         description: formData.description.trim() || null,
         category_id: formData.category_id,
-        image_url: formData.image_url.trim() || null,
+        image_url: formData.image_url.trim() ? convertGoogleDriveUrl(formData.image_url.trim()) : null,
         is_active: formData.is_active,
         display_order: formData.display_order,
       };
@@ -274,6 +287,9 @@ const SubcategoryForm = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
+                <p className="text-xs text-muted-foreground">
+                  💡 Para Google Drive: Copia el enlace para compartir y se convertirá automáticamente al formato correcto
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
