@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import Header from "@/components/Header";
@@ -67,6 +68,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [processedImages, setProcessedImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (productSlug) {
@@ -99,6 +101,16 @@ const ProductDetail = () => {
       }
 
       setProduct(productData);
+
+      // Convert Google Drive images to base64
+      if (productData.images && productData.images.length > 0) {
+        const convertedImages = await Promise.all(
+          productData.images.map(async (imageUrl: string) => {
+            return await convertGoogleDriveUrlToBase64(imageUrl);
+          })
+        );
+        setProcessedImages(convertedImages);
+      }
 
       // Fetch variants for this product
       const { data: variantsData } = await supabase
@@ -240,7 +252,7 @@ const ProductDetail = () => {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden">
               <img
-                src={product.images[selectedImageIndex] || '/placeholder.svg'}
+                src={processedImages[selectedImageIndex] || product.images[selectedImageIndex] || '/placeholder.svg'}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -259,7 +271,7 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={image}
+                      src={processedImages[index] || image}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
