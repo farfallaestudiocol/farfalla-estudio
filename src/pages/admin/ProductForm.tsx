@@ -140,6 +140,19 @@ const ProductForm = () => {
       .replace(/^-+|-+$/g, '');
   };
 
+  const convertGoogleDriveUrl = (url: string) => {
+    // Convert Google Drive sharing URL to direct image URL
+    const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+    const match = url.match(driveRegex);
+    
+    if (match) {
+      const fileId = match[1];
+      return `https://drive.google.com/uc?id=${fileId}`;
+    }
+    
+    return url;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -149,6 +162,7 @@ const ProductForm = () => {
         ...formData,
         slug: formData.slug || generateSlug(formData.name),
         category_id: formData.category_id || null,
+        images: formData.images.map(convertGoogleDriveUrl),
       };
 
       if (isEditing) {
@@ -199,9 +213,10 @@ const ProductForm = () => {
 
   const addImage = () => {
     if (newImage.trim()) {
+      const convertedUrl = convertGoogleDriveUrl(newImage.trim());
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, newImage.trim()]
+        images: [...prev.images, convertedUrl]
       }));
       setNewImage('');
     }
@@ -420,16 +435,21 @@ const ProductForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                />
-                <Button type="button" onClick={addImage} variant="outline">
-                  <Plus className="h-4 w-4" />
-                </Button>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={newImage}
+                    onChange={(e) => setNewImage(e.target.value)}
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+                  />
+                  <Button type="button" onClick={addImage} variant="outline">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  💡 Para Google Drive: Copia el enlace para compartir y se convertirá automáticamente al formato correcto
+                </p>
               </div>
 
               {formData.images.length > 0 && (
