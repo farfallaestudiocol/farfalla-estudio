@@ -1,4 +1,4 @@
-export const convertGoogleDriveUrlToBase64 = async (url: string): Promise<string> => {
+export const convertGoogleDriveUrlToBase64 = (url: string): string => {
   // Check if it's a Google Drive URL
   const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
   const match = url.match(driveRegex);
@@ -9,17 +9,12 @@ export const convertGoogleDriveUrlToBase64 = async (url: string): Promise<string
   
   const fileId = match[1];
   
-  try {
-    // Use our Supabase edge function proxy
-    const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
-    
-    console.log('Using proxy URL:', proxyUrl);
-    
-    return proxyUrl; // Return proxy URL directly instead of base64
-  } catch (error) {
-    console.error('Error creating proxy URL for Google Drive image:', error);
-    return url; // Return original URL on error
-  }
+  // Use our Supabase edge function proxy
+  const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
+  
+  console.log('Using proxy URL:', proxyUrl);
+  
+  return proxyUrl; // Return proxy URL directly
 };
 
 export const convertGoogleDriveUrl = (url: string): string => {

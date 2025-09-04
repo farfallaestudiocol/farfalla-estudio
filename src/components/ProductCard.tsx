@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
-import { useState, useEffect } from "react";
 import { convertGoogleDriveUrlToBase64 } from "@/lib/googleDrive";
 
 interface ProductCardProps {
@@ -37,16 +36,9 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const [processedImage, setProcessedImage] = useState<string>(image);
-
-  useEffect(() => {
-    const processImage = async () => {
-      const convertedImage = await convertGoogleDriveUrlToBase64(image);
-      setProcessedImage(convertedImage);
-    };
-    
-    processImage();
-  }, [image]);
+  
+  // Process image URL through proxy if it's a Google Drive link
+  const processedImage = convertGoogleDriveUrlToBase64(image);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',

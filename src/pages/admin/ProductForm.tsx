@@ -200,11 +200,11 @@ const ProductForm = () => {
     }));
   };
 
-  const addImage = async () => {
+  const addImage = () => {
     if (newImage.trim()) {
       setProcessingImage(true);
       try {
-        const convertedUrl = await convertGoogleDriveUrlToBase64(newImage.trim());
+        const convertedUrl = convertGoogleDriveUrlToBase64(newImage.trim());
         setFormData(prev => ({
           ...prev,
           images: [...prev.images, convertedUrl]
@@ -215,8 +215,8 @@ const ProductForm = () => {
         const isDriveUrl = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/.test(newImage.trim());
         if (isDriveUrl) {
           toast({
-            title: 'Imagen convertida',
-            description: 'La imagen de Google Drive se ha convertido correctamente',
+            title: 'Imagen procesada',
+            description: 'La imagen de Google Drive se procesará a través del proxy',
           });
         }
       } catch (error) {
