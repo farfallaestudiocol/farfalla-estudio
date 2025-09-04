@@ -1,20 +1,27 @@
 export const convertGoogleDriveUrlToBase64 = (url: string): string => {
-  // Check if it's a Google Drive URL
-  const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-  const match = url.match(driveRegex);
+  // Check if it's a Google Drive URL (sharing format)
+  let driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+  let match = url.match(driveRegex);
   
-  if (!match) {
-    return url; // Return original URL if it's not Google Drive
+  if (match) {
+    const fileId = match[1];
+    const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
+    console.log('Using proxy URL for sharing format:', proxyUrl);
+    return proxyUrl;
   }
   
-  const fileId = match[1];
+  // Check if it's already in direct format (uc?id=)
+  driveRegex = /https:\/\/drive\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/;
+  match = url.match(driveRegex);
   
-  // Use our Supabase edge function proxy
-  const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
+  if (match) {
+    const fileId = match[1];
+    const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
+    console.log('Using proxy URL for direct format:', proxyUrl);
+    return proxyUrl;
+  }
   
-  console.log('Using proxy URL:', proxyUrl);
-  
-  return proxyUrl; // Return proxy URL directly
+  return url; // Return original URL if it's not Google Drive
 };
 
 export const convertGoogleDriveUrl = (url: string): string => {
