@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
@@ -257,7 +258,7 @@ const CategoryPage = () => {
             {category.image_url && (
               <div className="mb-6">
                 <img
-                  src={category.image_url}
+                  src={convertGoogleDriveUrlToBase64(category.image_url)}
                   alt={category.name}
                   className="w-full h-64 object-cover rounded-xl"
                 />

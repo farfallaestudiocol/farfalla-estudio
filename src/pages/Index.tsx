@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -265,7 +266,7 @@ const Index = () => {
                     name={product.name}
                     price={product.price}
                     comparePrice={product.compare_price}
-                    image={product.images[0] || '/placeholder.svg'}
+                    image={product.images[0] ? convertGoogleDriveUrlToBase64(product.images[0]) : '/placeholder.svg'}
                     rating={product.rating}
                     reviewCount={product.review_count}
                     badge={
