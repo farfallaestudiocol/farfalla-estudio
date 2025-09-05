@@ -5,10 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface GoogleDriveProxyRequest {
-  fileId: string;
-}
-
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -20,27 +16,44 @@ const handler = async (req: Request): Promise<Response> => {
     const fileId = url.searchParams.get('fileId');
 
     if (!fileId) {
+      console.error('Missing fileId parameter');
       return new Response(JSON.stringify({ error: 'Missing fileId parameter' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Convert Google Drive sharing URL to direct download URL
-    const directUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
-    
-    console.log(`Fetching image from Google Drive: ${directUrl}`);
+    console.log(`Processing Google Drive file ID: ${fileId}`);
 
-    // Fetch the image from Google Drive
-    const response = await fetch(directUrl, {
+    // Try direct download first
+    let googleDriveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    
+    console.log(`Fetching from Google Drive: ${googleDriveUrl}`);
+
+    let response = await fetch(googleDriveUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
+      redirect: 'follow'
     });
+
+    // If we get an HTML response, it might be Google's confirmation page
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      console.log('Got HTML response, trying alternative URL format');
+      googleDriveUrl = `https://drive.google.com/uc?id=${fileId}`;
+      
+      response = await fetch(googleDriveUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
+        redirect: 'follow'
+      });
+    }
 
     if (!response.ok) {
       console.error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      return new Response(JSON.stringify({ error: 'Failed to fetch image from Google Drive' }), {
+      return new Response(JSON.stringify({ error: `Failed to fetch image from Google Drive: ${response.status}` }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -48,15 +61,21 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get the image data
     const imageData = await response.arrayBuffer();
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const finalContentType = response.headers.get('content-type');
 
-    console.log(`Successfully fetched image: ${imageData.byteLength} bytes, type: ${contentType}`);
+    console.log(`Successfully fetched image: ${imageData.byteLength} bytes, type: ${finalContentType}`);
+
+    // Determine content type - default to jpeg if not specified or if it's HTML
+    let imageContentType = 'image/jpeg';
+    if (finalContentType && finalContentType.startsWith('image/')) {
+      imageContentType = finalContentType;
+    }
 
     // Return the image with proper headers
     return new Response(imageData, {
       headers: {
         ...corsHeaders,
-        'Content-Type': contentType,
+        'Content-Type': imageContentType,
         'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
       },
     });

@@ -62,6 +62,9 @@ const ProductCard = ({
           alt={name}
           className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = '/placeholder.svg';
+          }}
         />
         
         {/* Badges */}

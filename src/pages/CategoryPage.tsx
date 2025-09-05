@@ -261,6 +261,9 @@ const CategoryPage = () => {
                   src={convertGoogleDriveUrlToBase64(category.image_url)}
                   alt={category.name}
                   className="w-full h-64 object-cover rounded-xl"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
                 />
               </div>
             )}

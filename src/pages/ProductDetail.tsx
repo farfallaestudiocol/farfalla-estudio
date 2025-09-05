@@ -244,6 +244,9 @@ const ProductDetail = () => {
                 src={convertGoogleDriveUrlToBase64(product.images[selectedImageIndex]) || '/placeholder.svg'}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
+                }}
               />
             </div>
             
@@ -263,6 +266,9 @@ const ProductDetail = () => {
                       src={convertGoogleDriveUrlToBase64(image)}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                   </button>
                 ))}

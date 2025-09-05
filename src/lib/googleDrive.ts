@@ -1,23 +1,33 @@
 export const convertGoogleDriveUrlToBase64 = (url: string): string => {
-  // Check if it's a Google Drive URL (sharing format)
-  let driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-  let match = url.match(driveRegex);
+  if (!url) return url;
   
-  if (match) {
-    const fileId = match[1];
-    const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
-    console.log('Using proxy URL for sharing format:', proxyUrl);
-    return proxyUrl;
+  let fileId: string | null = null;
+  
+  // Handle various Google Drive URL formats
+  const patterns = [
+    /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,  // Sharing format
+    /https:\/\/drive\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/,   // Direct format
+    /https:\/\/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/, // Open format
+    /https:\/\/docs\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/     // Docs format
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      fileId = match[1];
+      break;
+    }
   }
   
-  // Check if it's already in direct format (uc?id=)
-  driveRegex = /https:\/\/drive\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/;
-  match = url.match(driveRegex);
+  // If it's just a file ID (no URL format)
+  if (!fileId && /^[a-zA-Z0-9_-]{25,}$/.test(url)) {
+    fileId = url;
+  }
   
-  if (match) {
-    const fileId = match[1];
+  // If we found a file ID, use our proxy
+  if (fileId) {
     const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
-    console.log('Using proxy URL for direct format:', proxyUrl);
+    console.log('Using proxy URL for Google Drive:', proxyUrl);
     return proxyUrl;
   }
   
