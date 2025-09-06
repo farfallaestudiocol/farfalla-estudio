@@ -1,5 +1,6 @@
 import { Heart, Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import DynamicLogo from "@/components/DynamicLogo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -16,19 +17,20 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-12 flex justify-center">
-          {/* Brand Section */}
-          <div className="max-w-md text-center">
-            {settings?.company_logo_url ? (
-              <img 
-                src={settings.company_logo_url} 
-                alt={settings.company_name || "Logo"} 
-                className="h-12 mb-4 mx-auto"
-              />
-            ) : (
-              <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4">
-                {settings?.company_name || "Farfalla"} <span className="text-farfalla-pink">Estudio</span>
-              </h2>
-            )}
+            {/* Brand Section */}
+            <div className="max-w-md text-center">
+              {settings?.logo_square_color_url || settings?.logo_rectangular_color_url || settings?.logo_color_url || settings?.company_logo_url ? (
+                <DynamicLogo 
+                  shape="responsive" 
+                  variant="color" 
+                  className="h-12 mb-4 mx-auto" 
+                  alt={settings.company_name || "Logo"} 
+                />
+              ) : (
+                <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4">
+                  {settings?.company_name || "Farfalla"} <span className="text-farfalla-pink">Estudio</span>
+                </h2>
+              )}
             <p className="text-muted-foreground font-inter mb-6">
               {settings?.company_description || "Tu destino para productos de belleza de alta calidad. Descubre tu mejor versión con nuestra selección cuidadosamente curada."}
             </p>

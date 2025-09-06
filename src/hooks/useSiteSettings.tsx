@@ -21,6 +21,10 @@ interface SiteSettings {
   social_facebook: string;
   logo_color_url: string;
   logo_white_url: string;
+  logo_square_color_url: string;
+  logo_square_white_url: string;
+  logo_rectangular_color_url: string;
+  logo_rectangular_white_url: string;
 }
 
 interface SiteSettingsContextType {
@@ -50,6 +54,10 @@ const defaultSettings: SiteSettings = {
   social_facebook: 'https://facebook.com/farfallaestudio',
   logo_color_url: '',
   logo_white_url: '',
+  logo_square_color_url: '',
+  logo_square_white_url: '',
+  logo_rectangular_color_url: '',
+  logo_rectangular_white_url: '',
 };
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
@@ -82,7 +90,11 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'social_instagram',
           'social_facebook',
           'logo_color_url',
-          'logo_white_url'
+          'logo_white_url',
+          'logo_square_color_url',
+          'logo_square_white_url',
+          'logo_rectangular_color_url',
+          'logo_rectangular_white_url'
         ]);
 
       if (error) throw error;
