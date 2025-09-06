@@ -54,7 +54,7 @@ const Header = () => {
   const hiddenCategories = categories.slice(4);
 
   return (
-    <header className="bg-background border-b border-border/50 sticky top-0 z-50 backdrop-blur-lg bg-background/95">
+    <header className="bg-farfalla-pink/20 border-b border-farfalla-pink/30 sticky top-0 z-50 backdrop-blur-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 md:h-20">
