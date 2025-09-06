@@ -11,7 +11,8 @@ import {
   BarChart3,
   ChevronRight,
   Home,
-  ShoppingCart
+  ShoppingCart,
+  Palette
 } from 'lucide-react';
 
 import {
@@ -74,6 +75,11 @@ const managementItems = [
     title: "Órdenes",
     url: "/admin/orders",
     icon: ShoppingCart
+  },
+  {
+    title: "Branding",
+    url: "/admin/branding",
+    icon: Palette
   },
   {
     title: "Contenido del Sitio",

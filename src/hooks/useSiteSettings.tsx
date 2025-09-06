@@ -19,12 +19,15 @@ interface SiteSettings {
   contact_address: string;
   social_instagram: string;
   social_facebook: string;
+  logo_color_url: string;
+  logo_white_url: string;
 }
 
 interface SiteSettingsContextType {
   settings: SiteSettings | null;
   isLoading: boolean;
   refreshSettings: () => Promise<void>;
+  updateSetting: (key: string, value: string) => Promise<void>;
 }
 
 const defaultSettings: SiteSettings = {
@@ -45,6 +48,8 @@ const defaultSettings: SiteSettings = {
   contact_address: 'Bogotá, Colombia',
   social_instagram: 'https://instagram.com/farfallaestudio',
   social_facebook: 'https://facebook.com/farfallaestudio',
+  logo_color_url: '',
+  logo_white_url: '',
 };
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
@@ -75,7 +80,9 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'contact_city',
           'contact_address',
           'social_instagram',
-          'social_facebook'
+          'social_facebook',
+          'logo_color_url',
+          'logo_white_url'
         ]);
 
       if (error) throw error;
@@ -117,6 +124,25 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     await fetchSettings();
   };
 
+  const updateSetting = async (key: string, value: string) => {
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .upsert(
+          { setting_key: key, setting_value: value },
+          { onConflict: 'setting_key' }
+        );
+
+      if (error) throw error;
+      
+      // Refresh settings after update
+      await refreshSettings();
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -125,6 +151,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     settings,
     isLoading,
     refreshSettings,
+    updateSetting,
   };
 
   return (

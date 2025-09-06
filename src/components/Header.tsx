@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import DynamicLogo from "@/components/DynamicLogo";
 
 interface Category {
   id: string;
@@ -60,11 +61,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img 
-              src="/lovable-uploads/f9953d83-e6cc-4f4f-85ac-c7a1f7220021.png" 
-              alt="Farfalla Estudio - Manualidades en papel personalizadas"
-              className="h-12 md:h-16 w-auto"
-            />
+            <DynamicLogo />
           </div>
 
           {/* Desktop Navigation */}
