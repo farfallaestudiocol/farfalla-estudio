@@ -74,6 +74,7 @@ import Variants from "./pages/admin/Variants";
 import VariantForm from "./pages/admin/VariantForm";
 import AdminOrders from "./pages/admin/Orders";
 import Branding from "./pages/admin/Branding";
+import Banner from "./pages/admin/Banner";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
@@ -112,6 +113,7 @@ const App = () => (
                         <Route path="variants/edit/:id" element={<VariantForm />} />
                         <Route path="orders" element={<AdminOrders />} />
                         <Route path="branding" element={<Branding />} />
+                        <Route path="banner" element={<Banner />} />
                         <Route path="content" element={<Content />} />
                         <Route path="settings" element={<Settings />} />
                       </Routes>

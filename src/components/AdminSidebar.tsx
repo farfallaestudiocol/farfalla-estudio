@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Home,
   ShoppingCart,
-  Palette
+  Palette,
+  Monitor
 } from 'lucide-react';
 
 import {
@@ -80,6 +81,11 @@ const managementItems = [
     title: "Branding",
     url: "/admin/branding",
     icon: Palette
+  },
+  {
+    title: "Banner Principal",
+    url: "/admin/banner",
+    icon: Monitor
   },
   {
     title: "Contenido del Sitio",

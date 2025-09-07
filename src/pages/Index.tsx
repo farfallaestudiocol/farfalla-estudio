@@ -6,11 +6,11 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BannerCarousel from "@/components/BannerCarousel";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles, Heart, Leaf, Truck, Shield, Gift, Scissors } from "lucide-react";
-import heroImage from "@/assets/hero-crafting.jpg";
 
 interface Product {
   id: string;
@@ -111,38 +111,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden farfalla-hero-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="text-center">
-            <Badge className="farfalla-badge-promo mb-6 animate-in slide-in-from-bottom-4 duration-1000">
-              ✨ Creaciones Artesanales Únicas
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-poppins font-bold text-white mb-6 leading-tight animate-in slide-in-from-bottom-6 duration-1000">
-              Creaciones únicas
-              <span className="text-white block">hechas a mano</span>
-            </h1>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl animate-in slide-in-from-bottom-8 duration-1000 delay-200 mx-auto">
-              Manualidades en papel personalizadas para tus momentos especiales. Cada pieza es única y creada especialmente para ti.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in slide-in-from-bottom-10 duration-1000 delay-400">
-              <Button className="farfalla-btn-primary">
-                Personalizar Ahora
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button className="farfalla-btn-secondary mr-4 animate-in slide-in-from-bottom-10 duration-1000 delay-500">
-                Ver Creaciones
-              </Button>
-            </div>
-          </div>
-          <div className="mt-16 animate-in slide-in-from-bottom-12 duration-1000 delay-600">
-            <img
-              src={heroImage}
-              alt="Farfalla Estudio - Creaciones en papel"
-              className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl"
-            />
-          </div>
-        </div>
-      </section>
+      <BannerCarousel />
 
       {/* Benefits Section */}
       <section className="py-16 farfalla-section-gradient">
