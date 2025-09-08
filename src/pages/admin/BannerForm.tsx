@@ -250,6 +250,9 @@ const BannerForm = () => {
                       src={formData.image_url}
                       alt="Vista previa"
                       className="w-full max-w-md h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        console.log('Error loading image preview');
+                      }}
                     />
                   </div>
                 )}
