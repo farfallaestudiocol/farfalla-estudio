@@ -4,6 +4,7 @@ import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WompiWidget from '@/components/WompiWidget';
@@ -142,7 +143,7 @@ const Cart = () => {
                         <div className="flex-shrink-0">
                           <Link to={`/producto/${item.product.slug}`}>
                             <img
-                              src={item.product.images[0] || '/placeholder.svg'}
+                              src={item.product.images[0] ? convertGoogleDriveUrlToBase64(item.product.images[0]) : '/placeholder.svg'}
                               alt={item.product.name}
                               className="w-20 h-20 object-cover rounded-lg"
                             />
