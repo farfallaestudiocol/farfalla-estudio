@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -208,7 +209,7 @@ const Banner = () => {
               <CardContent>
                 <div className="mb-4">
                   <img
-                    src={slide.image_url}
+                    src={convertGoogleDriveUrlToBase64(slide.image_url)}
                     alt={slide.title}
                     className="w-full h-32 object-cover rounded-lg"
                   />
