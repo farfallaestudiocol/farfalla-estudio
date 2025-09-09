@@ -470,7 +470,7 @@ const ProductForm = () => {
                 <div className="space-y-2">
                   {formData.images.map((image, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                      <img src={image} alt={`Imagen ${index + 1}`} className="w-12 h-12 object-cover rounded" />
+                      <img src={convertGoogleDriveUrlToBase64(image)} alt={`Imagen ${index + 1}`} className="w-12 h-12 object-cover rounded" />
                       <span className="flex-1 text-sm truncate">{image}</span>
                       <Button
                         type="button"

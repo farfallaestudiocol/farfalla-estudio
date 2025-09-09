@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -247,7 +248,7 @@ const BannerForm = () => {
                 {formData.image_url && (
                   <div className="mt-2">
                     <img
-                      src={formData.image_url}
+                      src={convertGoogleDriveUrlToBase64(formData.image_url)}
                       alt="Vista previa"
                       className="w-full max-w-md h-32 object-cover rounded-lg"
                       onError={(e) => {
