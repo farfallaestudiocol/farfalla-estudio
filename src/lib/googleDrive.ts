@@ -1,6 +1,8 @@
 export const convertGoogleDriveUrlToBase64 = (url: string): string => {
   if (!url) return url;
   
+  console.log('Original URL:', url);
+  
   let fileId: string | null = null;
   
   // Handle various Google Drive URL formats
@@ -15,6 +17,7 @@ export const convertGoogleDriveUrlToBase64 = (url: string): string => {
     const match = url.match(pattern);
     if (match) {
       fileId = match[1];
+      console.log('Extracted file ID:', fileId);
       break;
     }
   }
@@ -22,6 +25,7 @@ export const convertGoogleDriveUrlToBase64 = (url: string): string => {
   // If it's just a file ID (no URL format)
   if (!fileId && /^[a-zA-Z0-9_-]{25,}$/.test(url)) {
     fileId = url;
+    console.log('Using URL as file ID:', fileId);
   }
   
   // If we found a file ID, use our proxy
@@ -31,6 +35,7 @@ export const convertGoogleDriveUrlToBase64 = (url: string): string => {
     return proxyUrl;
   }
   
+  console.log('No Google Drive pattern matched, returning original URL');
   return url; // Return original URL if it's not Google Drive
 };
 
