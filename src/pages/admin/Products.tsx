@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -222,7 +223,7 @@ const Products = () => {
                 {product.images.length > 0 && (
                   <div className="mb-4">
                     <img
-                      src={product.images[0]}
+                      src={convertGoogleDriveUrlToBase64(product.images[0])}
                       alt={product.name}
                       className="w-full h-32 object-cover rounded-lg"
                     />
