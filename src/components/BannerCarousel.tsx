@@ -162,6 +162,11 @@ const BannerCarousel = () => {
                       alt={slide.title}
                       className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl"
                       loading="lazy"
+                      onLoad={() => console.log('Image loaded successfully:', slide.title)}
+                      onError={(e) => {
+                        console.error('Image failed to load:', slide.title, 'Original URL:', slide.image_url, 'Converted URL:', convertGoogleDriveUrlToBase64(slide.image_url));
+                        console.error('Error details:', e);
+                      }}
                     />
                   </div>
                 )}
