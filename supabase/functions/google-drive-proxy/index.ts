@@ -25,36 +25,52 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing Google Drive file ID: ${fileId}`);
 
-    // Try direct download first
-    let googleDriveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    
-    console.log(`Fetching from Google Drive: ${googleDriveUrl}`);
+    // Array of different Google Drive URL formats to try
+    const urlFormats = [
+      `https://drive.google.com/thumbnail?id=${fileId}&sz=w2000`,
+      `https://drive.google.com/uc?export=view&id=${fileId}`,
+      `https://lh3.googleusercontent.com/d/${fileId}`,
+      `https://drive.google.com/uc?export=download&id=${fileId}`,
+      `https://drive.google.com/uc?id=${fileId}`,
+    ];
 
-    let response = await fetch(googleDriveUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      },
-      redirect: 'follow'
-    });
+    let response: Response | null = null;
+    let successUrl = '';
 
-    // If we get an HTML response, it might be Google's confirmation page
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('text/html')) {
-      console.log('Got HTML response, trying alternative URL format');
-      googleDriveUrl = `https://drive.google.com/uc?id=${fileId}`;
-      
-      response = await fetch(googleDriveUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        },
-        redirect: 'follow'
-      });
+    // Try each URL format until we find one that works
+    for (const googleDriveUrl of urlFormats) {
+      try {
+        console.log(`Trying URL: ${googleDriveUrl}`);
+        
+        const tempResponse = await fetch(googleDriveUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          },
+          redirect: 'follow'
+        });
+
+        const contentType = tempResponse.headers.get('content-type') || '';
+        console.log(`Response content type: ${contentType}`);
+        
+        // Check if we got a valid image response
+        if (tempResponse.ok && (contentType.startsWith('image/') || !contentType.includes('text/html'))) {
+          response = tempResponse;
+          successUrl = googleDriveUrl;
+          console.log(`Success with URL: ${googleDriveUrl}`);
+          break;
+        } else {
+          console.log(`Failed with URL ${googleDriveUrl}: ${tempResponse.status} - ${contentType}`);
+        }
+      } catch (error) {
+        console.log(`Error with URL ${googleDriveUrl}:`, error);
+        continue;
+      }
     }
 
-    if (!response.ok) {
-      console.error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      return new Response(JSON.stringify({ error: `Failed to fetch image from Google Drive: ${response.status}` }), {
-        status: response.status,
+    if (!response || !response.ok) {
+      console.error(`Failed to fetch image from all attempted URLs`);
+      return new Response(JSON.stringify({ error: `Failed to fetch image from Google Drive with all attempted methods` }), {
+        status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
