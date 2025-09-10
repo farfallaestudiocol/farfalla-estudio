@@ -32,10 +32,12 @@ const handler = async (req: Request): Promise<Response> => {
       `https://lh3.googleusercontent.com/d/${fileId}`,
       `https://drive.google.com/uc?export=download&id=${fileId}`,
       `https://drive.google.com/uc?id=${fileId}`,
+      `https://docs.google.com/uc?export=download&id=${fileId}`,
     ];
 
     let response: Response | null = null;
     let successUrl = '';
+    let lastError = '';
 
     // Try each URL format until we find one that works
     for (const googleDriveUrl of urlFormats) {
@@ -45,25 +47,63 @@ const handler = async (req: Request): Promise<Response> => {
         const tempResponse = await fetch(googleDriveUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://drive.google.com/',
           },
           redirect: 'follow'
         });
 
         const contentType = tempResponse.headers.get('content-type') || '';
-        console.log(`Response content type: ${contentType}`);
+        console.log(`Response for ${googleDriveUrl}: Status ${tempResponse.status}, Content-Type: ${contentType}`);
         
         // Check if we got a valid image response
-        if (tempResponse.ok && (contentType.startsWith('image/') || !contentType.includes('text/html'))) {
+        if (tempResponse.ok && contentType.startsWith('image/')) {
           response = tempResponse;
           successUrl = googleDriveUrl;
-          console.log(`Success with URL: ${googleDriveUrl}`);
+          console.log(`✅ Success with URL: ${googleDriveUrl}`);
           break;
+        } else if (contentType.includes('text/html')) {
+          // If we get HTML, try to extract any useful info
+          const htmlText = await tempResponse.text();
+          if (htmlText.includes('access_denied') || htmlText.includes('permission denied')) {
+            lastError = 'Permission denied - image is not publicly accessible';
+          } else if (htmlText.includes('file not found') || htmlText.includes('404')) {
+            lastError = 'File not found';
+          } else {
+            lastError = 'Google Drive returned HTML instead of image data';
+          }
+          console.log(`❌ Failed with URL ${googleDriveUrl}: ${lastError}`);
         } else {
-          console.log(`Failed with URL ${googleDriveUrl}: ${tempResponse.status} - ${contentType}`);
+          lastError = `Unexpected response: ${tempResponse.status} ${contentType}`;
+          console.log(`❌ Failed with URL ${googleDriveUrl}: ${lastError}`);
         }
       } catch (error) {
-        console.log(`Error with URL ${googleDriveUrl}:`, error);
+        lastError = `Network error: ${error.message}`;
+        console.log(`❌ Error with URL ${googleDriveUrl}:`, error);
         continue;
+      }
+    }
+
+    // If no URL worked, try one more approach - the direct thumbnail API
+    if (!response) {
+      console.log('🔄 All standard URLs failed, trying direct thumbnail API...');
+      try {
+        const thumbnailUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920`;
+        const thumbnailResponse = await fetch(thumbnailUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          }
+        });
+        
+        const contentType = thumbnailResponse.headers.get('content-type') || '';
+        console.log(`Thumbnail API response: ${thumbnailResponse.status}, Content-Type: ${contentType}`);
+        
+        if (thumbnailResponse.ok && contentType.startsWith('image/')) {
+          response = thumbnailResponse;
+          successUrl = thumbnailUrl;
+          console.log(`✅ Success with thumbnail API: ${thumbnailUrl}`);
+        }
+      } catch (error) {
+        console.log('❌ Thumbnail API also failed:', error);
       }
     }
 
