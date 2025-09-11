@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { useCart } from '@/hooks/useCart';
@@ -28,6 +29,7 @@ interface Product {
 interface Category {
   id: string;
   name: string;
+  slug: string;
   description?: string;
   image_url?: string;
   is_active: boolean;
@@ -36,6 +38,7 @@ interface Category {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,7 +183,11 @@ const Index = () => {
                 };
 
                 return (
-                  <div key={category.id} className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300">
+                  <div 
+                    key={category.id} 
+                    className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300 cursor-pointer"
+                    onClick={() => navigate(`/category/${category.slug}`)}
+                  >
                     <div className={`w-16 h-16 ${getColorClass(index)} rounded-2xl flex items-center justify-center mx-auto mb-6 ${getHoverColorClass(index)} transition-colors`}>
                       {getIcon(category.name)}
                     </div>
