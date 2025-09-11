@@ -24,6 +24,7 @@ interface Category {
   description?: string;
   image_url?: string;
   is_active: boolean;
+  is_featured: boolean;
   display_order: number;
   created_at: string;
   updated_at: string;
@@ -66,6 +67,35 @@ const Categories = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFeaturedStatus = async (categoryId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('categories')
+        .update({ is_featured: !currentStatus })
+        .eq('id', categoryId);
+
+      if (error) throw error;
+
+      setCategories(categories.map(category =>
+        category.id === categoryId
+          ? { ...category, is_featured: !currentStatus }
+          : category
+      ));
+
+      toast({
+        title: 'Éxito',
+        description: `Categoría ${!currentStatus ? 'destacada' : 'no destacada'} correctamente`,
+      });
+    } catch (error) {
+      console.error('Error updating featured status:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el estado destacado',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -194,6 +224,11 @@ const Categories = () => {
                     >
                       {category.is_active ? 'Activa' : 'Inactiva'}
                     </Badge>
+                    {category.is_featured && (
+                      <Badge variant="outline" className="farfalla-badge-promo text-xs">
+                        Destacada
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -219,6 +254,31 @@ const Categories = () => {
                   <span>
                     {new Date(category.created_at).toLocaleDateString('es-ES')}
                   </span>
+                </div>
+
+                <div className="flex gap-2 mb-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleFeaturedStatus(category.id, category.is_featured)}
+                    className="flex-1"
+                  >
+                    ⭐
+                    {category.is_featured ? 'No Destacar' : 'Destacar'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleCategoryStatus(category.id, category.is_active)}
+                    className="flex-1"
+                  >
+                    {category.is_active ? (
+                      <EyeOff className="h-4 w-4 mr-1" />
+                    ) : (
+                      <Eye className="h-4 w-4 mr-1" />
+                    )}
+                    {category.is_active ? 'Ocultar' : 'Mostrar'}
+                  </Button>
                 </div>
 
                 <div className="flex gap-2">

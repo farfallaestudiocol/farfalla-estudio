@@ -31,6 +31,7 @@ interface Category {
   description?: string;
   image_url?: string;
   is_active: boolean;
+  is_featured: boolean;
   display_order: number;
 }
 
@@ -67,11 +68,12 @@ const Index = () => {
         .eq('is_featured', true)
         .limit(6);
 
-      // Fetch active categories
+      // Fetch featured categories
       const { data: categoriesData } = await supabase
         .from('categories')
         .select('*')
         .eq('is_active', true)
+        .eq('is_featured', true)
         .order('display_order');
 
       setFeaturedProducts(products || []);
@@ -139,7 +141,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-poppins font-bold text-farfalla-ink mb-4">
-              Nuestras Especialidades
+              Especialidades Destacadas
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Explora nuestras creaciones artesanales en papel, perfectas para cada ocasión especial

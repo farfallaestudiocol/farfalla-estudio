@@ -16,6 +16,7 @@ interface CategoryFormData {
   description: string;
   image_url: string;
   is_active: boolean;
+  is_featured: boolean;
   display_order: number;
 }
 
@@ -32,6 +33,7 @@ const CategoryForm = () => {
     description: '',
     image_url: '',
     is_active: true,
+    is_featured: false,
     display_order: 0,
   });
 
@@ -61,6 +63,7 @@ const CategoryForm = () => {
           description: data.description || '',
           image_url: data.image_url || '',
           is_active: data.is_active ?? true,
+          is_featured: data.is_featured ?? false,
           display_order: data.display_order || 0,
         });
       }
@@ -269,13 +272,24 @@ const CategoryForm = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                  />
-                  <Label htmlFor="is_active">Categoría activa</Label>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="is_active"
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                    />
+                    <Label htmlFor="is_active">Categoría activa</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="is_featured"
+                      checked={formData.is_featured}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
+                    />
+                    <Label htmlFor="is_featured">Categoría destacada</Label>
+                  </div>
                 </div>
               </div>
 
