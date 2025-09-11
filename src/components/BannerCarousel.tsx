@@ -103,9 +103,6 @@ const BannerCarousel = () => {
                 Personalizar Ahora
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button className="farfalla-btn-secondary">
-                Ver Creaciones
-              </Button>
             </div>
           </div>
         </div>
@@ -149,9 +146,6 @@ const BannerCarousel = () => {
                     >
                       {slide.button_text}
                       <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                    <Button className="farfalla-btn-secondary mr-4 animate-in slide-in-from-bottom-10 duration-1000 delay-500">
-                      Ver Creaciones
                     </Button>
                   </div>
                 </div>
