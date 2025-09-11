@@ -186,7 +186,7 @@ const Index = () => {
                   <div 
                     key={category.id} 
                     className="farfalla-card p-8 text-center group hover:scale-105 transition-all duration-300 cursor-pointer"
-                    onClick={() => navigate(`/category/${category.slug}`)}
+                    onClick={() => navigate(`/categoria/${category.slug}`)}
                   >
                     <div className={`w-16 h-16 ${getColorClass(index)} rounded-2xl flex items-center justify-center mx-auto mb-6 ${getHoverColorClass(index)} transition-colors`}>
                       {getIcon(category.name)}
