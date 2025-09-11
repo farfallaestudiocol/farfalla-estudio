@@ -20,16 +20,20 @@ const Footer = () => {
             {/* Brand Section */}
             <div className="max-w-md text-center">
               {settings?.logo_square_color_url || settings?.logo_rectangular_color_url || settings?.logo_color_url || settings?.company_logo_url ? (
-                <DynamicLogo 
-                  shape="responsive" 
-                  variant="color" 
-                  className="h-12 mb-4 mx-auto" 
-                  alt={settings.company_name || "Logo"} 
-                />
+                <a href="/">
+                  <DynamicLogo 
+                    shape="responsive" 
+                    variant="color" 
+                    className="h-12 mb-4 mx-auto" 
+                    alt={settings.company_name || "Logo"} 
+                  />
+                </a>
               ) : (
-                <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4">
-                  {settings?.company_name || "Farfalla"} <span className="text-farfalla-pink">Estudio</span>
-                </h2>
+                <a href="/">
+                  <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4 hover:text-primary transition-colors cursor-pointer">
+                    {settings?.company_name || "Farfalla"} <span className="text-farfalla-pink">Estudio</span>
+                  </h2>
+                </a>
               )}
             <p className="text-muted-foreground font-inter mb-6">
               {settings?.company_description || "Tu destino para productos de belleza de alta calidad. Descubre tu mejor versión con nuestra selección cuidadosamente curada."}

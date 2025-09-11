@@ -61,7 +61,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <DynamicLogo shape="responsive" className="h-12 md:h-16 w-auto" />
+            <Link to="/">
+              <DynamicLogo shape="responsive" className="h-12 md:h-16 w-auto" />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
