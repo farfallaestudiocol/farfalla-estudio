@@ -273,6 +273,36 @@ export type Database = {
         }
         Relationships: []
       }
+      product_relationships: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          related_product_id: string
+          relationship_type: string
+          strength: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          related_product_id: string
+          relationship_type?: string
+          strength?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          related_product_id?: string
+          relationship_type?: string
+          strength?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_variants: {
         Row: {
           created_at: string
@@ -590,6 +620,31 @@ export type Database = {
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_frequently_bought_together: {
+        Args: { limit_count?: number; target_product_id: string }
+        Returns: {
+          co_purchase_count: number
+          confidence_score: number
+          product_id: string
+          product_image: string
+          product_name: string
+          product_price: number
+          product_slug: string
+        }[]
+      }
+      get_product_recommendations: {
+        Args: { limit_count?: number; target_product_id: string }
+        Returns: {
+          product_id: string
+          product_image: string
+          product_name: string
+          product_price: number
+          product_slug: string
+          reason: string
+          recommendation_type: string
+          strength: number
+        }[]
       }
       is_admin: {
         Args: Record<PropertyKey, never>
