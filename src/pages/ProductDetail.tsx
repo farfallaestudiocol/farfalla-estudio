@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ProductRecommendations } from "@/components/ProductRecommendations";
+import { FrequentlyBoughtTogether } from "@/components/FrequentlyBoughtTogether";
 import { 
   Heart, 
   ShoppingCart, 
@@ -457,6 +459,22 @@ const ProductDetail = () => {
           </Card>
         )}
       </div>
+
+      {/* Cross-selling sections */}
+      {product && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <FrequentlyBoughtTogether 
+            productId={product.id}
+            currentProduct={{
+              id: product.id,
+              name: product.name,
+              price: getCurrentPrice(),
+              image: product.images?.[0] || '/placeholder.svg'
+            }}
+          />
+          <ProductRecommendations productId={product.id} />
+        </div>
+      )}
 
       <Footer />
     </div>

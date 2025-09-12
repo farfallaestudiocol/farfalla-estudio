@@ -68,6 +68,14 @@ const hierarchyItems = [
       { title: "Ver todas", url: "/admin/variants" },
       { title: "Agregar variante", url: "/admin/variants/new" },
     ]
+  },
+  {
+    title: "Relaciones de Productos",
+    url: "/admin/product-relationships",
+    icon: Settings,
+    children: [
+      { title: "Ver todas", url: "/admin/product-relationships" },
+    ]
   }
 ];
 
