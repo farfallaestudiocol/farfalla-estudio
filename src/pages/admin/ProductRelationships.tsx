@@ -13,13 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -51,7 +44,7 @@ export default function ProductRelationships() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingRelationship, setEditingRelationship] = useState<ProductRelationship | null>(null);
   
   const [formData, setFormData] = useState({
@@ -158,7 +151,7 @@ export default function ProductRelationships() {
         });
       }
 
-      setIsDialogOpen(false);
+      setShowForm(false);
       setEditingRelationship(null);
       setFormData({
         product_id: "",
@@ -185,7 +178,7 @@ export default function ProductRelationships() {
       relationship_type: relationship.relationship_type,
       strength: relationship.strength
     });
-    setIsDialogOpen(true);
+    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -253,29 +246,35 @@ export default function ProductRelationships() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Relaciones de Productos</h1>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-                setEditingRelationship(null);
-                setFormData({
-                  product_id: "",
-                  related_product_id: "",
-                  relationship_type: "related",
-                  strength: 5
-                });
-              }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Relación
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingRelationship ? 'Editar Relación' : 'Nueva Relación'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+        <h1 className="text-3xl font-bold">Relaciones de Productos</h1>
+        <Button 
+          onClick={() => {
+            setEditingRelationship(null);
+            setFormData({
+              product_id: "",
+              related_product_id: "",
+              relationship_type: "related",
+              strength: 5
+            });
+            setShowForm(!showForm);
+          }}
+          variant={showForm ? "outline" : "default"}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {showForm ? 'Cancelar' : 'Nueva Relación'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {editingRelationship ? 'Editar Relación' : 'Nueva Relación'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Producto Principal
@@ -354,19 +353,27 @@ export default function ProductRelationships() {
                     required
                   />
                 </div>
+              </div>
 
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">
-                    {editingRelationship ? 'Actualizar' : 'Crear'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-      </div>
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingRelationship(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editingRelationship ? 'Actualizar' : 'Crear'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
           <CardHeader>
