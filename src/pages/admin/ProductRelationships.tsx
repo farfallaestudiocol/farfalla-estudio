@@ -252,7 +252,7 @@ export default function ProductRelationships() {
 
   return (
     <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Relaciones de Productos</h1>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -366,9 +366,9 @@ export default function ProductRelationships() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+      </div>
 
-        <Card>
+      <Card>
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Search className="h-4 w-4" />
@@ -430,8 +430,7 @@ export default function ProductRelationships() {
               </div>
             )}
           </CardContent>
-        </Card>
-      </div>
+      </Card>
     </div>
   );
 }
