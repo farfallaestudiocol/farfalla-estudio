@@ -583,6 +583,60 @@ export type Database = {
           },
         ]
       }
+      user_addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          full_address: string
+          id: string
+          is_primary: boolean | null
+          latitude: number | null
+          longitude: number | null
+          name: string
+          place_id: string | null
+          postal_code: string | null
+          state: string
+          street_address: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          full_address: string
+          id?: string
+          is_primary?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          place_id?: string | null
+          postal_code?: string | null
+          state: string
+          street_address: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          full_address?: string
+          id?: string
+          is_primary?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          place_id?: string | null
+          postal_code?: string | null
+          state?: string
+          street_address?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wishlist_items: {
         Row: {
           created_at: string
