@@ -79,6 +79,7 @@ import BannerForm from "./pages/admin/BannerForm";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import ProductRelationships from "./pages/admin/ProductRelationships";
+import UserAddresses from "./pages/UserAddresses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/mis-pedidos" element={<Orders />} />
                 <Route path="/pedido/:orderId" element={<OrderDetail />} />
+                <Route path="/mis-direcciones" element={<UserAddresses />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

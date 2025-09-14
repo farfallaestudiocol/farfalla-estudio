@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown, Package, Shield } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown, Package, Shield, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -154,6 +154,13 @@ const Header = () => {
                   >
                     <Package className="mr-2 h-4 w-4" />
                     <span>Mis Pedidos</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="flex items-center w-full cursor-pointer"
+                    onSelect={() => window.location.href = '/mis-direcciones'}
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    <span>Mis Direcciones</span>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <>
