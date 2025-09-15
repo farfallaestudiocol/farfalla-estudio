@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Input } from '@/components/ui/input';
+import { Loader } from '@googlemaps/js-api-loader';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { MapPin, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LocationMapProps {
   latitude?: number;
@@ -20,85 +19,110 @@ export function LocationMap({
   height = "400px"
 }: LocationMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [isTokenSet, setIsTokenSet] = useState(false);
+  const map = useRef<google.maps.Map | null>(null);
+  const marker = useRef<google.maps.Marker | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  const initializeMap = (token: string) => {
-    if (!mapContainer.current || !token) return;
+  const initializeMap = async () => {
+    if (!mapContainer.current) return;
 
     try {
-      mapboxgl.accessToken = token;
+      setIsLoading(true);
       
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [longitude, latitude],
-        zoom: 15
+      // Get Google Maps API key from Supabase edge function
+      const { data, error: configError } = await supabase.functions.invoke('google-maps-config');
+
+      if (configError || !data?.apiKey) {
+        throw new Error('No se pudo obtener la configuración de Google Maps');
+      }
+
+      const loader = new Loader({
+        apiKey: data.apiKey,
+        version: 'weekly',
+        libraries: ['places', 'geometry'],
       });
 
-      // Add navigation controls
-      map.current.addControl(
-        new mapboxgl.NavigationControl(),
-        'top-right'
-      );
+      await loader.load();
+      
+      const mapOptions: google.maps.MapOptions = {
+        center: { lat: latitude, lng: longitude },
+        zoom: 15,
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: false,
+      };
+
+      map.current = new google.maps.Map(mapContainer.current, mapOptions);
 
       // Add marker
-      marker.current = new mapboxgl.Marker({
-        draggable: true
-      })
-        .setLngLat([longitude, latitude])
-        .addTo(map.current);
+      marker.current = new google.maps.Marker({
+        position: { lat: latitude, lng: longitude },
+        map: map.current,
+        draggable: true,
+        title: 'Ubicación seleccionada'
+      });
 
       // Handle marker drag
-      marker.current.on('dragend', () => {
-        const lngLat = marker.current?.getLngLat();
-        if (lngLat && onLocationSelect) {
-          onLocationSelect(lngLat.lat, lngLat.lng);
+      marker.current.addListener('dragend', () => {
+        const position = marker.current?.getPosition();
+        if (position && onLocationSelect) {
+          onLocationSelect(position.lat(), position.lng());
         }
       });
 
       // Handle map click
-      map.current.on('click', (e) => {
-        const { lng, lat } = e.lngLat;
-        marker.current?.setLngLat([lng, lat]);
-        if (onLocationSelect) {
-          onLocationSelect(lat, lng);
+      map.current.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          const lat = e.latLng.lat();
+          const lng = e.latLng.lng();
+          
+          marker.current?.setPosition({ lat, lng });
+          if (onLocationSelect) {
+            onLocationSelect(lat, lng);
+          }
         }
       });
 
+      setIsInitialized(true);
       setError('');
     } catch (err) {
       console.error('Error initializing map:', err);
-      setError('Error al cargar el mapa. Verifica tu token de Mapbox.');
+      setError('Error al cargar Google Maps. Verifica la configuración de la API.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      setIsTokenSet(true);
-      initializeMap(mapboxToken.trim());
-    }
-  };
+  // Initialize map on component mount
+  useEffect(() => {
+    initializeMap();
+  }, []);
 
   // Update marker position when coordinates change
   useEffect(() => {
-    if (marker.current && map.current) {
-      marker.current.setLngLat([longitude, latitude]);
-      map.current.setCenter([longitude, latitude]);
+    if (marker.current && map.current && isInitialized) {
+      const newPosition = { lat: latitude, lng: longitude };
+      marker.current.setPosition(newPosition);
+      map.current.setCenter(newPosition);
     }
-  }, [latitude, longitude]);
+  }, [latitude, longitude, isInitialized]);
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      map.current?.remove();
-    };
-  }, []);
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <span className="text-sm text-muted-foreground">Cargando mapa...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  if (!isTokenSet) {
+  if (error) {
     return (
       <Card>
         <CardHeader>
@@ -108,27 +132,16 @@ export function LocationMap({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Para mostrar el mapa, necesitas un token público de Mapbox. 
-            Puedes obtenerlo en <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">mapbox.com</a>
-          </p>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Ingresa tu token público de Mapbox"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              type="password"
-            />
-            <Button onClick={handleTokenSubmit}>
-              Cargar Mapa
-            </Button>
+          <div className="flex items-center gap-2 text-destructive text-sm">
+            <AlertCircle className="h-4 w-4" />
+            {error}
           </div>
-          {error && (
-            <div className="flex items-center gap-2 text-destructive text-sm">
-              <AlertCircle className="h-4 w-4" />
-              {error}
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground">
+            Asegúrate de que la clave de la API de Google Places esté configurada correctamente.
+          </p>
+          <Button onClick={() => initializeMap()} size="sm">
+            Reintentar
+          </Button>
         </CardContent>
       </Card>
     );
