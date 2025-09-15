@@ -184,7 +184,7 @@ export function GooglePlacesAutocomplete({
       </div>
 
       {showSuggestions && predictions.length > 0 && (
-        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-background border shadow-lg">
+        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-card border shadow-lg">
           <div className="p-1">
             {predictions.map((prediction) => (
               <button
