@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { GooglePlacesAutocomplete } from '@/components/GooglePlacesAutocomplete';
+import { LocationMap } from '@/components/LocationMap';
 import { useUserAddresses } from '@/hooks/useUserAddresses';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -53,7 +54,9 @@ export default function UserAddresses() {
     city: '',
     state: '',
     postal_code: '',
-    country: 'Colombia'
+    country: 'Colombia',
+    latitude: 4.7110, // Default to Bogotá
+    longitude: -74.0721
   });
 
   const resetForm = () => {
@@ -64,7 +67,9 @@ export default function UserAddresses() {
       city: '',
       state: '',
       postal_code: '',
-      country: 'Colombia'
+      country: 'Colombia',
+      latitude: 4.7110,
+      longitude: -74.0721
     });
     setEditingAddress(null);
   };
@@ -192,6 +197,22 @@ export default function UserAddresses() {
                   value={formData.full_address}
                   onChange={(value) => setFormData(prev => ({ ...prev, full_address: value }))}
                   placeholder="Buscar dirección..."
+                />
+              </div>
+
+              <div>
+                <Label>Ubicación en el mapa</Label>
+                <LocationMap
+                  latitude={formData.latitude}
+                  longitude={formData.longitude}
+                  onLocationSelect={(lat, lng) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      latitude: lat,
+                      longitude: lng
+                    }));
+                  }}
+                  height="300px"
                 />
               </div>
 
