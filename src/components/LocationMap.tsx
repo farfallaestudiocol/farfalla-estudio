@@ -15,6 +15,8 @@ export function LocationMap({
   onLocationSelect,
   height = "400px"
 }: LocationMapProps) {
+  const safeLat = Number.isFinite(latitude) ? latitude : 4.7110;
+  const safeLng = Number.isFinite(longitude) ? longitude : -74.0721;
   
   return (
     <div className="space-y-4">
@@ -24,7 +26,7 @@ export function LocationMap({
           <MapPin className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Coordenadas:</span>
           <span className="text-muted-foreground">
-            {latitude.toFixed(6)}, {longitude.toFixed(6)}
+            {safeLat.toFixed(6)}, {safeLng.toFixed(6)}
           </span>
         </div>
       </Card>
@@ -32,7 +34,7 @@ export function LocationMap({
       {/* Google Maps Embed */}
       <div className="relative">
         <iframe
-          src={`https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`}
+          src={`https://maps.google.com/maps?q=${safeLat},${safeLng}&z=15&output=embed`}
           className="w-full rounded-lg border"
           style={{ height }}
           loading="lazy"
