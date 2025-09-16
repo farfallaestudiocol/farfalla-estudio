@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, MapPin, Edit2, Trash2, Star, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, MapPin, Edit2, Trash2, Star, Home, ArrowLeft } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -133,45 +136,66 @@ export default function UserAddresses() {
 
   if (!user) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Inicia sesión</h3>
-              <p className="text-muted-foreground">
-                Debes iniciar sesión para gestionar tus direcciones
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen">
+        <Header />
+        <div className="farfalla-section-gradient py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <MapPin className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-2xl font-poppins font-bold text-farfalla-ink mb-4">
+              Inicia sesión para gestionar tus direcciones
+            </h2>
+            <Link to="/auth">
+              <Button className="farfalla-btn-primary">
+                Iniciar Sesión
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Mis Direcciones</h1>
-          <p className="text-muted-foreground mt-1">
-            Gestiona tus direcciones de entrega
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setShowForm(!showForm);
-          }}
-          variant={showForm ? "outline" : "default"}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {showForm ? 'Cancelar' : 'Nueva Dirección'}
-        </Button>
-      </div>
+    <div className="min-h-screen">
+      <Header />
+      
+      <div className="farfalla-section-gradient py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Link 
+              to="/" 
+              className="inline-flex items-center text-muted-foreground hover:text-farfalla-teal transition-colors mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver al inicio
+            </Link>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-poppins font-bold text-farfalla-ink">
+                  Mis Direcciones
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Gestiona tus direcciones de entrega
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  resetForm();
+                  setShowForm(!showForm);
+                }}
+                variant={showForm ? "outline" : "default"}
+                className={showForm ? "" : "farfalla-btn-primary"}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {showForm ? 'Cancelar' : 'Nueva Dirección'}
+              </Button>
+            </div>
+          </div>
 
-      {showForm && (
-        <Card className="mb-6">
+          {showForm && (
+            <Card className="mb-6 farfalla-card">
           <CardHeader>
             <CardTitle>
               {editingAddress ? 'Editar Dirección' : 'Nueva Dirección'}
@@ -281,110 +305,114 @@ export default function UserAddresses() {
         </Card>
       )}
 
-      {isLoading ? (
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-full mb-1"></div>
-                  <div className="h-3 bg-muted rounded w-3/4"></div>
+          {isLoading ? (
+            <div className="grid gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="farfalla-card">
+                  <CardContent className="p-6">
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
+                      <div className="h-3 bg-muted rounded w-full mb-1"></div>
+                      <div className="h-3 bg-muted rounded w-3/4"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : addresses.length === 0 ? (
+            <Card className="farfalla-card">
+              <CardContent className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-poppins font-semibold text-farfalla-ink mb-2">No tienes direcciones guardadas</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Añade tu primera dirección para facilitar tus compras
+                  </p>
+                  <Button onClick={() => setShowForm(true)} className="farfalla-btn-primary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Añadir Dirección
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      ) : addresses.length === 0 ? (
-        <Card>
-          <CardContent className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No tienes direcciones guardadas</h3>
-              <p className="text-muted-foreground mb-4">
-                Añade tu primera dirección para facilitar tus compras
-              </p>
-              <Button onClick={() => setShowForm(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Añadir Dirección
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {addresses.map((address) => (
-            <Card key={address.id} className={address.is_primary ? 'ring-2 ring-primary' : ''}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{address.name}</h3>
-                      {address.is_primary && (
-                        <Badge variant="default" className="text-xs">
-                          <Star className="h-3 w-3 mr-1" />
-                          Principal
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-start gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p>{address.full_address}</p>
-                        <p className="text-sm">
-                          {address.city}, {address.state}
-                          {address.postal_code && ` ${address.postal_code}`}
-                        </p>
+          ) : (
+            <div className="grid gap-4">
+              {addresses.map((address) => (
+                <Card key={address.id} className={`farfalla-card ${address.is_primary ? 'ring-2 ring-farfalla-teal' : ''}`}>
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-poppins font-semibold text-farfalla-ink">{address.name}</h3>
+                          {address.is_primary && (
+                            <Badge className="farfalla-badge-nuevo text-xs">
+                              <Star className="h-3 w-3 mr-1" />
+                              Principal
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-start gap-2 text-muted-foreground">
+                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p>{address.full_address}</p>
+                            <p className="text-sm">
+                              {address.city}, {address.state}
+                              {address.postal_code && ` ${address.postal_code}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 ml-4">
+                        {!address.is_primary && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSetPrimary(address.id)}
+                            title="Establecer como principal"
+                          >
+                            <Star className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(address)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar dirección?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. La dirección será eliminada permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(address.id)}>
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 ml-4">
-                    {!address.is_primary && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSetPrimary(address.id)}
-                        title="Establecer como principal"
-                      >
-                        <Star className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(address)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar dirección?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción no se puede deshacer. La dirección será eliminada permanentemente.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(address.id)}>
-                            Eliminar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      <Footer />
     </div>
   );
 }
