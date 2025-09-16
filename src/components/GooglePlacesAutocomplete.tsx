@@ -184,13 +184,13 @@ export function GooglePlacesAutocomplete({
       </div>
 
       {showSuggestions && predictions.length > 0 && (
-        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-card border shadow-lg">
+        <Card className="absolute z-[60] w-full mt-1 max-h-60 overflow-y-auto bg-background/95 backdrop-blur-sm border shadow-lg">
           <div className="p-1">
             {predictions.map((prediction) => (
               <button
                 key={prediction.place_id}
                 onClick={() => handlePlaceSelect(prediction.place_id, prediction.description)}
-                className="w-full text-left p-3 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                className="w-full text-left p-3 bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors border-0"
               >
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
