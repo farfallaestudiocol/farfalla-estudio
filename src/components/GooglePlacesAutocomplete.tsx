@@ -184,21 +184,21 @@ export function GooglePlacesAutocomplete({
       </div>
 
       {showSuggestions && predictions.length > 0 && (
-        <Card className="absolute z-[60] w-full mt-1 max-h-60 overflow-y-auto bg-background/95 backdrop-blur-sm border shadow-lg">
-          <div className="p-1">
+        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-farfalla-teal/95 backdrop-blur-sm border shadow-lg p-1 text-white">
+          <div>
             {predictions.map((prediction) => (
               <button
                 key={prediction.place_id}
                 onClick={() => handlePlaceSelect(prediction.place_id, prediction.description)}
-                className="w-full text-left p-3 bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors border-0"
+                className="w-full text-left px-2 py-1.5 rounded-sm transition-colors hover:bg-farfalla-pink/20 focus:bg-farfalla-pink/30 focus:text-white"
               >
                 <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <MapPin className="h-4 w-4 text-white/70 mt-0.5 flex-shrink-0" />
                   <div>
-                    <div className="font-medium text-sm text-foreground">
+                    <div className="font-medium text-sm text-white">
                       {prediction.structured_formatting?.main_text}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-white/70">
                       {prediction.structured_formatting?.secondary_text}
                     </div>
                   </div>
