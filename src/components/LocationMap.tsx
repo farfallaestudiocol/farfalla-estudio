@@ -32,7 +32,7 @@ export function LocationMap({
       {/* Google Maps Embed */}
       <div className="relative">
         <iframe
-          src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dkmksqgDUkoIEE&center=${latitude},${longitude}&zoom=15&maptype=roadmap`}
+          src={`https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`}
           className="w-full rounded-lg border"
           style={{ height }}
           loading="lazy"
