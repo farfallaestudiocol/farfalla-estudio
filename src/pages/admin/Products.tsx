@@ -247,7 +247,7 @@ const Products = () => {
                 </div>
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                  <span>Stock: {product.stock_quantity}</span>
+                  <span>SKU: {product.sku || 'N/A'}</span>
                   <span>⭐ {product.rating} ({product.review_count})</span>
                 </div>
 

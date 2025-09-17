@@ -166,9 +166,8 @@ const ProductDetail = () => {
 
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
-    const maxStock = getCurrentStock();
     
-    if (newQuantity >= 1 && newQuantity <= maxStock) {
+    if (newQuantity >= 1) {
       setQuantity(newQuantity);
     }
   };
@@ -382,14 +381,13 @@ const ProductDetail = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= getCurrentStock()}
                     className="h-10 w-10 rounded-l-none"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {getCurrentStock()} disponibles
+                <span className="text-sm text-farfalla-teal font-medium">
+                  Hecho bajo pedido
                 </span>
               </div>
             </div>
@@ -399,10 +397,9 @@ const ProductDetail = () => {
               <Button 
                 className="farfalla-btn-primary w-full"
                 onClick={handleAddToCart}
-                disabled={getCurrentStock() === 0}
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                {getCurrentStock() === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                Agregar al carrito
               </Button>
               
               <Button 
