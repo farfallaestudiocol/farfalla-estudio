@@ -116,6 +116,7 @@ const App = () => (
                         <Route path="variants/edit/:id" element={<VariantForm />} />
                         <Route path="product-relationships" element={<ProductRelationships />} />
                         <Route path="orders" element={<AdminOrders />} />
+                        <Route path="orders/:orderId" element={<OrderDetail />} />
                         <Route path="branding" element={<Branding />} />
                   <Route path="banner" element={<Banner />} />
                   <Route path="banner/new" element={<BannerForm />} />

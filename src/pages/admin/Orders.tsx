@@ -375,7 +375,7 @@ export default function AdminOrders() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/order/${order.id}`)}
+                            onClick={() => navigate(`/admin/orders/${order.id}`)}
                             className="farfalla-btn-secondary"
                           >
                             <Eye className="h-4 w-4" />
