@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -71,7 +71,7 @@ export const useOrders = () => {
     }
   };
 
-  const getOrder = async (orderId: string): Promise<Order | null> => {
+  const getOrder = useCallback(async (orderId: string): Promise<Order | null> => {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -80,7 +80,7 @@ export const useOrders = () => {
           order_items (*)
         `)
         .eq('id', orderId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -88,7 +88,7 @@ export const useOrders = () => {
       console.error('Error fetching order:', error);
       return null;
     }
-  };
+  }, []);
 
   const createOrder = async (orderData: any) => {
     try {
