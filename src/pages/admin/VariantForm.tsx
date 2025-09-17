@@ -23,6 +23,7 @@ interface VariantFormData {
   stock_quantity: number;
   is_active: boolean;
   display_order: number;
+  image_url: string;
 }
 
 const VariantForm = () => {
@@ -40,6 +41,7 @@ const VariantForm = () => {
     stock_quantity: 0,
     is_active: true,
     display_order: 0,
+    image_url: '',
   });
 
   useEffect(() => {
@@ -87,6 +89,7 @@ const VariantForm = () => {
         stock_quantity: data.stock_quantity || 0,
         is_active: data.is_active ?? true,
         display_order: data.display_order || 0,
+        image_url: data.image_url || '',
       });
     } catch (error) {
       console.error('Error fetching variant:', error);
@@ -121,6 +124,7 @@ const VariantForm = () => {
         stock_quantity: formData.stock_quantity,
         is_active: formData.is_active,
         display_order: formData.display_order,
+        image_url: formData.image_url.trim() || null,
       };
 
       let error;
@@ -299,6 +303,19 @@ const VariantForm = () => {
                     </Label>
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image_url">Imagen de la Variante</Label>
+                <Input
+                  id="image_url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                  placeholder="URL de la imagen de Google Drive"
+                />
+                <p className="text-xs text-muted-foreground">
+                  URL de Google Drive para la imagen de esta variante
+                </p>
               </div>
 
               <div className="flex gap-4 pt-4">

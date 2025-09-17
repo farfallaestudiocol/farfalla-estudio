@@ -32,6 +32,7 @@ interface ProductVariant {
   sku?: string;
   stock_quantity: number;
   is_active: boolean;
+  image_url?: string;
 }
 
 interface Product {
@@ -69,6 +70,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [displayImages, setDisplayImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,9 +115,24 @@ const ProductDetail = () => {
 
       setVariants(variantsData || []);
       
-      // Set first variant as default if available
+      // Set initial images - combine product images with variant images
+      const allImages = [...productData.images];
       if (variantsData && variantsData.length > 0) {
+        variantsData.forEach(variant => {
+          if (variant.image_url && !allImages.includes(variant.image_url)) {
+            allImages.push(variant.image_url);
+          }
+        });
         setSelectedVariant(variantsData[0]);
+        // If first variant has image, show it first
+        if (variantsData[0].image_url) {
+          setDisplayImages([variantsData[0].image_url, ...productData.images.filter(img => img !== variantsData[0].image_url)]);
+          setSelectedImageIndex(0);
+        } else {
+          setDisplayImages(productData.images);
+        }
+      } else {
+        setDisplayImages(productData.images);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -242,7 +259,7 @@ const ProductDetail = () => {
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden">
               <img
-                src={convertGoogleDriveUrlToBase64(product.images[selectedImageIndex]) || '/placeholder.svg'}
+                src={convertGoogleDriveUrlToBase64(displayImages[selectedImageIndex]) || '/placeholder.svg'}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -251,9 +268,9 @@ const ProductDetail = () => {
               />
             </div>
             
-            {product.images.length > 1 && (
+            {displayImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {product.images.map((image, index) => (
+                {displayImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -345,6 +362,16 @@ const ProductDetail = () => {
                       onClick={() => {
                         setSelectedVariant(variant);
                         setQuantity(1); // Reset quantity when variant changes
+                        
+                        // Update displayed images when variant changes
+                        if (variant.image_url) {
+                          const newImages = [variant.image_url, ...product.images.filter(img => img !== variant.image_url)];
+                          setDisplayImages(newImages);
+                          setSelectedImageIndex(0);
+                        } else {
+                          setDisplayImages(product.images);
+                          setSelectedImageIndex(0);
+                        }
                       }}
                       className={selectedVariant?.id === variant.id ? "farfalla-btn-primary" : ""}
                     >
