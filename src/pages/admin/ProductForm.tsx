@@ -17,6 +17,12 @@ interface Category {
   name: string;
 }
 
+interface Subcategory {
+  id: string;
+  name: string;
+  category_id: string;
+}
+
 interface ProductFormData {
   name: string;
   slug: string;
@@ -28,6 +34,7 @@ interface ProductFormData {
   tags: string[];
   sku: string;
   category_id: string;
+  subcategory_id: string;
   is_featured: boolean;
   is_active: boolean;
   stock_quantity: number;
@@ -41,6 +48,7 @@ const ProductForm = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [newImage, setNewImage] = useState('');
   const [newTag, setNewTag] = useState('');
   const [processingImage, setProcessingImage] = useState(false);
@@ -56,6 +64,7 @@ const ProductForm = () => {
     tags: [],
     sku: '',
     category_id: '',
+    subcategory_id: '',
     is_featured: false,
     is_active: true,
     stock_quantity: 0,
@@ -88,6 +97,32 @@ const ProductForm = () => {
     }
   };
 
+  const fetchSubcategories = async (categoryId: string) => {
+    if (!categoryId) {
+      setSubcategories([]);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('subcategories')
+        .select('id, name, category_id')
+        .eq('category_id', categoryId)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setSubcategories(data || []);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar las subcategorías',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const fetchProduct = async () => {
     if (!id) return;
     
@@ -113,10 +148,16 @@ const ProductForm = () => {
           tags: data.tags || [],
           sku: data.sku || '',
           category_id: data.category_id || '',
+          subcategory_id: data.subcategory_id || '',
           is_featured: data.is_featured ?? false,
           is_active: data.is_active ?? true,
           stock_quantity: data.stock_quantity || 0,
         });
+        
+        // Fetch subcategories if category is selected
+        if (data.category_id) {
+          fetchSubcategories(data.category_id);
+        }
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -152,6 +193,7 @@ const ProductForm = () => {
         ...formData,
         slug: formData.slug || generateSlug(formData.name),
         category_id: formData.category_id || null,
+        subcategory_id: formData.subcategory_id || null,
       };
 
       if (isEditing) {
@@ -413,23 +455,54 @@ const ProductForm = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoría</Label>
+                  <Select
+                    value={formData.category_id}
+                    onValueChange={(value) => {
+                      setFormData(prev => ({ ...prev, category_id: value, subcategory_id: '' }));
+                      fetchSubcategories(value);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subcategory">Subcategoría</Label>
+                  <Select
+                    value={formData.subcategory_id}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}
+                    disabled={!formData.category_id || subcategories.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !formData.category_id 
+                          ? "Primero selecciona una categoría" 
+                          : subcategories.length === 0
+                          ? "No hay subcategorías disponibles"
+                          : "Seleccionar subcategoría"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subcategories.map((subcategory) => (
+                        <SelectItem key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
