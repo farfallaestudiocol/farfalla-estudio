@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Save, Loader2, Plus, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
+import ProductVariantsManager from '@/components/ProductVariantsManager';
+import ProductRelationshipsManager from '@/components/ProductRelationshipsManager';
 
 interface Category {
   id: string;
@@ -661,6 +663,16 @@ const ProductForm = () => {
             </Button>
           </div>
         </form>
+
+        {/* Variants Management - Only show when editing */}
+        {isEditing && (
+          <ProductVariantsManager productId={id} />
+        )}
+
+        {/* Relationships Management - Only show when editing */}
+        {isEditing && (
+          <ProductRelationshipsManager productId={id} />
+        )}
       </div>
     </div>
   );
