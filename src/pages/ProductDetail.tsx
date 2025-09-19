@@ -70,8 +70,16 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [displayImages, setDisplayImages] = useState<string[]>([]);
+  const [displayImages, setDisplayImages] = useState<Array<{type: 'image' | 'youtube', src: string, alt: string}>>([]);
   const [loading, setLoading] = useState(true);
+
+  // Helper function to extract YouTube video ID from URL
+  const getYouTubeVideoId = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
 
   useEffect(() => {
     if (productSlug) {
@@ -115,25 +123,46 @@ const ProductDetail = () => {
 
       setVariants(variantsData || []);
       
-      // Set initial images - combine product images with variant images
-      const allImages = [...productData.images];
+      // Set initial images - combine YouTube video, product images, and variant images
+      const allImages: Array<{type: 'image' | 'youtube', src: string, alt: string}> = [];
+      
+      // Add YouTube video first if it exists
+      if ((productData as any).youtube_url) {
+        allImages.push({
+          type: 'youtube',
+          src: (productData as any).youtube_url,
+          alt: `Video de ${productData.name}`
+        });
+      }
+      
+      // Add product images
+      productData.images.forEach(img => {
+        allImages.push({
+          type: 'image',
+          src: convertGoogleDriveUrlToBase64(img),
+          alt: productData.name
+        });
+      });
+      
+      // Add variant images
       if (variantsData && variantsData.length > 0) {
         variantsData.forEach(variant => {
-          if (variant.image_url && !allImages.includes(variant.image_url)) {
-            allImages.push(variant.image_url);
+          if (variant.image_url) {
+            const convertedUrl = convertGoogleDriveUrlToBase64(variant.image_url);
+            // Only add if not already in the list
+            if (!allImages.some(img => img.src === convertedUrl)) {
+              allImages.push({
+                type: 'image',
+                src: convertedUrl,
+                alt: `${productData.name} - ${variant.name}`
+              });
+            }
           }
         });
         setSelectedVariant(variantsData[0]);
-        // If first variant has image, show it first
-        if (variantsData[0].image_url) {
-          setDisplayImages([variantsData[0].image_url, ...productData.images.filter(img => img !== variantsData[0].image_url)]);
-          setSelectedImageIndex(0);
-        } else {
-          setDisplayImages(productData.images);
-        }
-      } else {
-        setDisplayImages(productData.images);
       }
+      
+      setDisplayImages(allImages);
     } catch (error) {
       console.error('Error fetching product:', error);
       toast({
@@ -258,19 +287,40 @@ const ProductDetail = () => {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden">
-              <img
-                src={convertGoogleDriveUrlToBase64(displayImages[selectedImageIndex]) || '/placeholder.svg'}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = '/placeholder.svg';
-                }}
-              />
+              {displayImages.length > 0 && displayImages[selectedImageIndex] ? (
+                displayImages[selectedImageIndex].type === 'youtube' ? (
+                  <div className="w-full h-full">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(displayImages[selectedImageIndex].src)}`}
+                      title={displayImages[selectedImageIndex].alt}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <img
+                    src={displayImages[selectedImageIndex].src || '/placeholder.svg'}
+                    alt={displayImages[selectedImageIndex].alt}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                )
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <Package className="h-16 w-16 text-muted-foreground" />
+                </div>
+              )}
             </div>
             
             {displayImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {displayImages.map((image, index) => (
+                {displayImages.map((media, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -280,14 +330,31 @@ const ProductDetail = () => {
                         : 'border-transparent'
                     }`}
                   >
-                    <img
-                      src={convertGoogleDriveUrlToBase64(image)}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
+                    {media.type === 'youtube' ? (
+                      <div className="w-full h-full bg-black flex items-center justify-center relative">
+                        <img
+                          src={`https://img.youtube.com/vi/${getYouTubeVideoId(media.src)}/mqdefault.jpg`}
+                          alt={media.alt}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={media.src}
+                        alt={media.alt}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    )}
                   </button>
                 ))}
               </div>
@@ -363,15 +430,9 @@ const ProductDetail = () => {
                         setSelectedVariant(variant);
                         setQuantity(1); // Reset quantity when variant changes
                         
-                        // Update displayed images when variant changes
-                        if (variant.image_url) {
-                          const newImages = [variant.image_url, ...product.images.filter(img => img !== variant.image_url)];
-                          setDisplayImages(newImages);
-                          setSelectedImageIndex(0);
-                        } else {
-                          setDisplayImages(product.images);
-                          setSelectedImageIndex(0);
-                        }
+                        // No need to update images here as they're all in displayImages already
+                        // Just reset to first image
+                        setSelectedImageIndex(0);
                       }}
                       className={selectedVariant?.id === variant.id ? "farfalla-btn-primary" : ""}
                     >

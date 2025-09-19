@@ -374,6 +374,7 @@ export type Database = {
           subcategory_id: string | null
           tags: string[] | null
           updated_at: string
+          youtube_url: string | null
         }
         Insert: {
           category_id?: string | null
@@ -395,6 +396,7 @@ export type Database = {
           subcategory_id?: string | null
           tags?: string[] | null
           updated_at?: string
+          youtube_url?: string | null
         }
         Update: {
           category_id?: string | null
@@ -416,6 +418,7 @@ export type Database = {
           subcategory_id?: string | null
           tags?: string[] | null
           updated_at?: string
+          youtube_url?: string | null
         }
         Relationships: [
           {

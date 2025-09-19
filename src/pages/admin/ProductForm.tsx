@@ -153,7 +153,7 @@ const ProductForm = () => {
           sku: data.sku || '',
           category_id: data.category_id || '',
           subcategory_id: data.subcategory_id || '',
-          youtube_url: data.youtube_url || '',
+          youtube_url: (data as any).youtube_url || '',
           is_featured: data.is_featured ?? false,
           is_active: data.is_active ?? true,
           stock_quantity: data.stock_quantity || 0,
@@ -562,6 +562,33 @@ const ProductForm = () => {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* YouTube Video */}
+          <Card className="farfalla-card">
+            <CardHeader>
+              <CardTitle className="text-xl font-poppins text-farfalla-ink">
+                Video de YouTube
+              </CardTitle>
+              <CardDescription>
+                URL del video de YouTube (opcional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="youtube_url">URL de YouTube</Label>
+                <Input
+                  id="youtube_url"
+                  type="url"
+                  value={formData.youtube_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, youtube_url: e.target.value }))}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-sm text-muted-foreground">
+                  El video aparecerá en la galería de imágenes del producto
+                </p>
+              </div>
             </CardContent>
           </Card>
 
