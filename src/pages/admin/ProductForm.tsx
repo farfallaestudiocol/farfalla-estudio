@@ -37,6 +37,7 @@ interface ProductFormData {
   sku: string;
   category_id: string;
   subcategory_id: string;
+  youtube_url: string;
   is_featured: boolean;
   is_active: boolean;
   stock_quantity: number;
@@ -67,6 +68,7 @@ const ProductForm = () => {
     sku: '',
     category_id: '',
     subcategory_id: '',
+    youtube_url: '',
     is_featured: false,
     is_active: true,
     stock_quantity: 0,
@@ -151,6 +153,7 @@ const ProductForm = () => {
           sku: data.sku || '',
           category_id: data.category_id || '',
           subcategory_id: data.subcategory_id || '',
+          youtube_url: data.youtube_url || '',
           is_featured: data.is_featured ?? false,
           is_active: data.is_active ?? true,
           stock_quantity: data.stock_quantity || 0,
