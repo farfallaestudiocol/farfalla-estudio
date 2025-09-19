@@ -430,9 +430,14 @@ const ProductDetail = () => {
                         setSelectedVariant(variant);
                         setQuantity(1); // Reset quantity when variant changes
                         
-                        // No need to update images here as they're all in displayImages already
-                        // Just reset to first image
-                        setSelectedImageIndex(0);
+                        // Find the variant's image in displayImages and focus on it
+                        if (variant.image_url) {
+                          const convertedVariantUrl = convertGoogleDriveUrlToBase64(variant.image_url);
+                          const variantImageIndex = displayImages.findIndex(img => img.src === convertedVariantUrl);
+                          if (variantImageIndex !== -1) {
+                            setSelectedImageIndex(variantImageIndex);
+                          }
+                        }
                       }}
                       className={selectedVariant?.id === variant.id ? "farfalla-btn-primary" : ""}
                     >
