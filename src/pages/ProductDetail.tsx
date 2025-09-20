@@ -125,19 +125,10 @@ const ProductDetail = () => {
 
       setVariants(variantsData || []);
       
-      // Set initial images - combine YouTube video, product images, and variant images
+      // Set initial images - combine product images, variant images, and YouTube video at the end
       const allImages: Array<{type: 'image' | 'youtube', src: string, alt: string}> = [];
       
-      // Add YouTube video first if it exists
-      if ((productData as any).youtube_url) {
-        allImages.push({
-          type: 'youtube',
-          src: (productData as any).youtube_url,
-          alt: `Video de ${productData.name}`
-        });
-      }
-      
-      // Add product images
+      // Add product images first
       productData.images.forEach(img => {
         allImages.push({
           type: 'image',
@@ -162,6 +153,15 @@ const ProductDetail = () => {
           }
         });
         setSelectedVariant(variantsData[0]);
+      }
+      
+      // Add YouTube video at the end if it exists
+      if ((productData as any).youtube_url) {
+        allImages.push({
+          type: 'youtube',
+          src: (productData as any).youtube_url,
+          alt: `Video de ${productData.name}`
+        });
       }
       
       setDisplayImages(allImages);

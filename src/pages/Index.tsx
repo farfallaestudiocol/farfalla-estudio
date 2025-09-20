@@ -16,6 +16,7 @@ import { ArrowRight, Sparkles, Heart, Leaf, Truck, Shield, Gift, Scissors } from
 interface Product {
   id: string;
   name: string;
+  slug: string;
   price: number;
   compare_price?: number;
   images: string[];
