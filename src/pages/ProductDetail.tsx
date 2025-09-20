@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ const ProductDetail = () => {
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { settings } = useSiteSettings();
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
@@ -411,9 +413,11 @@ const ProductDetail = () => {
                   </>
                 )}
               </div>
-              <p className="text-sm text-farfalla-teal font-medium">
-                Envío gratis desde $150.000
-              </p>
+              {settings?.free_shipping_enabled && (
+                <p className="text-sm text-farfalla-teal font-medium">
+                  Envío gratis desde {formatPrice(settings.free_shipping_minimum)}
+                </p>
+              )}
             </div>
 
             {/* Variants */}
@@ -512,10 +516,12 @@ const ProductDetail = () => {
             {/* Product Features */}
             <Card>
               <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Truck className="h-5 w-5 text-farfalla-teal" />
-                  <span className="text-sm">Envío gratis desde $150.000</span>
-                </div>
+                {settings?.free_shipping_enabled && (
+                  <div className="flex items-center gap-3">
+                    <Truck className="h-5 w-5 text-farfalla-teal" />
+                    <span className="text-sm">Envío gratis desde {formatPrice(settings.free_shipping_minimum)}</span>
+                  </div>
+                )}
                 <Separator />
                 <div className="flex items-center gap-3">
                   <Shield className="h-5 w-5 text-farfalla-teal" />

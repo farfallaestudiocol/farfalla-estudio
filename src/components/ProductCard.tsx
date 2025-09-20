@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { convertGoogleDriveUrlToBase64 } from "@/lib/googleDrive";
 
 interface ProductCardProps {
@@ -36,6 +37,7 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { settings } = useSiteSettings();
   
   // Process image URL through proxy if it's a Google Drive link
   const processedImage = convertGoogleDriveUrlToBase64(image);
@@ -157,9 +159,11 @@ const ProductCard = ({
         </div>
 
         {/* Free Shipping */}
-        <div className="text-xs text-primary font-medium">
-          Envío gratis desde $150.000
-        </div>
+        {settings?.free_shipping_enabled && (
+          <div className="text-xs text-primary font-medium">
+            Envío gratis desde {formatPrice(settings.free_shipping_minimum)}
+          </div>
+        )}
       </div>
     </Link>
   );
