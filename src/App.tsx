@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { SiteSettingsProvider } from "@/hooks/useSiteSettings";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -93,6 +94,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              <WhatsAppWidget />
               <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
