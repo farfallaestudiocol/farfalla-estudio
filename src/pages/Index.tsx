@@ -238,9 +238,10 @@ const Index = () => {
           ) : featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProducts.map((product, index) => (
-                <div key={product.id} className="animate-fade-in" style={{animationDelay: `${index * 200}ms`}}>
+                <div key={product.slug} className="animate-fade-in" style={{animationDelay: `${index * 200}ms`}}>
                   <ProductCard
                     id={product.id}
+                    slug={product.slug}
                     name={product.name}
                     price={product.price}
                     comparePrice={product.compare_price}
