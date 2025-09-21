@@ -51,7 +51,7 @@ const WhatsAppWidget = () => {
           />
           
           {/* Modal */}
-          <Card className="relative w-full max-w-md animate-in slide-in-from-bottom-4 bg-card border-border shadow-xl z-50">
+          <Card className="relative w-full max-w-md animate-in slide-in-from-bottom-4 bg-gradient-to-br from-farfalla-pink-100 to-farfalla-teal-100 border-farfalla-pink-200 shadow-xl z-50">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
