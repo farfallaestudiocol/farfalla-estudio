@@ -49,7 +49,8 @@ const ProductCard = ({
     }).format(price);
   };
 
-  const discountPercentage = comparePrice 
+  const hasComparePrice = typeof comparePrice === 'number' && comparePrice > price;
+  const discountPercentage = hasComparePrice
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
     : 0;
 
@@ -151,9 +152,9 @@ const ProductCard = ({
           <span className="text-lg font-poppins font-semibold text-farfalla-ink">
             {formatPrice(price)}
           </span>
-          {comparePrice && (
+          {hasComparePrice && (
             <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(comparePrice)}
+              {formatPrice(comparePrice as number)}
             </span>
           )}
         </div>
