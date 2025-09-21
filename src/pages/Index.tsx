@@ -67,7 +67,7 @@ const Index = () => {
       // Fetch featured products
       const { data: products } = await supabase
         .from('products')
-        .select('*')
+        .select('id, name, slug, price, compare_price, images, rating, review_count, is_featured, is_active, short_description')
         .eq('is_active', true)
         .eq('is_featured', true)
         .limit(6);
