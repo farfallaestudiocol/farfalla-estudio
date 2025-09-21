@@ -192,12 +192,6 @@ const ProductDetail = () => {
     return product?.price || 0;
   };
 
-  const getCurrentStock = () => {
-    if (selectedVariant) {
-      return selectedVariant.stock_quantity;
-    }
-    return product?.stock_quantity || 0;
-  };
 
   const discountPercentage = product?.compare_price 
     ? Math.round(((product.compare_price - getCurrentPrice()) / product.compare_price) * 100)
