@@ -32,6 +32,7 @@ interface AddressFormData {
   state: string;
   postal_code: string;
   country: string;
+  phone: string;
   latitude?: number;
   longitude?: number;
   place_id?: string;
@@ -58,6 +59,7 @@ export default function UserAddresses() {
     state: '',
     postal_code: '',
     country: 'Colombia',
+    phone: '',
     latitude: 4.7110, // Default to Bogotá
     longitude: -74.0721
   });
@@ -71,6 +73,7 @@ export default function UserAddresses() {
       state: '',
       postal_code: '',
       country: 'Colombia',
+      phone: '',
       latitude: 4.7110,
       longitude: -74.0721
     });
@@ -118,6 +121,7 @@ export default function UserAddresses() {
       state: address.state,
       postal_code: address.postal_code || '',
       country: address.country,
+      phone: address.phone || '',
       latitude: address.latitude,
       longitude: address.longitude,
       place_id: address.place_id
@@ -283,6 +287,18 @@ export default function UserAddresses() {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Teléfono de contacto</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Ej: +57 300 123 4567"
+                  required
+                />
               </div>
 
               <div className="flex justify-end space-x-2">

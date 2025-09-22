@@ -13,6 +13,7 @@ interface UserAddress {
   state: string;
   postal_code: string | null;
   country: string;
+  phone: string | null;
   latitude: number | null;
   longitude: number | null;
   is_primary: boolean;
@@ -29,6 +30,7 @@ interface CreateAddressData {
   state: string;
   postal_code?: string;
   country: string;
+  phone?: string;
   latitude?: number;
   longitude?: number;
   is_primary?: boolean;

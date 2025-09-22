@@ -600,6 +600,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           name: string
+          phone: string | null
           place_id: string | null
           postal_code: string | null
           state: string
@@ -617,6 +618,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           name: string
+          phone?: string | null
           place_id?: string | null
           postal_code?: string | null
           state: string
@@ -634,6 +636,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           name?: string
+          phone?: string | null
           place_id?: string | null
           postal_code?: string | null
           state?: string
