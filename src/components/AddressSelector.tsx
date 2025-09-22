@@ -90,7 +90,7 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
   }
 
   return (
-    <Card className="farfalla-card">
+    <Card className="farfalla-card w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -106,17 +106,17 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
           </Link>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="w-full overflow-hidden">
         <RadioGroup 
           value={selectedAddressId} 
           onValueChange={onAddressSelect}
-          className="space-y-4"
+          className="space-y-4 w-full"
         >
           {addresses.map((address) => (
-            <div key={address.id} className="relative">
+            <div key={address.id} className="relative w-full">
               <Label
                 htmlFor={address.id}
-                className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 ${
+                className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 w-full ${
                   selectedAddressId === address.id 
                     ? 'border-farfalla-teal bg-farfalla-teal/5' 
                     : 'border-border'
@@ -125,28 +125,28 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
                 <RadioGroupItem 
                   value={address.id} 
                   id={address.id}
-                  className="mt-0.5"
+                  className="mt-0.5 flex-shrink-0"
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-poppins font-semibold text-farfalla-ink">
+                    <h4 className="font-poppins font-semibold text-farfalla-ink truncate">
                       {address.name}
                     </h4>
                     {address.is_primary && (
-                      <Badge className="farfalla-badge-nuevo text-xs">
+                      <Badge className="farfalla-badge-nuevo text-xs flex-shrink-0">
                         <Star className="h-3 w-3 mr-1" />
                         Principal
                       </Badge>
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>{address.full_address}</p>
-                    <p>
+                    <p className="break-words">{address.full_address}</p>
+                    <p className="break-words">
                       {address.city}, {address.state}
                       {address.postal_code && ` ${address.postal_code}`}
                     </p>
                     {address.phone && (
-                      <p className="font-medium">Tel: {address.phone}</p>
+                      <p className="font-medium break-words">Tel: {address.phone}</p>
                     )}
                   </div>
                 </div>

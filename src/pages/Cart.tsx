@@ -236,8 +236,8 @@ const Cart = () => {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <Card className="sticky top-8">
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-poppins font-bold text-farfalla-ink mb-4">
+                <CardContent className="p-6 space-y-6">
+                  <h2 className="text-xl font-poppins font-bold text-farfalla-ink">
                     Resumen del Pedido
                   </h2>
 
@@ -285,7 +285,7 @@ const Cart = () => {
                     </div>
 
                     {/* Address Selection */}
-                    <div className="mt-6">
+                    <div className="w-full">
                       <AddressSelector
                         selectedAddressId={selectedAddressId}
                         onAddressSelect={setSelectedAddressId}
@@ -294,7 +294,7 @@ const Cart = () => {
                     </div>
 
                     {/* Order Notes */}
-                    <div className="mt-6 space-y-2">
+                    <div className="w-full space-y-2">
                       <Label htmlFor="order-notes" className="flex items-center gap-2 text-sm font-medium">
                         <MessageSquare className="h-4 w-4" />
                         Notas o instrucciones especiales
@@ -305,7 +305,7 @@ const Cart = () => {
                         value={orderNotes}
                         onChange={(e) => setOrderNotes(e.target.value)}
                         rows={3}
-                        className="resize-none"
+                        className="resize-none w-full"
                       />
                       <p className="text-xs text-muted-foreground">
                         Opcional: Agrega cualquier instrucción especial para tu pedido
@@ -313,7 +313,7 @@ const Cart = () => {
                     </div>
 
                   {/* Wompi Payment Widget */}
-                  <div className="mt-6">
+                  <div className="w-full">
                     {!user && (
                       <div className="mb-4 p-4 bg-muted rounded-lg text-center">
                         <p className="text-sm text-muted-foreground mb-2">
