@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserAddresses } from '@/hooks/useUserAddresses';
 import { supabase } from '@/integrations/supabase/client';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WompiWidget from '@/components/WompiWidget';
+import { AddressSelector } from '@/components/AddressSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -39,7 +41,9 @@ const Cart = () => {
   
   const { settings } = useSiteSettings();
   const { user, profile } = useAuth();
+  const { addresses } = useUserAddresses();
   const [orderNotes, setOrderNotes] = useState('');
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
 
   const formatPrice = (price: number) => {
     const currency = settings?.currency || 'COP';
@@ -280,6 +284,15 @@ const Cart = () => {
                       </div>
                     </div>
 
+                    {/* Address Selection */}
+                    <div className="mt-6">
+                      <AddressSelector
+                        selectedAddressId={selectedAddressId}
+                        onAddressSelect={setSelectedAddressId}
+                        required={true}
+                      />
+                    </div>
+
                     {/* Order Notes */}
                     <div className="mt-6 space-y-2">
                       <Label htmlFor="order-notes" className="flex items-center gap-2 text-sm font-medium">
@@ -301,12 +314,34 @@ const Cart = () => {
 
                   {/* Wompi Payment Widget */}
                   <div className="mt-6">
-                    <WompiWidget 
-                      amount={finalTotal}
-                      currency={settings?.currency || 'COP'}
-                      customerEmail={user?.email || ''}
-                      customerName={profile?.full_name}
-                      onSuccess={async (result) => {
+                    {!user && (
+                      <div className="mb-4 p-4 bg-muted rounded-lg text-center">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Debes iniciar sesión para continuar
+                        </p>
+                        <Link to="/auth">
+                          <Button variant="outline" size="sm">
+                            Iniciar Sesión
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                    
+                    {user && !selectedAddressId && (
+                      <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
+                        <p className="text-sm text-destructive font-medium">
+                          Selecciona una dirección de entrega para continuar
+                        </p>
+                      </div>
+                    )}
+
+                    {user && selectedAddressId ? (
+                      <WompiWidget 
+                        amount={finalTotal}
+                        currency={settings?.currency || 'COP'}
+                        customerEmail={user?.email || ''}
+                        customerName={profile?.full_name}
+                        onSuccess={async (result) => {
                         console.log('Payment successful:', result);
                         
                         try {
@@ -321,13 +356,38 @@ const Cart = () => {
                             product_sku: item.variant?.sku || item.product.sku
                           }));
 
+                          // Get selected address
+                          const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+
                           // Create order data
                           const orderData = {
                             customer_email: user?.email || '',
                             customer_name: profile?.full_name || user?.email || '',
-                            customer_phone: '', // TODO: Add phone field to profile
-                            shipping_address: null, // TODO: Implement shipping address
-                            billing_address: null, // TODO: Implement billing address
+                            customer_phone: selectedAddress?.phone || '',
+                            shipping_address: selectedAddress ? {
+                              name: selectedAddress.name,
+                              full_address: selectedAddress.full_address,
+                              street_address: selectedAddress.street_address,
+                              city: selectedAddress.city,
+                              state: selectedAddress.state,
+                              postal_code: selectedAddress.postal_code,
+                              country: selectedAddress.country,
+                              phone: selectedAddress.phone,
+                              latitude: selectedAddress.latitude,
+                              longitude: selectedAddress.longitude
+                            } : null,
+                            billing_address: selectedAddress ? {
+                              name: selectedAddress.name,
+                              full_address: selectedAddress.full_address,
+                              street_address: selectedAddress.street_address,
+                              city: selectedAddress.city,
+                              state: selectedAddress.state,
+                              postal_code: selectedAddress.postal_code,
+                              country: selectedAddress.country,
+                              phone: selectedAddress.phone,
+                              latitude: selectedAddress.latitude,
+                              longitude: selectedAddress.longitude
+                            } : null,
                             items: orderItems,
                             shipping_amount: shipping,
                             tax_amount: tax,
@@ -356,11 +416,25 @@ const Cart = () => {
                           console.error('Error creating order:', error);
                           toast.error('Error al procesar el pedido');
                         }
-                      }}
-                      onError={(error) => {
-                        console.log('Payment error:', error);
-                      }}
-                    />
+                        }}
+                        onError={(error) => {
+                          console.log('Payment error:', error);
+                        }}
+                      />
+                    ) : (
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <div className="text-muted-foreground">
+                            <p className="mb-2">Complete los pasos anteriores para continuar con el pago</p>
+                            <div className="text-sm space-y-1">
+                              {!user && <p>• Inicia sesión</p>}
+                              {user && !selectedAddressId && <p>• Selecciona una dirección de entrega</p>}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                   </div>
 
                   <div className="mt-4 text-xs text-muted-foreground text-center">
