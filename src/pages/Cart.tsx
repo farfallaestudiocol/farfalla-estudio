@@ -328,11 +328,11 @@ const Cart = () => {
                     )}
                     
                     {user && !selectedAddressId && (
-                      <div className=" bg-destructive/10 border border-destructive/20 rounded-lg text-center">
-                        <p className="text-sm text-destructive font-medium">
+                      
+                        
                           Selecciona una dirección de entrega para continuar
-                        </p>
-                      </div>
+                        
+                      
                     )}
 
                     {user && selectedAddressId ? (
