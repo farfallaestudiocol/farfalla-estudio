@@ -328,7 +328,7 @@ const Cart = () => {
                     )}
                     
                     {user && !selectedAddressId && (
-                      <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
+                      <div className=" bg-destructive/10 border border-destructive/20 rounded-lg text-center">
                         <p className="text-sm text-destructive font-medium">
                           Selecciona una dirección de entrega para continuar
                         </p>
