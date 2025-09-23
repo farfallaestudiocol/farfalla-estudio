@@ -113,15 +113,15 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
           className="space-y-4 w-full"
         >
           {addresses.map((address) => (
-            <div key={address.id} className="relative w-full">
-              <Label
-                htmlFor={address.id}
-                className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 w-full ${
-                  selectedAddressId === address.id 
-                    ? 'border-farfalla-teal bg-farfalla-teal/5' 
-                    : 'border-border'
-                }`}
-              >
+            <Label
+              key={address.id}
+              htmlFor={address.id}
+              className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 w-full ${
+                selectedAddressId === address.id 
+                  ? 'border-farfalla-teal bg-farfalla-teal/5' 
+                  : 'border-border'
+              }`}
+            >
                 <RadioGroupItem 
                   value={address.id} 
                   id={address.id}
@@ -151,7 +151,6 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
                   </div>
                 </div>
               </Label>
-            </div>
           ))}
         </RadioGroup>
       </CardContent>
