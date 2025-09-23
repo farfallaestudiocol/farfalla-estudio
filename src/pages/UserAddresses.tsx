@@ -51,6 +51,7 @@ export default function UserAddresses() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
+  const [isFromAutocomplete, setIsFromAutocomplete] = useState(false);
   const [formData, setFormData] = useState<AddressFormData>({
     name: '',
     full_address: '',
@@ -78,6 +79,7 @@ export default function UserAddresses() {
       longitude: -74.0721
     });
     setEditingAddress(null);
+    setIsFromAutocomplete(false);
   };
 
   const handlePlaceSelect = (placeData: any) => {
@@ -93,6 +95,7 @@ export default function UserAddresses() {
       longitude: placeData.longitude,
       place_id: placeData.place_id
     }));
+    setIsFromAutocomplete(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,6 +130,7 @@ export default function UserAddresses() {
       place_id: address.place_id
     });
     setEditingAddress(address.id);
+    setIsFromAutocomplete(!!address.place_id); // Mark as from autocomplete if has place_id
     setShowForm(true);
   };
 
@@ -220,12 +224,42 @@ export default function UserAddresses() {
 
               <div>
                 <Label htmlFor="address">Dirección</Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelect={handlePlaceSelect}
-                  value={formData.full_address}
-                  onChange={(value) => setFormData(prev => ({ ...prev, full_address: value }))}
-                  placeholder="Buscar dirección..."
-                />
+                <div className="space-y-2">
+                  <GooglePlacesAutocomplete
+                    onPlaceSelect={handlePlaceSelect}
+                    value={formData.full_address}
+                    onChange={(value) => {
+                      setFormData(prev => ({ ...prev, full_address: value }));
+                      // If user types manually after autocomplete, unlock fields
+                      if (isFromAutocomplete && value !== formData.full_address) {
+                        setIsFromAutocomplete(false);
+                      }
+                    }}
+                    placeholder="Buscar dirección..."
+                  />
+                  {isFromAutocomplete && (
+                    <div className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm">
+                      <span className="text-muted-foreground">
+                        Dirección obtenida de Google Maps
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsFromAutocomplete(false);
+                          setFormData(prev => ({
+                            ...prev,
+                            place_id: undefined
+                          }));
+                        }}
+                        className="text-xs h-6 px-2"
+                      >
+                        Editar manualmente
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -253,7 +287,14 @@ export default function UserAddresses() {
                     onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                     placeholder="Ciudad"
                     required
+                    readOnly={isFromAutocomplete}
+                    className={isFromAutocomplete ? "bg-muted cursor-not-allowed" : ""}
                   />
+                  {isFromAutocomplete && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Información obtenida de Google Maps
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="state">Departamento</Label>
@@ -263,7 +304,14 @@ export default function UserAddresses() {
                     onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
                     placeholder="Departamento"
                     required
+                    readOnly={isFromAutocomplete}
+                    className={isFromAutocomplete ? "bg-muted cursor-not-allowed" : ""}
                   />
+                  {isFromAutocomplete && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Información obtenida de Google Maps
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -275,7 +323,14 @@ export default function UserAddresses() {
                     value={formData.postal_code}
                     onChange={(e) => setFormData(prev => ({ ...prev, postal_code: e.target.value }))}
                     placeholder="Código postal (opcional)"
+                    readOnly={isFromAutocomplete}
+                    className={isFromAutocomplete ? "bg-muted cursor-not-allowed" : ""}
                   />
+                  {isFromAutocomplete && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Información obtenida de Google Maps
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="country">País</Label>
@@ -285,7 +340,14 @@ export default function UserAddresses() {
                     onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
                     placeholder="País"
                     required
+                    readOnly={isFromAutocomplete}
+                    className={isFromAutocomplete ? "bg-muted cursor-not-allowed" : ""}
                   />
+                  {isFromAutocomplete && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Información obtenida de Google Maps
+                    </p>
+                  )}
                 </div>
               </div>
 
