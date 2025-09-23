@@ -6,6 +6,8 @@ interface SiteSettings {
   free_shipping_enabled: boolean;
   free_shipping_minimum: number;
   shipping_cost: number;
+  shipping_cost_bogota: number;
+  shipping_cost_outside_bogota: number;
   tax_enabled: boolean;
   tax_rate: number;
   currency: string;
@@ -39,6 +41,8 @@ const defaultSettings: SiteSettings = {
   free_shipping_enabled: true,
   free_shipping_minimum: 150000,
   shipping_cost: 15000,
+  shipping_cost_bogota: 10000,
+  shipping_cost_outside_bogota: 25000,
   tax_enabled: true,
   tax_rate: 0.19,
   currency: 'COP',
@@ -76,6 +80,8 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'free_shipping_enabled', 
           'free_shipping_minimum',
           'shipping_cost',
+          'shipping_cost_bogota',
+          'shipping_cost_outside_bogota',
           'tax_enabled',
           'tax_rate',
           'currency',

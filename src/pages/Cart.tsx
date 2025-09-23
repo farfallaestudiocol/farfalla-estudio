@@ -56,15 +56,35 @@ const Cart = () => {
     }).format(price);
   };
 
-  // Calculate shipping based on settings
+  // Calculate shipping based on settings and selected address
   const calculateShipping = () => {
     if (!settings?.shipping_enabled) return 0;
-    if (!settings?.free_shipping_enabled) return settings?.shipping_cost || 0;
     
     const cartTotal = getCartTotal();
     const freeShippingMin = settings?.free_shipping_minimum || 0;
     
-    return cartTotal >= freeShippingMin ? 0 : (settings?.shipping_cost || 0);
+    // Check if free shipping applies
+    if (settings?.free_shipping_enabled && cartTotal >= freeShippingMin) {
+      return 0;
+    }
+    
+    // Get selected address to determine shipping rate
+    const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+    
+    if (!selectedAddress) {
+      // Default to outside Bogotá rate if no address selected
+      return settings?.shipping_cost_outside_bogota || settings?.shipping_cost || 0;
+    }
+    
+    // Check if address is in Bogotá
+    const isBogota = selectedAddress.city?.toLowerCase().includes('bogotá') || 
+                     selectedAddress.city?.toLowerCase().includes('bogota') ||
+                     selectedAddress.state?.toLowerCase().includes('bogotá') ||
+                     selectedAddress.state?.toLowerCase().includes('bogota');
+    
+    return isBogota 
+      ? (settings?.shipping_cost_bogota || settings?.shipping_cost || 0)
+      : (settings?.shipping_cost_outside_bogota || settings?.shipping_cost || 0);
   };
 
   // Calculate tax based on settings
@@ -248,8 +268,24 @@ const Cart = () => {
                       </div>
 
                       {settings?.shipping_enabled && (
-                        <div className="flex justify-between">
-                          <span>Envío</span>
+                        <div className="flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <span>Envío</span>
+                            {selectedAddressId && (
+                              <span className="text-xs text-muted-foreground">
+                                {(() => {
+                                  const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+                                  const isBogota = selectedAddress?.city?.toLowerCase().includes('bogotá') || 
+                                                   selectedAddress?.city?.toLowerCase().includes('bogota') ||
+                                                   selectedAddress?.state?.toLowerCase().includes('bogotá') ||
+                                                   selectedAddress?.state?.toLowerCase().includes('bogota');
+                                  return isBogota ? 
+                                    `Tarifa Bogotá` : 
+                                    `Tarifa Nacional`;
+                                })()}
+                              </span>
+                            )}
+                          </div>
                           <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
                             {shipping === 0 ? 'Gratis' : formatPrice(shipping)}
                           </span>

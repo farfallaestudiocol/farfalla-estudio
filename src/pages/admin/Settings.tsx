@@ -46,6 +46,8 @@ const Settings = () => {
     const ecommerceKeys = [
       'shipping_enabled',
       'shipping_cost', 
+      'shipping_cost_bogota',
+      'shipping_cost_outside_bogota',
       'free_shipping_enabled',
       'free_shipping_minimum',
       'free_shipping_threshold',
@@ -322,19 +324,33 @@ const Settings = () => {
                   <>
                     <Separator />
                     
-                    {/* Shipping Cost */}
+                    {/* Shipping Costs */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="shipping_cost">Costo de Envío (COP)</Label>
+                        <Label htmlFor="shipping_cost_bogota">Envío en Bogotá (COP)</Label>
                         <Input
-                          id="shipping_cost"
+                          id="shipping_cost_bogota"
                           type="number"
-                          value={siteSettings?.shipping_cost || 0}
-                          onChange={(e) => saveSetting('shipping_cost', parseInt(e.target.value) || 0)}
-                          placeholder="15000"
+                          value={siteSettings?.shipping_cost_bogota || 0}
+                          onChange={(e) => saveSetting('shipping_cost_bogota', parseInt(e.target.value) || 0)}
+                          placeholder="10000"
                         />
                         <p className="text-xs text-muted-foreground">
-                          Costo estándar de envío en pesos colombianos
+                          Costo de envío dentro de Bogotá
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="shipping_cost_outside_bogota">Envío Fuera de Bogotá (COP)</Label>
+                        <Input
+                          id="shipping_cost_outside_bogota"
+                          type="number"
+                          value={siteSettings?.shipping_cost_outside_bogota || 0}
+                          onChange={(e) => saveSetting('shipping_cost_outside_bogota', parseInt(e.target.value) || 0)}
+                          placeholder="25000"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Costo de envío fuera de Bogotá
                         </p>
                       </div>
                     </div>
