@@ -134,7 +134,7 @@ const Cart = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-4 min-w-0">
               {items.map((item) => {
                 const itemPrice = item.variant?.price || item.product.price;
                 const totalPrice = itemPrice * item.quantity;
@@ -234,9 +234,9 @@ const Cart = () => {
             </div>
 
             {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-8">
-                <CardContent className="p-6 space-y-6">
+            <div className="lg:col-span-1 min-w-0">
+              <Card className="sticky top-8 overflow-hidden">
+                <CardContent className="p-6 space-y-6 w-full overflow-hidden">
                   <h2 className="text-xl font-poppins font-bold text-farfalla-ink">
                     Resumen del Pedido
                   </h2>
@@ -285,7 +285,7 @@ const Cart = () => {
                     </div>
 
                     {/* Address Selection */}
-                    <div className="w-full">
+                    <div className="w-full min-w-0">
                       <AddressSelector
                         selectedAddressId={selectedAddressId}
                         onAddressSelect={setSelectedAddressId}

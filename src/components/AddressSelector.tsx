@@ -90,16 +90,16 @@ export function AddressSelector({ selectedAddressId, onAddressSelect, required =
   }
 
   return (
-    <Card className="farfalla-card w-full">
+    <Card className="farfalla-card w-full max-w-full overflow-hidden">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+        <div className="flex items-center justify-between flex-wrap gap-2 min-w-0">
+          <CardTitle className="flex items-center gap-2 truncate min-w-0">
             <MapPin className="h-5 w-5" />
             Dirección de Entrega
             {required && <Badge variant="destructive" className="text-xs">Requerida</Badge>}
           </CardTitle>
           <Link to="/mis-direcciones">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="shrink-0">
               <Plus className="h-4 w-4 mr-2" />
               Nueva
             </Button>
