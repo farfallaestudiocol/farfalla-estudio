@@ -80,6 +80,9 @@ import BannerForm from "./pages/admin/BannerForm";
 import Content from "./pages/admin/Content";
 import Settings from "./pages/admin/Settings";
 import ProductRelationships from "./pages/admin/ProductRelationships";
+import Themes from "./pages/admin/Themes";
+import ThemeForm from "./pages/admin/ThemeForm";
+import ThemeBulkUpload from "./pages/admin/ThemeBulkUpload";
 import UserAddresses from "./pages/UserAddresses";
 import NotFound from "./pages/NotFound";
 
@@ -117,6 +120,10 @@ const App = () => (
                         <Route path="variants/new" element={<VariantForm />} />
                         <Route path="variants/edit/:id" element={<VariantForm />} />
                         <Route path="product-relationships" element={<ProductRelationships />} />
+                        <Route path="themes" element={<Themes />} />
+                        <Route path="themes/new" element={<ThemeForm />} />
+                        <Route path="themes/edit/:id" element={<ThemeForm />} />
+                        <Route path="themes/bulk-upload" element={<ThemeBulkUpload />} />
                         <Route path="orders" element={<AdminOrders />} />
                         <Route path="orders/:orderId" element={<OrderDetail />} />
                         <Route path="branding" element={<Branding />} />

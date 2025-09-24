@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 import { FrequentlyBoughtTogether } from "@/components/FrequentlyBoughtTogether";
+import { ProductThemes } from "@/components/ProductThemes";
 import { 
   Heart, 
   ShoppingCart, 
@@ -505,9 +506,16 @@ const ProductDetail = () => {
                 />
                 {product && isInWishlist(product.id) ? 'En lista de deseos' : 'Agregar a lista de deseos'}
               </Button>
-            </div>
+        </div>
 
-            {/* Product Features */}
+        {/* Product Themes */}
+        <ProductThemes 
+          productId={product.id} 
+          variantId={selectedVariant?.id}
+          className="mb-8"
+        />
+
+        {/* Product Features */}
             <Card>
               <CardContent className="p-4 space-y-3">
                 {settings?.free_shipping_enabled && (

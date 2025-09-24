@@ -76,6 +76,16 @@ const hierarchyItems = [
     children: [
       { title: "Ver todas", url: "/admin/product-relationships" },
     ]
+  },
+  {
+    title: "Temas",
+    url: "/admin/themes",
+    icon: Palette,
+    children: [
+      { title: "Ver todos", url: "/admin/themes" },
+      { title: "Agregar tema", url: "/admin/themes/new" },
+      { title: "Carga masiva", url: "/admin/themes/bulk-upload" },
+    ]
   }
 ];
 
