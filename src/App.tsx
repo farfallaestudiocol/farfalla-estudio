@@ -83,6 +83,8 @@ import ProductRelationships from "./pages/admin/ProductRelationships";
 import Themes from "./pages/admin/Themes";
 import ThemeForm from "./pages/admin/ThemeForm";
 import ThemeBulkUpload from "./pages/admin/ThemeBulkUpload";
+import ThemeImageBulkUpload from "./pages/admin/ThemeImageBulkUpload";
+import ThemeElements from "./pages/admin/ThemeElements";
 import UserAddresses from "./pages/UserAddresses";
 import NotFound from "./pages/NotFound";
 
@@ -124,6 +126,8 @@ const App = () => (
                         <Route path="themes/new" element={<ThemeForm />} />
                         <Route path="themes/edit/:id" element={<ThemeForm />} />
                         <Route path="themes/bulk-upload" element={<ThemeBulkUpload />} />
+                        <Route path="themes/image-bulk-upload" element={<ThemeImageBulkUpload />} />
+                        <Route path="themes/:themeId/elements" element={<ThemeElements />} />
                         <Route path="orders" element={<AdminOrders />} />
                         <Route path="orders/:orderId" element={<OrderDetail />} />
                         <Route path="branding" element={<Branding />} />

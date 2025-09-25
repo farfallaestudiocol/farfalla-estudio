@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,10 +14,23 @@ import {
   Eye, 
   EyeOff,
   Palette,
-  Upload
+  Upload,
+  Settings
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const Themes = () => {
+  const navigate = useNavigate();
   const { themes, loading, updateTheme, deleteTheme } = useThemes();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -30,10 +43,7 @@ const Themes = () => {
     await updateTheme(themeId, { is_active: !currentStatus });
   };
 
-  const handleDeleteTheme = async (themeId: string, themeName: string) => {
-    if (!confirm(`¿Estás seguro de que quieres eliminar el tema "${themeName}"?`)) {
-      return;
-    }
+  const handleDelete = async (themeId: string) => {
     await deleteTheme(themeId);
   };
 
@@ -62,11 +72,17 @@ const Themes = () => {
                 {filteredThemes.length} temas encontrados
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button asChild variant="outline" className="farfalla-btn-secondary">
                 <Link to="/admin/themes/bulk-upload" className="flex items-center">
                   <Upload className="h-4 w-4 mr-2" />
-                  <span>Carga Masiva</span>
+                  <span>Carga CSV</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="farfalla-btn-secondary">
+                <Link to="/admin/themes/image-bulk-upload" className="flex items-center">
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span>Carga por Imágenes</span>
                 </Link>
               </Button>
               <Button asChild className="farfalla-btn-primary">
@@ -131,29 +147,51 @@ const Themes = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleThemeStatus(theme.id, theme.is_active)}
+                    onClick={() => navigate(`/admin/themes/${theme.id}/elements`)}
                     className="flex-1"
+                    title="Gestionar elementos"
+                  >
+                    <Settings className="h-4 w-4 mr-1" />
+                    Elementos
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleThemeStatus(theme.id, theme.is_active)}
                   >
                     {theme.is_active ? (
-                      <EyeOff className="h-4 w-4 mr-1" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 mr-1" />
+                      <Eye className="h-4 w-4" />
                     )}
-                    {theme.is_active ? 'Ocultar' : 'Mostrar'}
                   </Button>
                   <Button asChild variant="outline" size="sm">
                     <Link to={`/admin/themes/edit/${theme.id}`}>
                       <Edit className="h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteTheme(theme.id, theme.name)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar tema?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. El tema "{theme.name}" será eliminado permanentemente.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(theme.id)}>
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
@@ -173,7 +211,13 @@ const Themes = () => {
               <Button asChild variant="outline" className="farfalla-btn-secondary">
                 <Link to="/admin/themes/bulk-upload" className="flex items-center">
                   <Upload className="h-4 w-4 mr-2" />
-                  <span>Carga Masiva</span>
+                  <span>Carga CSV</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="farfalla-btn-secondary">
+                <Link to="/admin/themes/image-bulk-upload" className="flex items-center">
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span>Carga por Imágenes</span>
                 </Link>
               </Button>
               <Button asChild className="farfalla-btn-primary">
