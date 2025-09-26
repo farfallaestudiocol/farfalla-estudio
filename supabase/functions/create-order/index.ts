@@ -167,10 +167,12 @@ Deno.serve(async (req) => {
     )
   } catch (error) {
     console.error('Error in create-order function:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create order';
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to create order' 
+        error: errorMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

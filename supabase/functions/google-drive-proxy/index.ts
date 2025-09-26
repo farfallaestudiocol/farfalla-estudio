@@ -77,7 +77,8 @@ const handler = async (req: Request): Promise<Response> => {
           console.log(`❌ Failed with URL ${googleDriveUrl}: ${lastError}`);
         }
       } catch (error) {
-        lastError = `Network error: ${error.message}`;
+        const errorMessage = error instanceof Error ? error.message : 'Network error';
+        lastError = `Network error: ${errorMessage}`;
         console.log(`❌ Error with URL ${googleDriveUrl}:`, error);
         continue;
       }

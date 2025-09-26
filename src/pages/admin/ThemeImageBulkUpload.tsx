@@ -60,26 +60,30 @@ export default function ThemeImageBulkUpload() {
     );
   };
 
-  const uploadImageToGoogleDrive = async (file: File): Promise<string> => {
-    // Create FormData for file upload
-    const formData = new FormData();
-    formData.append('file', file);
-    
+  const uploadImageToGoogleDrive = async (file: File, fileName: string): Promise<string> => {
     try {
-      // Upload to a temporary storage or directly to Google Drive
-      // For now, we'll simulate the upload and return a placeholder URL
-      // In a real implementation, you would upload to Google Drive API
-      console.log(`Uploading ${file.name} to Google Drive...`);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', fileName);
       
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
       
-      // Return a simulated Google Drive URL
-      // In real implementation, this would be the actual Google Drive file ID/URL
-      return `https://drive.google.com/file/d/simulated-${Date.now()}-${file.name}`;
+      if (!response.ok) {
+        if (result.needsAuth) {
+          throw new Error('Google Drive no está configurado correctamente. Contacta al administrador.');
+        }
+        throw new Error(result.error || 'Error al subir imagen');
+      }
+
+      return result.proxyUrl;
     } catch (error) {
       console.error('Error uploading to Google Drive:', error);
-      throw new Error(`Error al subir ${file.name} a Google Drive`);
+      throw error;
     }
   };
 
@@ -115,7 +119,7 @@ export default function ThemeImageBulkUpload() {
         setUploadProgress(((i + 1) / total) * 50); // First 50% for uploads
 
         try {
-          const googleDriveUrl = await uploadImageToGoogleDrive(imageData.file);
+          const googleDriveUrl = await uploadImageToGoogleDrive(imageData.file, imageData.name);
           const processedUrl = convertGoogleDriveUrlToBase64(googleDriveUrl);
           
           themesData.push({

@@ -147,7 +147,7 @@ const Themes = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/admin/themes/${theme.id}/elements`)}
+                    onClick={() => navigate(`/admin/theme-elements/${theme.id}`)}
                     className="flex-1"
                     title="Gestionar elementos"
                   >
