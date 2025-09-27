@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, Upload, X, ArrowLeft } from 'lucide-react';
+import { Loader2, Upload, X, ArrowLeft, Link } from 'lucide-react';
 import { useThemes } from '@/hooks/useThemes';
 import { toast } from 'sonner';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
@@ -31,6 +31,72 @@ export default function ThemeImageBulkUpload() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<BulkUploadResult | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+
+  // Check for stored refresh token on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('google_drive_refresh_token');
+    if (stored) {
+      setRefreshToken(stored);
+    }
+
+    // Listen for auth success messages from popup
+    const handleAuthMessage = (event: MessageEvent) => {
+      if (event.data.type === 'GOOGLE_DRIVE_AUTH_SUCCESS') {
+        const tokens = event.data.tokens;
+        if (tokens.refresh_token) {
+          localStorage.setItem('google_drive_refresh_token', tokens.refresh_token);
+          setRefreshToken(tokens.refresh_token);
+          toast.success('Google Drive autorizado correctamente');
+        }
+        setIsAuthorizing(false);
+      }
+    };
+
+    window.addEventListener('message', handleAuthMessage);
+    return () => window.removeEventListener('message', handleAuthMessage);
+  }, []);
+
+  const handleGoogleDriveAuth = async () => {
+    setIsAuthorizing(true);
+    
+    try {
+      const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-auth/authorize');
+      const data = await response.json();
+      
+      if (data.authUrl) {
+        // Open auth window
+        const popup = window.open(
+          data.authUrl,
+          'google_drive_auth',
+          'width=600,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        // Check if popup was blocked
+        if (!popup) {
+          toast.error('Popup bloqueado. Permite popups para autorizar Google Drive.');
+          setIsAuthorizing(false);
+          return;
+        }
+
+        // Monitor popup closure
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            if (!refreshToken) {
+              setIsAuthorizing(false);
+              toast.error('Autorización cancelada');
+            }
+          }
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error getting auth URL:', error);
+      toast.error('Error al iniciar autorización');
+      setIsAuthorizing(false);
+    }
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -61,10 +127,15 @@ export default function ThemeImageBulkUpload() {
   };
 
   const uploadImageToGoogleDrive = async (file: File, fileName: string): Promise<string> => {
+    if (!refreshToken) {
+      throw new Error('Google Drive no está autorizado. Por favor autoriza primero.');
+    }
+
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileName', fileName);
+      formData.append('refreshToken', refreshToken);
       
       const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-upload', {
         method: 'POST',
@@ -75,7 +146,10 @@ export default function ThemeImageBulkUpload() {
       
       if (!response.ok) {
         if (result.needsAuth) {
-          throw new Error('Google Drive no está configurado correctamente. Contacta al administrador.');
+          // Clear invalid token
+          localStorage.removeItem('google_drive_refresh_token');
+          setRefreshToken(null);
+          throw new Error('Token de Google Drive expirado. Por favor autoriza nuevamente.');
         }
         throw new Error(result.error || 'Error al subir imagen');
       }
@@ -88,6 +162,11 @@ export default function ThemeImageBulkUpload() {
   };
 
   const handleSubmit = async () => {
+    if (!refreshToken) {
+      toast.error('Debes autorizar Google Drive primero');
+      return;
+    }
+
     if (selectedImages.length === 0) {
       toast.error('Selecciona al menos una imagen');
       return;
@@ -245,6 +324,53 @@ export default function ThemeImageBulkUpload() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {!refreshToken && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-orange-800">Autorización Requerida</h3>
+                    <p className="text-sm text-orange-600 mt-1">
+                      Necesitas autorizar el acceso a Google Drive para subir las imágenes automáticamente.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleGoogleDriveAuth}
+                    disabled={isAuthorizing}
+                    variant="outline"
+                  >
+                    {isAuthorizing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Autorizando...
+                      </>
+                    ) : (
+                      <>
+                        <Link className="h-4 w-4 mr-2" />
+                        Autorizar Google Drive
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {refreshToken && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-green-800">Google Drive Autorizado ✓</h3>
+                    <p className="text-sm text-green-600 mt-1">
+                      Listo para subir imágenes a Google Drive automáticamente.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           <div>
             <Label htmlFor="images">Seleccionar Imágenes</Label>
             <Input
@@ -320,7 +446,7 @@ export default function ThemeImageBulkUpload() {
 
               <Button
                 onClick={handleSubmit}
-                disabled={uploading}
+                disabled={uploading || !refreshToken}
                 className="w-full"
               >
                 {uploading ? (

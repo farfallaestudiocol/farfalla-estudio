@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.google-drive-upload]
 verify_jwt = false
+
+[functions.google-drive-auth]
+verify_jwt = false

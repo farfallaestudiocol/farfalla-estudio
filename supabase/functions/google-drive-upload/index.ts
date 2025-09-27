@@ -5,30 +5,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface GoogleDriveConfig {
-  client_id: string;
-  client_secret: string;
-  refresh_token: string;
-  folder_id?: string;
-}
-
-async function getAccessToken(config: GoogleDriveConfig): Promise<string> {
-  const response = await fetch('https://oauth2.googleapis.com/token', {
+async function getAccessToken(refreshToken: string): Promise<string> {
+  const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/google-drive-auth/token`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
     },
-    body: new URLSearchParams({
-      client_id: config.client_id,
-      client_secret: config.client_secret,
-      refresh_token: config.refresh_token,
-      grant_type: 'refresh_token',
+    body: JSON.stringify({
+      refresh_token: refreshToken
     }),
   });
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(`Failed to get access token: ${data.error_description || data.error}`);
+    throw new Error(`Failed to get access token: ${data.error || 'Unknown error'}`);
   }
 
   return data.access_token;
@@ -112,35 +103,14 @@ serve(async (req) => {
       });
     }
 
-    // Get Google Drive credentials from secrets
-    const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
-    if (!clientSecret) {
-      return new Response(JSON.stringify({ error: 'Google Drive credentials not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    let config: GoogleDriveConfig;
-    try {
-      const credentials = JSON.parse(clientSecret);
-      config = {
-        client_id: credentials.web.client_id,
-        client_secret: credentials.web.client_secret,
-        refresh_token: Deno.env.get('GOOGLE_DRIVE_REFRESH_TOKEN') || '',
-        folder_id: folderId || undefined,
-      };
-    } catch (e) {
-      return new Response(JSON.stringify({ error: 'Invalid Google Drive credentials format' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!config.refresh_token) {
+    // Get refresh token from request
+    const refreshToken = formData.get('refreshToken') as string;
+    
+    if (!refreshToken) {
       return new Response(JSON.stringify({ 
-        error: 'Google Drive refresh token not configured. Please complete OAuth setup first.',
-        needsAuth: true 
+        error: 'Refresh token required. Please authorize Google Drive access first.',
+        needsAuth: true,
+        authUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-drive-auth/authorize`
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -149,8 +119,8 @@ serve(async (req) => {
 
     console.log(`Uploading file: ${fileName} (${file.size} bytes)`);
     
-    const accessToken = await getAccessToken(config);
-    const result = await uploadToGoogleDrive(file, fileName, accessToken, config.folder_id);
+    const accessToken = await getAccessToken(refreshToken);
+    const result = await uploadToGoogleDrive(file, fileName, accessToken, folderId || undefined);
 
     console.log(`Upload successful: ${result.id}`);
 
