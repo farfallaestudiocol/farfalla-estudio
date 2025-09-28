@@ -12,16 +12,17 @@ interface GoogleDriveConfig {
 }
 
 function getGoogleDriveConfig(): GoogleDriveConfig {
+  const clientId = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID');
   const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
-  if (!clientSecret) {
-    throw new Error('Google Drive credentials not configured');
+  
+  if (!clientId || !clientSecret) {
+    throw new Error('Google Drive credentials not configured. Please set GOOGLE_DRIVE_CLIENT_ID and GOOGLE_DRIVE_CLIENT_SECRET');
   }
   
-  const credentials = JSON.parse(clientSecret);
   return {
-    client_id: credentials.web.client_id,
-    client_secret: credentials.web.client_secret,
-    redirect_uri: credentials.web.redirect_uris[0] || `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-drive-auth/callback`
+    client_id: clientId,
+    client_secret: clientSecret,
+    redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-drive-auth/callback`
   };
 }
 
