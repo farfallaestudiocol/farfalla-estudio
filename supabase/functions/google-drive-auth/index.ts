@@ -137,16 +137,22 @@ serve(async (req) => {
         <html>
           <body>
             <script>
-              // Send tokens to parent window and close immediately
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'GOOGLE_DRIVE_AUTH_SUCCESS',
-                  tokens: ${JSON.stringify(tokens)}
-                }, '*');
-                window.close();
-              } else {
-                // Fallback if no opener
-                document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h2>✓ Autorización completada</h2><p>Puedes cerrar esta ventana.</p></div>';
+              // Send tokens to parent window and close immediately (with fallbacks)
+              try {
+                if (window.opener) {
+                  window.opener.postMessage({
+                    type: 'GOOGLE_DRIVE_AUTH_SUCCESS',
+                    tokens: ${JSON.stringify(tokens)}
+                  }, '*');
+                  window.close();
+                } else {
+                  // Fallback if no opener
+                  document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h2>✓ Autorización completada</h2><p>Puedes cerrar esta ventana.</p></div>';
+                  setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
+                }
+              } catch (_) {
+                // Ensure the window does not hang around
+                setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
               }
             </script>
           </body>
