@@ -136,16 +136,17 @@ serve(async (req) => {
       return new Response(`
         <html>
           <body>
-            <h1>Authorization Successful!</h1>
-            <p>Google Drive access has been granted.</p>
             <script>
-              // Store tokens in localStorage for the parent window
+              // Send tokens to parent window and close immediately
               if (window.opener) {
                 window.opener.postMessage({
                   type: 'GOOGLE_DRIVE_AUTH_SUCCESS',
                   tokens: ${JSON.stringify(tokens)}
                 }, '*');
                 window.close();
+              } else {
+                // Fallback if no opener
+                document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h2>✓ Autorización completada</h2><p>Puedes cerrar esta ventana.</p></div>';
               }
             </script>
           </body>
