@@ -88,6 +88,7 @@ import ThemeImageBulkUpload from "./pages/admin/ThemeImageBulkUpload";
 import ThemeElements from "./pages/admin/ThemeElements";
 import UserAddresses from "./pages/UserAddresses";
 import NotFound from "./pages/NotFound";
+import GoogleDriveCallback from "./pages/GoogleDriveCallback";
 
 const queryClient = new QueryClient();
 
@@ -149,6 +150,7 @@ const App = () => (
                 <Route path="/mis-pedidos" element={<Orders />} />
                 <Route path="/pedido/:orderId" element={<OrderDetail />} />
                 <Route path="/mis-direcciones" element={<UserAddresses />} />
+                <Route path="/google-drive-callback" element={<GoogleDriveCallback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

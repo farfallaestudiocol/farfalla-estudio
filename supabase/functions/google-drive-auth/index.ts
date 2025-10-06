@@ -22,7 +22,7 @@ function getGoogleDriveConfig(): GoogleDriveConfig {
   return {
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-drive-auth/callback`
+    redirect_uri: `https://26adf891-ac86-4a79-b567-82e0f319e2b7.lovableproject.com/google-drive-callback`
   };
 }
 
@@ -108,79 +108,23 @@ serve(async (req) => {
       });
     }
 
-    // Manejar callback de Google
-    if (pathname.endsWith('/callback')) {
-      const code = url.searchParams.get('code');
-      const error = url.searchParams.get('error');
-
-      if (error) {
-        return new Response(`
-          <html>
-            <body>
-              <h1>Authorization Failed</h1>
-              <p>Error: ${error}</p>
-              <script>window.close();</script>
-            </body>
-          </html>
-        `, {
-          headers: { 'Content-Type': 'text/html' },
-        });
-      }
-
+    // Intercambiar código por tokens (nueva ruta)
+    if (pathname.endsWith('/exchange') && req.method === 'POST') {
+      const { code } = await req.json();
+      
       if (!code) {
-        return new Response('No authorization code received', { status: 400 });
+        return new Response(JSON.stringify({ 
+          error: 'Authorization code required' 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
 
       const tokens = await exchangeCodeForTokens(code, config);
       
-      return new Response(`
-        <html>
-          <head>
-            <meta charset="utf-8" />
-            <title>Google Drive Auth</title>
-          </head>
-          <body>
-            <script>
-              (function() {
-                const payload = { type: 'GOOGLE_DRIVE_AUTH_SUCCESS', tokens: ${JSON.stringify(tokens)} };
-                function send(target) { try { target && target.postMessage(payload, '*'); } catch (_) {} }
-
-                // Try multiple targets and retries to ensure delivery
-                let attempts = 0;
-                const maxAttempts = 10;
-                const interval = setInterval(() => {
-                  attempts++;
-                  send(window.opener);
-                  send(window.parent);
-                  send(window.top);
-                  if (attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    try { window.close(); } catch (_) {}
-                    setTimeout(() => {
-                      try { window.open('', '_self'); window.close(); } catch (_) {}
-                    }, 200);
-                  }
-                }, 200);
-
-                // Also try immediate delivery
-                send(window.opener);
-                send(window.parent);
-                send(window.top);
-
-                // Minimal UI in case window can't close
-                document.body.innerHTML = '<div style="text-align:center;padding:40px;font-family:system-ui,-apple-system,Segoe UI,Roboto"><h2>✓ Autorización completada</h2><p>Esta ventana se cerrará automáticamente.</p></div>';
-
-                // Last resort: force close after short delay
-                setTimeout(() => {
-                  try { window.close(); } catch (_) {}
-                  try { window.open('', '_self'); window.close(); } catch (_) {}
-                }, 1200);
-              })();
-            </script>
-          </body>
-        </html>
-      `, {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      return new Response(JSON.stringify(tokens), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
