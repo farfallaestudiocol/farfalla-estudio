@@ -135,30 +135,52 @@ serve(async (req) => {
       
       return new Response(`
         <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Google Drive Auth</title>
+          </head>
           <body>
             <script>
-              // Send tokens to parent window and close immediately (with fallbacks)
-              try {
-                if (window.opener) {
-                  window.opener.postMessage({
-                    type: 'GOOGLE_DRIVE_AUTH_SUCCESS',
-                    tokens: ${JSON.stringify(tokens)}
-                  }, '*');
-                  window.close();
-                } else {
-                  // Fallback if no opener
-                  document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial,sans-serif;"><h2>✓ Autorización completada</h2><p>Puedes cerrar esta ventana.</p></div>';
-                  setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
-                }
-              } catch (_) {
-                // Ensure the window does not hang around
-                setTimeout(() => { try { window.close(); } catch (_) {} }, 500);
-              }
+              (function() {
+                const payload = { type: 'GOOGLE_DRIVE_AUTH_SUCCESS', tokens: ${JSON.stringify(tokens)} };
+                function send(target) { try { target && target.postMessage(payload, '*'); } catch (_) {} }
+
+                // Try multiple targets and retries to ensure delivery
+                let attempts = 0;
+                const maxAttempts = 10;
+                const interval = setInterval(() => {
+                  attempts++;
+                  send(window.opener);
+                  send(window.parent);
+                  send(window.top);
+                  if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    try { window.close(); } catch (_) {}
+                    setTimeout(() => {
+                      try { window.open('', '_self'); window.close(); } catch (_) {}
+                    }, 200);
+                  }
+                }, 200);
+
+                // Also try immediate delivery
+                send(window.opener);
+                send(window.parent);
+                send(window.top);
+
+                // Minimal UI in case window can't close
+                document.body.innerHTML = '<div style="text-align:center;padding:40px;font-family:system-ui,-apple-system,Segoe UI,Roboto"><h2>✓ Autorización completada</h2><p>Esta ventana se cerrará automáticamente.</p></div>';
+
+                // Last resort: force close after short delay
+                setTimeout(() => {
+                  try { window.close(); } catch (_) {}
+                  try { window.open('', '_self'); window.close(); } catch (_) {}
+                }, 1200);
+              })();
             </script>
           </body>
         </html>
       `, {
-        headers: { 'Content-Type': 'text/html' },
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
       });
     }
 

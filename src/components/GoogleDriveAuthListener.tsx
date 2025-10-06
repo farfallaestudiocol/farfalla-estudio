@@ -7,10 +7,15 @@ export default function GoogleDriveAuthListener() {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       try {
-        if (!event?.data || typeof event.data !== 'object') return;
-        if (event.data.type !== 'GOOGLE_DRIVE_AUTH_SUCCESS') return;
+        let data: any = event?.data;
+        if (!data) return;
+        if (typeof data === 'string') {
+          try { data = JSON.parse(data); } catch (_) {}
+        }
+        if (!data || typeof data !== 'object') return;
+        if (data.type !== 'GOOGLE_DRIVE_AUTH_SUCCESS') return;
 
-        const tokens = event.data.tokens || {};
+        const tokens = data.tokens || {};
         const refreshToken = tokens.refresh_token as string | undefined;
 
         if (refreshToken) {
