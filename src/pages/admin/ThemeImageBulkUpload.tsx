@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Upload, X, ArrowLeft, Link } from 'lucide-react';
 import { useThemes } from '@/hooks/useThemes';
 import { toast } from 'sonner';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 
-interface ImageThemeData {
+interface ImageElementData {
   file: File;
   preview: string;
   name: string;
@@ -26,8 +27,9 @@ interface BulkUploadResult {
 
 export default function ThemeImageBulkUpload() {
   const navigate = useNavigate();
-  const { bulkCreateThemes } = useThemes();
-  const [selectedImages, setSelectedImages] = useState<ImageThemeData[]>([]);
+  const { themes, bulkCreateThemeElements } = useThemes();
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
+  const [selectedImages, setSelectedImages] = useState<ImageElementData[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<BulkUploadResult | null>(null);
@@ -101,7 +103,7 @@ export default function ThemeImageBulkUpload() {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
-    const imageData: ImageThemeData[] = files.map(file => ({
+    const imageData: ImageElementData[] = files.map(file => ({
       file,
       preview: URL.createObjectURL(file),
       name: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
@@ -162,6 +164,11 @@ export default function ThemeImageBulkUpload() {
   };
 
   const handleSubmit = async () => {
+    if (!selectedThemeId) {
+      toast.error('Selecciona un tema primero');
+      return;
+    }
+
     if (!refreshToken) {
       toast.error('Debes autorizar Google Drive primero');
       return;
@@ -175,7 +182,7 @@ export default function ThemeImageBulkUpload() {
     // Validate that all images have names
     const invalidImages = selectedImages.filter(img => !img.name.trim());
     if (invalidImages.length > 0) {
-      toast.error('Todos los temas deben tener un nombre');
+      toast.error('Todos los elementos deben tener un nombre');
       return;
     }
 
@@ -190,7 +197,7 @@ export default function ThemeImageBulkUpload() {
 
     try {
       const total = selectedImages.length;
-      const themesData = [];
+      const elementsData = [];
 
       // Upload images to Google Drive first
       for (let i = 0; i < selectedImages.length; i++) {
@@ -201,11 +208,13 @@ export default function ThemeImageBulkUpload() {
           const googleDriveUrl = await uploadImageToGoogleDrive(imageData.file, imageData.name);
           const processedUrl = convertGoogleDriveUrlToBase64(googleDriveUrl);
           
-          themesData.push({
+          elementsData.push({
+            theme_id: selectedThemeId,
             name: imageData.name.trim(),
             description: imageData.description.trim() || null,
             image_url: processedUrl,
-            is_active: true
+            is_active: true,
+            display_order: 0
           });
         } catch (error) {
           result.failed++;
@@ -213,22 +222,22 @@ export default function ThemeImageBulkUpload() {
         }
       }
 
-      // Create themes in database
-      if (themesData.length > 0) {
+      // Create theme elements in database
+      if (elementsData.length > 0) {
         setUploadProgress(75);
-        await bulkCreateThemes(themesData);
-        result.success = themesData.length;
+        await bulkCreateThemeElements(elementsData);
+        result.success = elementsData.length;
       }
 
       setUploadProgress(100);
       setUploadResult(result);
 
       if (result.success > 0) {
-        toast.success(`${result.success} temas creados exitosamente`);
+        toast.success(`${result.success} elementos creados exitosamente`);
       }
       
       if (result.failed > 0) {
-        toast.error(`${result.failed} temas fallaron al crearse`);
+        toast.error(`${result.failed} elementos fallaron al crearse`);
       }
 
     } catch (error) {
@@ -257,7 +266,7 @@ export default function ThemeImageBulkUpload() {
           <CardHeader>
             <CardTitle>Resultado de la Carga Masiva</CardTitle>
             <CardDescription>
-              Resumen del proceso de carga de temas
+              Resumen del proceso de carga de elementos
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -284,8 +293,8 @@ export default function ThemeImageBulkUpload() {
             )}
 
             <div className="flex gap-4 pt-4">
-              <Button onClick={() => navigate('/admin/themes')}>
-                Ver Temas
+              <Button onClick={() => navigate(`/admin/theme-elements?theme=${selectedThemeId}`)}>
+                Ver Elementos
               </Button>
               <Button variant="outline" onClick={resetUpload}>
                 Nueva Carga
@@ -309,21 +318,39 @@ export default function ThemeImageBulkUpload() {
           Volver
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Carga Masiva de Temas por Imágenes</h1>
+          <h1 className="text-2xl font-bold">Carga Masiva de Elementos de Tema</h1>
           <p className="text-muted-foreground">
-            Selecciona imágenes y completa la información para cada tema
+            Selecciona un tema y agrega múltiples elementos con imágenes
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Seleccionar Imágenes</CardTitle>
+          <CardTitle>Configuración</CardTitle>
           <CardDescription>
-            Selecciona las imágenes que quieres convertir en temas. Cada imagen se subirá a Google Drive automáticamente.
+            Selecciona el tema al que quieres agregar elementos y luego selecciona las imágenes
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div>
+            <Label htmlFor="theme">Tema *</Label>
+            <Select value={selectedThemeId} onValueChange={setSelectedThemeId}>
+              <SelectTrigger id="theme" className="mt-2">
+                <SelectValue placeholder="Selecciona un tema" />
+              </SelectTrigger>
+              <SelectContent>
+                {themes?.map((theme) => (
+                  <SelectItem key={theme.id} value={theme.id}>
+                    {theme.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground mt-1">
+              Los elementos que agregues se asociarán a este tema
+            </p>
+          </div>
           {!refreshToken && (
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="pt-6">
@@ -407,14 +434,14 @@ export default function ThemeImageBulkUpload() {
                         </Button>
                       </div>
                       
-                      <div className="flex-1 space-y-3">
+                       <div className="flex-1 space-y-3">
                         <div>
-                          <Label htmlFor={`name-${index}`}>Nombre del Tema *</Label>
+                          <Label htmlFor={`name-${index}`}>Nombre del Elemento *</Label>
                           <Input
                             id={`name-${index}`}
                             value={imageData.name}
                             onChange={(e) => updateImageData(index, 'name', e.target.value)}
-                            placeholder="Ej: Superhéroes"
+                            placeholder="Ej: Iron Man"
                           />
                         </div>
                         
@@ -424,7 +451,7 @@ export default function ThemeImageBulkUpload() {
                             id={`description-${index}`}
                             value={imageData.description}
                             onChange={(e) => updateImageData(index, 'description', e.target.value)}
-                            placeholder="Descripción del tema (opcional)"
+                            placeholder="Descripción del elemento (opcional)"
                             rows={2}
                           />
                         </div>
@@ -446,7 +473,7 @@ export default function ThemeImageBulkUpload() {
 
               <Button
                 onClick={handleSubmit}
-                disabled={uploading || !refreshToken}
+                disabled={uploading || !refreshToken || !selectedThemeId}
                 className="w-full"
               >
                 {uploading ? (
@@ -457,7 +484,7 @@ export default function ThemeImageBulkUpload() {
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
-                    Crear {selectedImages.length} Tema{selectedImages.length !== 1 ? 's' : ''}
+                    Crear {selectedImages.length} Elemento{selectedImages.length !== 1 ? 's' : ''}
                   </>
                 )}
               </Button>

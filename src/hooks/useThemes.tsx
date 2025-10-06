@@ -213,6 +213,25 @@ export const useThemes = () => {
     }
   };
 
+  const bulkCreateThemeElements = async (elementsData: Omit<ThemeElement, 'id' | 'created_at' | 'updated_at'>[]) => {
+    try {
+      const { data, error } = await supabase
+        .from('theme_elements')
+        .insert(elementsData)
+        .select();
+
+      if (error) throw error;
+
+      setThemeElements(prev => [...prev, ...data]);
+      toast.success(`${data.length} elementos creados correctamente`);
+      return data;
+    } catch (error) {
+      console.error('Error bulk creating theme elements:', error);
+      toast.error('No se pudieron crear los elementos masivamente');
+      throw error;
+    }
+  };
+
   return {
     themes,
     themeElements,
@@ -226,5 +245,6 @@ export const useThemes = () => {
     createThemeElement,
     updateThemeElement,
     deleteThemeElement,
+    bulkCreateThemeElements,
   };
 };
