@@ -25,6 +25,57 @@ async function getAccessToken(refreshToken: string): Promise<string> {
   return data.access_token;
 }
 
+async function findOrCreateFolder(
+  folderName: string,
+  accessToken: string,
+  parentId?: string
+): Promise<string> {
+  // Search for existing folder
+  const searchQuery = parentId 
+    ? `name='${folderName}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`
+    : `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+
+  const searchResponse = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(searchQuery)}&fields=files(id,name)`,
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const searchResult = await searchResponse.json();
+  
+  if (searchResult.files && searchResult.files.length > 0) {
+    console.log(`Found existing folder: ${folderName} (${searchResult.files[0].id})`);
+    return searchResult.files[0].id;
+  }
+
+  // Create folder if it doesn't exist
+  const metadata = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: parentId ? [parentId] : undefined,
+  };
+
+  const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(metadata),
+  });
+
+  const createResult = await createResponse.json();
+  if (!createResponse.ok) {
+    throw new Error(`Failed to create folder: ${createResult.error?.message || 'Unknown error'}`);
+  }
+
+  console.log(`Created folder: ${folderName} (${createResult.id})`);
+  return createResult.id;
+}
+
 async function uploadToGoogleDrive(
   file: File, 
   fileName: string, 
@@ -94,7 +145,7 @@ serve(async (req) => {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const fileName = formData.get('fileName') as string;
-    const folderId = formData.get('folderId') as string | null;
+    const themeName = formData.get('themeName') as string | null;
 
     if (!file || !fileName) {
       return new Response(JSON.stringify({ error: 'File and fileName are required' }), {
@@ -120,7 +171,19 @@ serve(async (req) => {
     console.log(`Uploading file: ${fileName} (${file.size} bytes)`);
     
     const accessToken = await getAccessToken(refreshToken);
-    const result = await uploadToGoogleDrive(file, fileName, accessToken, folderId || undefined);
+    
+    // Create folder structure if themeName is provided
+    let targetFolderId: string | undefined = undefined;
+    if (themeName) {
+      console.log(`Creating folder structure for theme: ${themeName}`);
+      // Create/find "Temas" folder
+      const temasFolder = await findOrCreateFolder('Temas', accessToken);
+      // Create/find theme folder inside "Temas"
+      targetFolderId = await findOrCreateFolder(themeName, accessToken, temasFolder);
+      console.log(`Using folder: Temas/${themeName} (${targetFolderId})`);
+    }
+    
+    const result = await uploadToGoogleDrive(file, fileName, accessToken, targetFolderId);
 
     console.log(`Upload successful: ${result.id}`);
 

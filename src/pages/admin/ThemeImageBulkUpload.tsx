@@ -128,7 +128,7 @@ export default function ThemeImageBulkUpload() {
     );
   };
 
-  const uploadImageToGoogleDrive = async (file: File, fileName: string): Promise<string> => {
+  const uploadImageToGoogleDrive = async (file: File, fileName: string, themeName: string): Promise<string> => {
     if (!refreshToken) {
       throw new Error('Google Drive no está autorizado. Por favor autoriza primero.');
     }
@@ -137,6 +137,7 @@ export default function ThemeImageBulkUpload() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileName', fileName);
+      formData.append('themeName', themeName);
       formData.append('refreshToken', refreshToken);
       
       const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-upload', {
@@ -198,6 +199,10 @@ export default function ThemeImageBulkUpload() {
     try {
       const total = selectedImages.length;
       const elementsData = [];
+      
+      // Get theme name for folder structure
+      const selectedTheme = themes?.find(t => t.id === selectedThemeId);
+      const themeName = selectedTheme?.name || 'Sin Tema';
 
       // Upload images to Google Drive first
       for (let i = 0; i < selectedImages.length; i++) {
@@ -205,7 +210,7 @@ export default function ThemeImageBulkUpload() {
         setUploadProgress(((i + 1) / total) * 50); // First 50% for uploads
 
         try {
-          const googleDriveUrl = await uploadImageToGoogleDrive(imageData.file, imageData.name);
+          const googleDriveUrl = await uploadImageToGoogleDrive(imageData.file, imageData.name, themeName);
           const processedUrl = convertGoogleDriveUrlToBase64(googleDriveUrl);
           
           elementsData.push({
