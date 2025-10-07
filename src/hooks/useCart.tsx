@@ -8,6 +8,7 @@ interface CartItem {
   product_id: string;
   variant_id?: string;
   quantity: number;
+  theme_id?: string;
   product: {
     id: string;
     name: string;
@@ -22,12 +23,16 @@ interface CartItem {
     price?: number;
     sku?: string;
   };
+  theme?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface CartContextType {
   items: CartItem[];
   isLoading: boolean;
-  addToCart: (productId: string, variantId?: string, quantity?: number) => Promise<void>;
+  addToCart: (productId: string, variantId?: string, quantity?: number, themeId?: string) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -69,6 +74,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
             name,
             price,
             sku
+          ),
+          themes:theme_id (
+            id,
+            name
           )
         `)
         .eq('user_id', user.id);
@@ -80,6 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         product_id: item.product_id,
         variant_id: item.variant_id,
         quantity: item.quantity,
+        theme_id: item.theme_id,
         product: {
           id: item.products?.id || item.product_id,
           name: item.products?.name || '',
@@ -93,6 +103,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           name: item.product_variants.name || '',
           price: item.product_variants.price,
           sku: item.product_variants.sku,
+        } : undefined,
+        theme: item.themes ? {
+          id: item.themes.id || item.theme_id || '',
+          name: item.themes.name || '',
         } : undefined,
       }));
 
@@ -110,7 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   // Add item to cart
-  const addToCart = async (productId: string, variantId?: string, quantity = 1) => {
+  const addToCart = async (productId: string, variantId?: string, quantity = 1, themeId?: string) => {
     if (!user) {
       toast({
         title: "Inicia sesión",
@@ -138,6 +152,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             product_id: productId,
             variant_id: variantId,
             quantity: quantity,
+            theme_id: themeId,
           });
 
         if (error) throw error;

@@ -75,6 +75,8 @@ const ProductDetail = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [displayImages, setDisplayImages] = useState<Array<{type: 'image' | 'youtube', src: string, alt: string}>>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [hasThemes, setHasThemes] = useState(false);
 
   // Helper function to extract YouTube video ID from URL
   const getYouTubeVideoId = (url: string) => {
@@ -166,6 +168,15 @@ const ProductDetail = () => {
       }
       
       setDisplayImages(allImages);
+
+      // Check if product has themes
+      const { data: themesData } = await supabase
+        .from('product_themes')
+        .select('id')
+        .eq('product_id', productData.id)
+        .limit(1);
+      
+      setHasThemes((themesData?.length || 0) > 0);
     } catch (error) {
       console.error('Error fetching product:', error);
       toast({
@@ -201,7 +212,17 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    await addToCart(product.id, selectedVariant?.id, quantity);
+    // Validate theme selection if product has themes
+    if (hasThemes && !selectedTheme) {
+      toast({
+        title: 'Selecciona un tema',
+        description: 'Debes seleccionar un tema antes de agregar al carrito',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await addToCart(product.id, selectedVariant?.id, quantity, selectedTheme || undefined);
     
     // Reset quantity after adding
     setQuantity(1);
@@ -483,6 +504,17 @@ const ProductDetail = () => {
                 </span>
               </div>
             </div>
+            
+            {/* Product Themes - Must be before Add to Cart */}
+            {hasThemes && (
+              <ProductThemes 
+                productId={product.id} 
+                variantId={selectedVariant?.id}
+                onThemeSelect={setSelectedTheme}
+                selectedThemeId={selectedTheme}
+                required={true}
+              />
+            )}
 
             {/* Actions */}
             <div className="space-y-3">
@@ -507,13 +539,6 @@ const ProductDetail = () => {
                 {product && isInWishlist(product.id) ? 'En lista de deseos' : 'Agregar a lista de deseos'}
               </Button>
         </div>
-
-        {/* Product Themes */}
-        <ProductThemes 
-          productId={product.id} 
-          variantId={selectedVariant?.id}
-          className="mb-8"
-        />
 
         {/* Product Features */}
             <Card>

@@ -189,6 +189,11 @@ const Cart = () => {
                               Variante: {item.variant.name}
                             </p>
                           )}
+                          {item.theme && (
+                            <p className="text-sm text-muted-foreground">
+                              Tema: {item.theme.name}
+                            </p>
+                          )}
                           <p className="text-lg font-poppins font-semibold text-farfalla-ink">
                             {formatPrice(itemPrice)}
                           </p>
@@ -381,7 +386,7 @@ const Cart = () => {
                         console.log('Payment successful:', result);
                         
                         try {
-                          // Create order with cart items
+                           // Create order with cart items
                           const orderItems = items.map(item => ({
                             product_id: item.product.id,
                             variant_id: item.variant?.id,
@@ -389,7 +394,9 @@ const Cart = () => {
                             unit_price: item.variant?.price || item.product.price,
                             product_name: item.product.name,
                             variant_name: item.variant?.name,
-                            product_sku: item.variant?.sku || item.product.sku
+                            product_sku: item.variant?.sku || item.product.sku,
+                            theme_id: item.theme_id,
+                            theme_name: item.theme?.name
                           }));
 
                           // Get selected address

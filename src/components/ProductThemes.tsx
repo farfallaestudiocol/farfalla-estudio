@@ -22,9 +22,19 @@ interface ProductThemesProps {
   productId: string;
   variantId?: string;
   className?: string;
+  onThemeSelect?: (themeId: string | null) => void;
+  selectedThemeId?: string | null;
+  required?: boolean;
 }
 
-export const ProductThemes = ({ productId, variantId, className }: ProductThemesProps) => {
+export const ProductThemes = ({ 
+  productId, 
+  variantId, 
+  className, 
+  onThemeSelect,
+  selectedThemeId,
+  required = false
+}: ProductThemesProps) => {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +42,11 @@ export const ProductThemes = ({ productId, variantId, className }: ProductThemes
   useEffect(() => {
     fetchProductThemes();
   }, [productId, variantId]);
+
+  const handleThemeSelect = (theme: Theme) => {
+    setSelectedTheme(theme);
+    onThemeSelect?.(theme.id);
+  };
 
   const fetchProductThemes = async () => {
     try {
@@ -64,8 +79,15 @@ export const ProductThemes = ({ productId, variantId, className }: ProductThemes
       const fetchedThemes = data?.map((pt: ProductTheme) => pt.themes).filter(Boolean) || [];
       setThemes(fetchedThemes);
       
-      if (fetchedThemes.length > 0) {
-        setSelectedTheme(fetchedThemes[0]);
+      // Set selected theme based on prop or first theme
+      if (selectedThemeId) {
+        const theme = fetchedThemes.find(t => t.id === selectedThemeId);
+        setSelectedTheme(theme || null);
+      } else if (fetchedThemes.length > 0 && !required) {
+        // Only auto-select if not required (to force user selection)
+        const firstTheme = fetchedThemes[0];
+        setSelectedTheme(firstTheme);
+        onThemeSelect?.(firstTheme.id);
       }
     } catch (error) {
       console.error('Error fetching product themes:', error);
@@ -90,11 +112,18 @@ export const ProductThemes = ({ productId, variantId, className }: ProductThemes
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center gap-2">
         <Palette className="h-5 w-5 text-farfalla-teal" />
-        <h3 className="text-lg font-semibold text-farfalla-ink">Temas Disponibles</h3>
+        <h3 className="text-lg font-semibold text-farfalla-ink">
+          Elige tu Tema {required && <span className="text-red-500">*</span>}
+        </h3>
         <Badge variant="secondary" className="text-xs">
           {themes.length} tema{themes.length !== 1 ? 's' : ''}
         </Badge>
       </div>
+      {required && !selectedTheme && (
+        <p className="text-sm text-red-500">
+          Debes seleccionar un tema antes de agregar al carrito
+        </p>
+      )}
 
       {/* Theme Selection Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -106,7 +135,7 @@ export const ProductThemes = ({ productId, variantId, className }: ProductThemes
                 ? 'ring-2 ring-farfalla-teal shadow-md' 
                 : 'hover:ring-1 hover:ring-farfalla-teal/50'
             }`}
-            onClick={() => setSelectedTheme(theme)}
+            onClick={() => handleThemeSelect(theme)}
           >
             <CardContent className="p-3">
               {theme.image_url ? (

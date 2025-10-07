@@ -13,6 +13,8 @@ interface OrderItem {
   product_name: string
   variant_name?: string
   product_sku?: string
+  theme_id?: string
+  theme_name?: string
 }
 
 interface CreateOrderRequest {
@@ -118,7 +120,9 @@ Deno.serve(async (req) => {
       total_price: Math.round(item.unit_price * item.quantity),
       product_name: item.product_name,
       variant_name: item.variant_name,
-      product_sku: item.product_sku
+      product_sku: item.product_sku,
+      theme_id: item.theme_id,
+      theme_name: item.theme_name
     }))
 
     const { error: itemsError } = await supabaseClient

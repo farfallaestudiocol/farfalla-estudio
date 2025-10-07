@@ -62,6 +62,7 @@ export type Database = {
           id: string
           product_id: string | null
           quantity: number
+          theme_id: string | null
           updated_at: string
           user_id: string | null
           variant_id: string | null
@@ -71,6 +72,7 @@ export type Database = {
           id?: string
           product_id?: string | null
           quantity?: number
+          theme_id?: string | null
           updated_at?: string
           user_id?: string | null
           variant_id?: string | null
@@ -80,6 +82,7 @@ export type Database = {
           id?: string
           product_id?: string | null
           quantity?: number
+          theme_id?: string | null
           updated_at?: string
           user_id?: string | null
           variant_id?: string | null
@@ -90,6 +93,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
             referencedColumns: ["id"]
           },
           {
@@ -149,6 +159,8 @@ export type Database = {
           product_name: string
           product_sku: string | null
           quantity: number
+          theme_id: string | null
+          theme_name: string | null
           total_price: number
           unit_price: number
           variant_id: string | null
@@ -162,6 +174,8 @@ export type Database = {
           product_name: string
           product_sku?: string | null
           quantity: number
+          theme_id?: string | null
+          theme_name?: string | null
           total_price: number
           unit_price: number
           variant_id?: string | null
@@ -175,6 +189,8 @@ export type Database = {
           product_name?: string
           product_sku?: string | null
           quantity?: number
+          theme_id?: string | null
+          theme_name?: string | null
           total_price?: number
           unit_price?: number
           variant_id?: string | null
@@ -193,6 +209,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
             referencedColumns: ["id"]
           },
           {
