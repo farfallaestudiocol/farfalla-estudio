@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import ProductVariantsManager from '@/components/ProductVariantsManager';
 import ProductRelationshipsManager from '@/components/ProductRelationshipsManager';
+import { ProductThemeManager } from '@/components/ProductThemeManager';
 
 interface Category {
   id: string;
@@ -697,6 +698,11 @@ const ProductForm = () => {
         {/* Variants Management - Only show when editing */}
         {isEditing && (
           <ProductVariantsManager productId={id} />
+        )}
+
+        {/* Theme Management - Only show when editing */}
+        {isEditing && (
+          <ProductThemeManager productId={id} />
         )}
 
         {/* Relationships Management - Only show when editing */}

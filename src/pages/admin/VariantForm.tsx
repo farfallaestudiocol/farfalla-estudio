@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { VariantThemeManager } from '@/components/VariantThemeManager';
 
 interface Product {
   id: string;
@@ -340,6 +341,15 @@ const VariantForm = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Theme Management - Only show when editing */}
+        {isEditing && formData.product_id && (
+          <VariantThemeManager 
+            productId={formData.product_id} 
+            variantId={id!}
+            variantName={formData.name}
+          />
+        )}
       </div>
     </div>
   );

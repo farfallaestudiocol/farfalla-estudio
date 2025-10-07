@@ -37,6 +37,7 @@ export const ProductThemeManager = ({ productId, variants = [] }: ProductThemeMa
   const [themes, setThemes] = useState<Theme[]>([]);
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
   const [variantThemes, setVariantThemes] = useState<Record<string, Set<string>>>({});
+  const [productVariants, setProductVariants] = useState<ProductVariant[]>(variants);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -44,7 +45,28 @@ export const ProductThemeManager = ({ productId, variants = [] }: ProductThemeMa
   useEffect(() => {
     fetchThemes();
     fetchProductThemes();
+    if (variants.length === 0) {
+      fetchProductVariants();
+    } else {
+      setProductVariants(variants);
+    }
   }, [productId]);
+
+  const fetchProductVariants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select('id, name')
+        .eq('product_id', productId)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setProductVariants(data || []);
+    } catch (error) {
+      console.error('Error fetching product variants:', error);
+    }
+  };
 
   const fetchThemes = async () => {
     try {
@@ -249,7 +271,7 @@ export const ProductThemeManager = ({ productId, variants = [] }: ProductThemeMa
         </div>
 
         {/* Variant-specific themes */}
-        {variants.length > 0 && (
+        {productVariants.length > 0 && (
           <>
             <Separator />
             <div>
@@ -257,7 +279,7 @@ export const ProductThemeManager = ({ productId, variants = [] }: ProductThemeMa
               <p className="text-sm text-muted-foreground mb-4">
                 Asigna temas específicos a cada variante del producto
               </p>
-              {variants.map((variant) => (
+              {productVariants.map((variant) => (
                 <div key={variant.id} className="mb-6 last:mb-0">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="outline">{variant.name}</Badge>
