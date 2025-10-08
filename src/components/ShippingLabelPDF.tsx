@@ -59,8 +59,12 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
   
   pdf.setFontSize(7);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(settings.contact_phone || '', 20, 12);
-  pdf.text(settings.contact_address || '', 20, 15);
+  if (settings.contact_phone) {
+    pdf.text(settings.contact_phone, 20, 12);
+  }
+  if (settings.contact_address) {
+    pdf.text(settings.contact_address, 20, 15);
+  }
 
   // Order number in top-right
   pdf.setFontSize(8);
@@ -80,10 +84,19 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
   
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(7);
-  pdf.text(settings.company_name || 'Farfalla Estudio', 3, 29);
+  
+  let senderY = 29;
+  pdf.text(settings.company_name || 'Farfalla Estudio', 3, senderY);
+  senderY += 3;
+  
+  if (settings.contact_phone) {
+    pdf.text(`Tel: ${settings.contact_phone}`, 3, senderY);
+    senderY += 3;
+  }
+  
   if (settings.contact_address) {
     const addressLines = pdf.splitTextToSize(settings.contact_address, 45);
-    pdf.text(addressLines, 3, 32);
+    pdf.text(addressLines, 3, senderY);
   }
 
   // Vertical divider
@@ -112,29 +125,41 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
 
   // Shipping address
   if (order.shipping_address) {
-    const address = order.shipping_address.full_address || 
-      order.shipping_address.street_address || 
-      `${order.shipping_address.street || ''}, ${order.shipping_address.city || ''}, ${order.shipping_address.state || ''}`;
+    // Build complete address
+    const addressParts = [];
     
-    if (address && address.trim()) {
-      const addressLines = pdf.splitTextToSize(address.trim(), 42);
+    if (order.shipping_address.full_address) {
+      addressParts.push(order.shipping_address.full_address);
+    } else if (order.shipping_address.street_address) {
+      addressParts.push(order.shipping_address.street_address);
+    } else if (order.shipping_address.street) {
+      addressParts.push(order.shipping_address.street);
+    }
+    
+    // Display street address
+    if (addressParts.length > 0) {
+      const addressLines = pdf.splitTextToSize(addressParts[0], 42);
       pdf.text(addressLines, 55, currentY);
       currentY += addressLines.length * 3;
     }
     
-    // City, state, postal code in a separate line if needed
-    if (order.shipping_address.city || order.shipping_address.state || order.shipping_address.postal_code) {
-      const locationParts = [
-        order.shipping_address.city,
-        order.shipping_address.state,
-        order.shipping_address.postal_code
-      ].filter(Boolean);
-      
-      if (locationParts.length > 0 && !order.shipping_address.full_address) {
-        const locationLine = locationParts.join(', ');
-        const locationLines = pdf.splitTextToSize(locationLine, 42);
-        pdf.text(locationLines, 55, currentY);
-      }
+    // Display city, state, postal code
+    const locationParts = [
+      order.shipping_address.city,
+      order.shipping_address.state,
+      order.shipping_address.postal_code
+    ].filter(Boolean);
+    
+    if (locationParts.length > 0) {
+      const locationLine = locationParts.join(', ');
+      const locationLines = pdf.splitTextToSize(locationLine, 42);
+      pdf.text(locationLines, 55, currentY);
+      currentY += locationLines.length * 3;
+    }
+    
+    // Display country if available
+    if (order.shipping_address.country) {
+      pdf.text(order.shipping_address.country, 55, currentY);
     }
   }
 
