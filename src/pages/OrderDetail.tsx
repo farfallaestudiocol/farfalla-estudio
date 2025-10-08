@@ -2,12 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@/hooks/useAuth';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { generateShippingLabel } from '@/components/ShippingLabelPDF';
+import { toast } from '@/hooks/use-toast';
 import { 
   Package, 
   ArrowLeft, 
@@ -19,7 +24,8 @@ import {
   CreditCard,
   User,
   Phone,
-  Mail
+  Mail,
+  FileText
 } from 'lucide-react';
 
 interface Order {
@@ -49,8 +55,10 @@ const OrderDetail = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { getOrder } = useOrders();
   const { user, isAdmin } = useAuth();
+  const { settings } = useSiteSettings();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -139,6 +147,55 @@ const OrderDetail = () => {
         {statusConfig.label}
       </Badge>
     );
+  };
+
+  const updateOrderStatus = async (newStatus: string) => {
+    if (!orderId) return;
+    
+    setIsUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setOrder(prev => prev ? { ...prev, status: newStatus } : null);
+      
+      toast({
+        title: "Estado actualizado",
+        description: "El estado de la orden ha sido actualizado exitosamente",
+      });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado de la orden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleGenerateLabel = async () => {
+    if (!order) return;
+
+    try {
+      await generateShippingLabel(order, settings);
+      toast({
+        title: "Rótulo generado",
+        description: "El rótulo de envío ha sido descargado",
+      });
+    } catch (error) {
+      console.error('Error generating label:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el rótulo de envío",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!user) {
@@ -412,10 +469,42 @@ const OrderDetail = () => {
                   <CardHeader>
                     <CardTitle className="text-farfalla-ink">Panel de Admin</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <Link to={`/admin/orders/${order.id}`}>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-farfalla-ink">
+                        Estado del Pedido
+                      </label>
+                      <Select
+                        value={order.status}
+                        onValueChange={updateOrderStatus}
+                        disabled={isUpdatingStatus}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pendiente</SelectItem>
+                          <SelectItem value="processing">Procesando</SelectItem>
+                          <SelectItem value="shipped">Enviado</SelectItem>
+                          <SelectItem value="delivered">Entregado</SelectItem>
+                          <SelectItem value="cancelled">Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {(order.payment_status === 'completed' || order.payment_status === 'paid') && (
+                      <Button
+                        onClick={handleGenerateLabel}
+                        className="w-full farfalla-btn-primary"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Generar Rótulo de Envío
+                      </Button>
+                    )}
+
+                    <Link to="/admin/orders">
                       <Button variant="outline" className="w-full">
-                        Gestionar Pedido
+                        Ver Todas las Órdenes
                       </Button>
                     </Link>
                   </CardContent>
