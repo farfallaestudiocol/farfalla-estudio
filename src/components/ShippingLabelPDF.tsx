@@ -5,12 +5,15 @@ interface OrderData {
   customer_name: string;
   customer_phone?: string;
   shipping_address?: {
+    name?: string;
     full_address?: string;
+    street_address?: string;
     street?: string;
     city?: string;
     state?: string;
     postal_code?: string;
     country?: string;
+    phone?: string;
   };
 }
 
@@ -93,19 +96,46 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
   
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(7);
-  pdf.text(order.customer_name, 55, 29);
   
-  if (order.customer_phone) {
-    pdf.text(`Tel: ${order.customer_phone}`, 55, 32);
+  // Customer name
+  const recipientName = order.shipping_address?.name || order.customer_name;
+  pdf.text(recipientName, 55, 29);
+  
+  // Phone number - prioritize shipping_address phone
+  const recipientPhone = order.shipping_address?.phone || order.customer_phone;
+  let currentY = 32;
+  
+  if (recipientPhone) {
+    pdf.text(`Tel: ${recipientPhone}`, 55, currentY);
+    currentY += 3;
   }
 
   // Shipping address
   if (order.shipping_address) {
     const address = order.shipping_address.full_address || 
+      order.shipping_address.street_address || 
       `${order.shipping_address.street || ''}, ${order.shipping_address.city || ''}, ${order.shipping_address.state || ''}`;
     
-    const addressLines = pdf.splitTextToSize(address, 42);
-    pdf.text(addressLines, 55, order.customer_phone ? 35 : 32);
+    if (address && address.trim()) {
+      const addressLines = pdf.splitTextToSize(address.trim(), 42);
+      pdf.text(addressLines, 55, currentY);
+      currentY += addressLines.length * 3;
+    }
+    
+    // City, state, postal code in a separate line if needed
+    if (order.shipping_address.city || order.shipping_address.state || order.shipping_address.postal_code) {
+      const locationParts = [
+        order.shipping_address.city,
+        order.shipping_address.state,
+        order.shipping_address.postal_code
+      ].filter(Boolean);
+      
+      if (locationParts.length > 0 && !order.shipping_address.full_address) {
+        const locationLine = locationParts.join(', ');
+        const locationLines = pdf.splitTextToSize(locationLine, 42);
+        pdf.text(locationLines, 55, currentY);
+      }
+    }
   }
 
   // Save the PDF
