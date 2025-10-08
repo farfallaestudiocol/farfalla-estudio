@@ -20,6 +20,7 @@ interface OrderData {
 interface SiteSettings {
   company_name?: string;
   contact_phone?: string;
+  contact_city?: string;
   contact_address?: string;
   logo_square_color_url?: string;
 }
@@ -97,6 +98,11 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
   if (settings.contact_address) {
     const addressLines = pdf.splitTextToSize(settings.contact_address, 45);
     pdf.text(addressLines, 3, senderY);
+    senderY += addressLines.length * 3;
+  }
+  
+  if (settings.contact_city) {
+    pdf.text(settings.contact_city, 3, senderY);
   }
 
   // Vertical divider
