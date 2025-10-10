@@ -89,7 +89,7 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
 
   // Extraer campos del destinatario con múltiples posibles nombres de propiedad
   const ship: any = (order as any).shipping_address || {};
-  const recipientName = ship.name || order.customer_name;
+  const recipientName = order.customer_name || ship.name;
   const recipientPhone = ship.phone || ship.phone_number || order.customer_phone || '';
   const street =
     ship.full_address ||
