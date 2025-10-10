@@ -52,122 +52,95 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
     console.error('Error loading logo:', error);
   }
 
-  // Header with company name
+  // Remitente en la parte superior (banda superior)
+  // Título compañía + datos compactos
   pdf.setFontSize(10);
   pdf.setTextColor(...primaryColor);
   pdf.setFont('helvetica', 'bold');
-  pdf.text(settings.company_name || 'Farfalla Estudio', 20, 8);
-  
-  pdf.setFontSize(7);
-  pdf.setFont('helvetica', 'normal');
-  if (settings.contact_phone) {
-    pdf.text(settings.contact_phone, 20, 12);
-  }
-  if (settings.contact_address) {
-    pdf.text(settings.contact_address, 20, 15);
-  }
+  pdf.text(settings.company_name || 'Farfalla Estudio', 20, 10);
 
-  // Order number in top-right
+  // Número de pedido en esquina superior derecha
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'bold');
   pdf.text(`Pedido: ${order.order_number}`, width - 3, 8, { align: 'right' });
 
-  // Divider line
-  pdf.setDrawColor(...primaryColor);
-  pdf.setLineWidth(0.3);
-  pdf.line(3, 20, width - 3, 20);
-
-  // Remitente section
-  pdf.setFontSize(8);
+  // Subtítulo Remitente + teléfono, ciudad y dirección
   pdf.setTextColor(...textColor);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('REMITENTE:', 3, 25);
-  
-  pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(7);
-  
-  let senderY = 29;
-  pdf.text(settings.company_name || 'Farfalla Estudio', 3, senderY);
-  senderY += 3;
-  
-  if (settings.contact_phone) {
-    pdf.text(`Tel: ${settings.contact_phone}`, 3, senderY);
-    senderY += 3;
+  pdf.text('REMITENTE', 20, 6);
+
+  pdf.setFont('helvetica', 'normal');
+  const senderInfo: string[] = [];
+  if (settings.contact_phone) senderInfo.push(`Tel: ${settings.contact_phone}`);
+  if (settings.contact_city) senderInfo.push(settings.contact_city);
+  if (senderInfo.length) {
+    pdf.text(senderInfo.join(' • '), 20, 14);
   }
-  
   if (settings.contact_address) {
-    const addressLines = pdf.splitTextToSize(settings.contact_address, 45);
-    pdf.text(addressLines, 3, senderY);
-    senderY += addressLines.length * 3;
-  }
-  
-  if (settings.contact_city) {
-    pdf.text(settings.contact_city, 3, senderY);
+    const addr = pdf.splitTextToSize(settings.contact_address, 60);
+    pdf.text(addr, 20, 18);
   }
 
-  // Vertical divider
-  pdf.line(52, 22, 52, height - 3);
+  // Línea divisoria para separar remitente del destinatario
+  pdf.setDrawColor(...primaryColor);
+  pdf.setLineWidth(0.3);
+  pdf.line(3, 21, width - 3, 21);
 
-  // Destinatario section
+  // Extraer campos del destinatario con múltiples posibles nombres de propiedad
+  const ship: any = (order as any).shipping_address || {};
+  const recipientName = ship.name || order.customer_name;
+  const recipientPhone = ship.phone || ship.phone_number || order.customer_phone || '';
+  const street =
+    ship.full_address ||
+    ship.street_address ||
+    ship.street ||
+    ship.address ||
+    ship.address1 ||
+    ship.line1 ||
+    ship.formatted_address || '';
+  const city = ship.city || ship.locality || ship.town || ship.municipality || '';
+  const state = ship.state || ship.region || ship.administrative_area_level_1 || '';
+  const postal = ship.postal_code || ship.zip || ship.zip_code || '';
+  const country = ship.country || ship.country_code || '';
+
+  // Etiqueta y contenido de destinatario ocupando el resto del rótulo
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(8);
-  pdf.text('DESTINATARIO:', 55, 25);
-  
+  pdf.text('DESTINATARIO', 3, 26);
+
+  // Nombre destacado
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text(recipientName || 'Destinatario', 3, 31);
+
+  // Detalles
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
-  
-  // Customer name
-  const recipientName = order.shipping_address?.name || order.customer_name;
-  pdf.text(recipientName, 55, 29);
-  
-  // Phone number - prioritize shipping_address phone
-  const recipientPhone = order.shipping_address?.phone || order.customer_phone;
-  let currentY = 32;
-  
+  pdf.setFontSize(8);
+  let y = 35;
+
   if (recipientPhone) {
-    pdf.text(`Tel: ${recipientPhone}`, 55, currentY);
-    currentY += 3;
+    pdf.text(`Tel: ${recipientPhone}`, 3, y);
+    y += 4;
   }
 
-  // Shipping address
-  if (order.shipping_address) {
-    // Build complete address
-    const addressParts = [];
-    
-    if (order.shipping_address.full_address) {
-      addressParts.push(order.shipping_address.full_address);
-    } else if (order.shipping_address.street_address) {
-      addressParts.push(order.shipping_address.street_address);
-    } else if (order.shipping_address.street) {
-      addressParts.push(order.shipping_address.street);
-    }
-    
-    // Display street address
-    if (addressParts.length > 0) {
-      const addressLines = pdf.splitTextToSize(addressParts[0], 42);
-      pdf.text(addressLines, 55, currentY);
-      currentY += addressLines.length * 3;
-    }
-    
-    // Display city, state, postal code
-    const locationParts = [
-      order.shipping_address.city,
-      order.shipping_address.state,
-      order.shipping_address.postal_code
-    ].filter(Boolean);
-    
-    if (locationParts.length > 0) {
-      const locationLine = locationParts.join(', ');
-      const locationLines = pdf.splitTextToSize(locationLine, 42);
-      pdf.text(locationLines, 55, currentY);
-      currentY += locationLines.length * 3;
-    }
-    
-    // Display country if available
-    if (order.shipping_address.country) {
-      pdf.text(order.shipping_address.country, 55, currentY);
-    }
+  if (street) {
+    const streetLines = pdf.splitTextToSize(street, width - 6);
+    pdf.text(streetLines, 3, y);
+    y += streetLines.length * 4;
   }
+
+  const locationParts = [city, state, postal].filter(Boolean);
+  if (locationParts.length) {
+    const locLines = pdf.splitTextToSize(locationParts.join(', '), width - 6);
+    pdf.text(locLines, 3, y);
+    y += locLines.length * 4;
+  }
+
+  if (country) {
+    pdf.text(country, 3, y);
+  }
+
 
   // Save the PDF
   pdf.save(`Rotulo_${order.order_number}.pdf`);
