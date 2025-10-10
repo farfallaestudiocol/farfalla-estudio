@@ -9,6 +9,7 @@ interface CartItem {
   variant_id?: string;
   quantity: number;
   theme_id?: string;
+  personalization_notes?: string;
   product: {
     id: string;
     name: string;
@@ -32,9 +33,10 @@ interface CartItem {
 interface CartContextType {
   items: CartItem[];
   isLoading: boolean;
-  addToCart: (productId: string, variantId?: string, quantity?: number, themeId?: string) => Promise<void>;
+  addToCart: (productId: string, variantId?: string, quantity?: number, themeId?: string, personalizationNotes?: string) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  updatePersonalization: (itemId: string, personalizationNotes: string) => Promise<void>;
   clearCart: () => Promise<void>;
   getCartTotal: () => number;
   getCartCount: () => number;
@@ -90,6 +92,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         variant_id: item.variant_id,
         quantity: item.quantity,
         theme_id: item.theme_id,
+        personalization_notes: item.personalization_notes,
         product: {
           id: item.products?.id || item.product_id,
           name: item.products?.name || '',
@@ -124,7 +127,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   // Add item to cart
-  const addToCart = async (productId: string, variantId?: string, quantity = 1, themeId?: string) => {
+  const addToCart = async (productId: string, variantId?: string, quantity = 1, themeId?: string, personalizationNotes?: string) => {
     if (!user) {
       toast({
         title: "Inicia sesión",
@@ -135,34 +138,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Check if item already exists in cart
-      const existingItem = items.find(
-        item => item.product_id === productId && item.variant_id === variantId
-      );
-
-      if (existingItem) {
-        // Update quantity
-        await updateQuantity(existingItem.id, existingItem.quantity + quantity);
-      } else {
-        // Add new item
-        const { error } = await supabase
-          .from('cart_items')
-          .insert({
-            user_id: user.id,
-            product_id: productId,
-            variant_id: variantId,
-            quantity: quantity,
-            theme_id: themeId,
-          });
-
-        if (error) throw error;
-
-        await fetchCartItems();
-        toast({
-          title: "Agregado al carrito",
-          description: "El producto se agregó correctamente",
+      // Add new item - each item with different personalization is separate
+      const { error } = await supabase
+        .from('cart_items')
+        .insert({
+          user_id: user.id,
+          product_id: productId,
+          variant_id: variantId,
+          quantity: quantity,
+          theme_id: themeId,
+          personalization_notes: personalizationNotes,
         });
-      }
+
+      if (error) throw error;
+
+      await fetchCartItems();
+      toast({
+        title: "Agregado al carrito",
+        description: "El producto se agregó correctamente",
+      });
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({
@@ -226,6 +220,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Update item personalization
+  const updatePersonalization = async (itemId: string, personalizationNotes: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .update({ personalization_notes: personalizationNotes })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      setItems(items.map(item => 
+        item.id === itemId ? { ...item, personalization_notes: personalizationNotes } : item
+      ));
+      
+      toast({
+        title: "Personalización actualizada",
+        description: "Los datos de personalización han sido guardados",
+      });
+    } catch (error) {
+      console.error('Error updating personalization:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la personalización",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Clear cart
   const clearCart = async () => {
     if (!user) return;
@@ -273,6 +297,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     addToCart,
     removeFromCart,
     updateQuantity,
+    updatePersonalization,
     clearCart,
     getCartTotal,
     getCartCount,

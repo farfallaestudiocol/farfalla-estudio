@@ -60,6 +60,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          personalization_notes: string | null
           product_id: string | null
           quantity: number
           theme_id: string | null
@@ -70,6 +71,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          personalization_notes?: string | null
           product_id?: string | null
           quantity?: number
           theme_id?: string | null
@@ -80,6 +82,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          personalization_notes?: string | null
           product_id?: string | null
           quantity?: number
           theme_id?: string | null
@@ -155,6 +158,7 @@ export type Database = {
           created_at: string
           id: string
           order_id: string | null
+          personalization_notes: string | null
           product_id: string | null
           product_name: string
           product_sku: string | null
@@ -170,6 +174,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: string | null
+          personalization_notes?: string | null
           product_id?: string | null
           product_name: string
           product_sku?: string | null
@@ -185,6 +190,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: string | null
+          personalization_notes?: string | null
           product_id?: string | null
           product_name?: string
           product_sku?: string | null

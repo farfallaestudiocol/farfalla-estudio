@@ -34,6 +34,7 @@ const Cart = () => {
     isLoading, 
     removeFromCart, 
     updateQuantity, 
+    updatePersonalization,
     clearCart, 
     getCartTotal,
     getCartCount 
@@ -44,6 +45,7 @@ const Cart = () => {
   const { addresses } = useUserAddresses();
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [editingPersonalization, setEditingPersonalization] = useState<{[key: string]: string}>({});
 
   const formatPrice = (price: number) => {
     const currency = settings?.currency || 'COP';
@@ -162,7 +164,7 @@ const Cart = () => {
                 return (
                   <Card key={item.id}>
                     <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-start gap-4">
                         {/* Product Image */}
                         <div className="flex-shrink-0">
                           <Link to={`/producto/${item.product.slug}`}>
@@ -175,32 +177,58 @@ const Cart = () => {
                         </div>
 
                         {/* Product Info */}
-                        <div className="flex-1 min-w-0">
-                          <Link 
-                            to={`/producto/${item.product.slug}`}
-                            className="hover:text-farfalla-teal transition-colors"
-                          >
-                            <h3 className="font-poppins font-semibold text-farfalla-ink truncate">
-                              {item.product.name}
-                            </h3>
-                          </Link>
-                          {item.variant && (
-                            <p className="text-sm text-muted-foreground">
-                              Variante: {item.variant.name}
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <div>
+                            <Link 
+                              to={`/producto/${item.product.slug}`}
+                              className="hover:text-farfalla-teal transition-colors"
+                            >
+                              <h3 className="font-poppins font-semibold text-farfalla-ink truncate">
+                                {item.product.name}
+                              </h3>
+                            </Link>
+                            {item.variant && (
+                              <p className="text-sm text-muted-foreground">
+                                Variante: {item.variant.name}
+                              </p>
+                            )}
+                            {item.theme && (
+                              <p className="text-sm text-muted-foreground">
+                                Tema: {item.theme.name}
+                              </p>
+                            )}
+                            <p className="text-lg font-poppins font-semibold text-farfalla-ink">
+                              {formatPrice(itemPrice)}
                             </p>
-                          )}
-                          {item.theme && (
-                            <p className="text-sm text-muted-foreground">
-                              Tema: {item.theme.name}
-                            </p>
-                          )}
-                          <p className="text-lg font-poppins font-semibold text-farfalla-ink">
-                            {formatPrice(itemPrice)}
-                          </p>
+                          </div>
+
+                          {/* Personalization */}
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold text-muted-foreground">
+                              Personalización:
+                            </Label>
+                            <Textarea
+                              value={editingPersonalization[item.id] ?? item.personalization_notes ?? ''}
+                              onChange={(e) => setEditingPersonalization({
+                                ...editingPersonalization,
+                                [item.id]: e.target.value
+                              })}
+                              onBlur={() => {
+                                if (editingPersonalization[item.id] !== undefined && 
+                                    editingPersonalization[item.id] !== item.personalization_notes) {
+                                  updatePersonalization(item.id, editingPersonalization[item.id]);
+                                }
+                              }}
+                              placeholder="Detalles de personalización..."
+                              rows={2}
+                              className="resize-none text-sm"
+                            />
+                          </div>
                         </div>
 
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
+                        {/* Right side - Quantity and Price */}
+                        <div className="flex flex-col items-end gap-3">
+                          {/* Quantity Controls */}
                           <div className="flex items-center border border-border rounded-lg">
                             <Button
                               variant="ghost"
@@ -223,21 +251,21 @@ const Cart = () => {
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-                        </div>
 
-                        {/* Total Price */}
-                        <div className="text-right">
-                          <p className="font-poppins font-semibold text-farfalla-ink">
-                            {formatPrice(totalPrice)}
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 hover:text-red-700 h-8 w-8"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {/* Total Price */}
+                          <div className="text-right">
+                            <p className="font-poppins font-semibold text-farfalla-ink">
+                              {formatPrice(totalPrice)}
+                            </p>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-red-500 hover:text-red-700 h-8 w-8"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -396,7 +424,8 @@ const Cart = () => {
                             variant_name: item.variant?.name,
                             product_sku: item.variant?.sku || item.product.sku,
                             theme_id: item.theme_id,
-                            theme_name: item.theme?.name
+                            theme_name: item.theme?.name,
+                            personalization_notes: item.personalization_notes
                           }));
 
                           // Get selected address

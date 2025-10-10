@@ -15,6 +15,7 @@ interface OrderItem {
   product_sku?: string
   theme_id?: string
   theme_name?: string
+  personalization_notes?: string
 }
 
 interface CreateOrderRequest {
@@ -122,7 +123,8 @@ Deno.serve(async (req) => {
       variant_name: item.variant_name,
       product_sku: item.product_sku,
       theme_id: item.theme_id,
-      theme_name: item.theme_name
+      theme_name: item.theme_name,
+      personalization_notes: item.personalization_notes
     }))
 
     const { error: itemsError } = await supabaseClient

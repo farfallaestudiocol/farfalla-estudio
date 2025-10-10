@@ -24,8 +24,11 @@ import {
   Shield,
   Package,
   Minus,
-  Plus
+  Plus,
+  Edit3
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface ProductVariant {
   id: string;
@@ -77,6 +80,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [hasThemes, setHasThemes] = useState(false);
+  const [personalizationNotes, setPersonalizationNotes] = useState('');
 
   // Helper function to extract YouTube video ID from URL
   const getYouTubeVideoId = (url: string) => {
@@ -212,6 +216,16 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     if (!product) return;
 
+    // Validate personalization notes
+    if (!personalizationNotes.trim()) {
+      toast({
+        title: 'Personalización requerida',
+        description: 'Debes agregar los datos de personalización antes de agregar al carrito',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Validate theme selection if product has themes
     if (hasThemes && !selectedTheme) {
       toast({
@@ -222,10 +236,11 @@ const ProductDetail = () => {
       return;
     }
 
-    await addToCart(product.id, selectedVariant?.id, quantity, selectedTheme || undefined);
+    await addToCart(product.id, selectedVariant?.id, quantity, selectedTheme || undefined, personalizationNotes);
     
-    // Reset quantity after adding
+    // Reset after adding
     setQuantity(1);
+    setPersonalizationNotes('');
   };
 
   const handleQuantityChange = (change: number) => {
@@ -515,6 +530,28 @@ const ProductDetail = () => {
                 required={true}
               />
             )}
+
+            {/* Personalization Notes - Required */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Edit3 className="h-4 w-4 text-farfalla-teal" />
+                <Label htmlFor="personalization" className="font-semibold text-farfalla-ink">
+                  Personalización *
+                </Label>
+              </div>
+              <Textarea
+                id="personalization"
+                placeholder="Ej: Nombre del niño/a, fecha especial, datos de contacto..."
+                value={personalizationNotes}
+                onChange={(e) => setPersonalizationNotes(e.target.value)}
+                rows={3}
+                className="resize-none"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                * Campo obligatorio. Proporciona los detalles de la personalización que deseas para este producto.
+              </p>
+            </div>
 
             {/* Actions */}
             <div className="space-y-3">
