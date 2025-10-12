@@ -153,6 +153,39 @@ export type Database = {
         }
         Relationships: []
       }
+      document_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -516,6 +549,8 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          document_number: string | null
+          document_type_id: string | null
           email: string | null
           full_name: string | null
           id: string
@@ -525,6 +560,8 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          document_number?: string | null
+          document_type_id?: string | null
           email?: string | null
           full_name?: string | null
           id: string
@@ -534,13 +571,23 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          document_number?: string | null
+          document_type_id?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           role?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_document_type_id_fkey"
+            columns: ["document_type_id"]
+            isOneToOne: false
+            referencedRelation: "document_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_content: {
         Row: {
