@@ -433,7 +433,7 @@ const ProductDetail = () => {
                 <span className="text-3xl font-poppins font-bold text-farfalla-ink">
                   {formatPrice(getCurrentPrice())}
                 </span>
-                {product.compare_price && (
+                {product.compare_price && product.compare_price > getCurrentPrice() && (
                   <>
                     <span className="text-lg text-muted-foreground line-through">
                       {formatPrice(product.compare_price)}
