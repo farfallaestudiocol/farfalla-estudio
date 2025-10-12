@@ -89,6 +89,8 @@ import ThemeElements from "./pages/admin/ThemeElements";
 import UserAddresses from "./pages/UserAddresses";
 import NotFound from "./pages/NotFound";
 import GoogleDriveCallback from "./pages/GoogleDriveCallback";
+import DocumentTypes from "./pages/admin/DocumentTypes";
+import DocumentTypeForm from "./pages/admin/DocumentTypeForm";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +140,9 @@ const App = () => (
                   <Route path="banner/new" element={<BannerForm />} />
                   <Route path="banner/edit/:id" element={<BannerForm />} />
                         <Route path="content" element={<Content />} />
+                        <Route path="document-types" element={<DocumentTypes />} />
+                        <Route path="document-types/new" element={<DocumentTypeForm />} />
+                        <Route path="document-types/:id/edit" element={<DocumentTypeForm />} />
                         <Route path="settings" element={<Settings />} />
                       </Routes>
                     </AdminLayout>

@@ -43,6 +43,7 @@ interface Order {
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
+  user_id?: string;
   shipping_address?: any;
   billing_address?: any;
   notes?: string;

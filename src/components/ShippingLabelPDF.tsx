@@ -4,6 +4,7 @@ interface OrderData {
   order_number: string;
   customer_name: string;
   customer_phone?: string;
+  user_id?: string;
   shipping_address?: {
     name?: string;
     full_address?: string;
@@ -36,6 +37,29 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
     unit: 'mm',
     format: [width, height]
   });
+
+  // Fetch user profile to get document information
+  let userDocumentInfo = '';
+  if (order.user_id) {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select(`
+          document_number,
+          document_types (code, name)
+        `)
+        .eq('id', order.user_id)
+        .single();
+
+      if (profile && profile.document_number && profile.document_types) {
+        const docType = profile.document_types as any;
+        userDocumentInfo = `${docType.code}: ${profile.document_number}`;
+      }
+    } catch (error) {
+      console.error('Error fetching user document info:', error);
+    }
+  }
 
   // Colors
   const primaryColor: [number, number, number] = [147, 51, 234]; // Farfalla purple
@@ -121,6 +145,11 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
 
   if (recipientPhone) {
     pdf.text(`Tel: ${recipientPhone}`, 3, y);
+    y += 4;
+  }
+
+  if (userDocumentInfo) {
+    pdf.text(userDocumentInfo, 3, y);
     y += 4;
   }
 

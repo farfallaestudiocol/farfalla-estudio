@@ -111,6 +111,11 @@ const managementItems = [
     icon: FileText
   },
   {
+    title: "Tipos de Documento",
+    url: "/admin/document-types",
+    icon: FileText
+  },
+  {
     title: "Configuración", 
     url: "/admin/settings",
     icon: Settings

@@ -6,9 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Mail, Lock, Eye, EyeOff, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+interface DocumentType {
+  id: string;
+  code: string;
+  name: string;
+}
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -25,6 +32,9 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupFullName, setSignupFullName] = useState("");
+  const [signupDocumentType, setSignupDocumentType] = useState("");
+  const [signupDocumentNumber, setSignupDocumentNumber] = useState("");
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -35,6 +45,20 @@ const Auth = () => {
       }
     };
     checkUser();
+
+    // Fetch document types
+    const fetchDocumentTypes = async () => {
+      const { data } = await supabase
+        .from('document_types')
+        .select('id, code, name')
+        .eq('is_active', true)
+        .order('display_order');
+      
+      if (data) {
+        setDocumentTypes(data);
+      }
+    };
+    fetchDocumentTypes();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -66,6 +90,13 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!signupDocumentType || !signupDocumentNumber.trim()) {
+      toast.error("Tipo y número de documento son obligatorios");
+      return;
+    }
+    
     setLoading(true);
     setMessage("");
 
@@ -79,6 +110,8 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: signupFullName,
+            document_type_code: signupDocumentType,
+            document_number: signupDocumentNumber,
           },
         },
       });
@@ -94,6 +127,8 @@ const Auth = () => {
         setSignupEmail("");
         setSignupPassword("");
         setSignupFullName("");
+        setSignupDocumentType("");
+        setSignupDocumentNumber("");
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -254,6 +289,38 @@ const Auth = () => {
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-document-type">Tipo de Documento *</Label>
+                    <Select value={signupDocumentType} onValueChange={setSignupDocumentType} required>
+                      <SelectTrigger id="signup-document-type">
+                        <SelectValue placeholder="Selecciona tipo de documento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {documentTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.code}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-document-number">Número de Documento *</Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input
+                        id="signup-document-number"
+                        type="text"
+                        placeholder="Número de documento"
+                        value={signupDocumentNumber}
+                        onChange={(e) => setSignupDocumentNumber(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
                   </div>
 
