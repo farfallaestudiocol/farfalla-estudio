@@ -133,23 +133,22 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
   pdf.setFontSize(8);
   pdf.text('DESTINATARIO', 3, 26);
 
-  // Nombre destacado
+  // Nombre destacado con documento
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(10);
-  pdf.text(recipientName || 'Destinatario', 3, 31);
+  const nameWithDoc = userDocumentInfo 
+    ? `${recipientName || 'Destinatario'} - ${userDocumentInfo}`
+    : recipientName || 'Destinatario';
+  const nameLines = pdf.splitTextToSize(nameWithDoc, width - 6);
+  pdf.text(nameLines, 3, 31);
 
   // Detalles
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
-  let y = 35;
+  let y = 31 + (nameLines.length * 4);
 
   if (recipientPhone) {
     pdf.text(`Tel: ${recipientPhone}`, 3, y);
-    y += 4;
-  }
-
-  if (userDocumentInfo) {
-    pdf.text(userDocumentInfo, 3, y);
     y += 4;
   }
 
