@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Mail, Lock, Eye, EyeOff, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import DynamicLogo from "@/components/DynamicLogo";
 
 interface DocumentType {
   id: string;
@@ -144,11 +145,13 @@ const Auth = () => {
     <div className="min-h-screen farfalla-hero-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img 
-            src="/lovable-uploads/f9953d83-e6cc-4f4f-85ac-c7a1f7220021.png" 
-            alt="Farfalla Estudio"
-            className="h-16 w-auto mx-auto mb-4"
-          />
+          <div className="mx-auto mb-4 flex justify-center">
+            <DynamicLogo 
+              variant="white"
+              shape="responsive"
+              className="h-16 w-auto"
+            />
+          </div>
           <h1 className="text-2xl font-poppins font-bold text-white mb-2">
             Bienvenido a Farfalla Estudio
           </h1>
