@@ -140,12 +140,13 @@ export const generateShippingLabel = async (order: OrderData, settings: SiteSett
     ? `${recipientName || 'Destinatario'} - ${userDocumentInfo}`
     : recipientName || 'Destinatario';
   const nameLines = pdf.splitTextToSize(nameWithDoc, width - 6);
-  pdf.text(nameLines, 3, 31);
+  const nameFirstLine = Array.isArray(nameLines) ? (nameLines[0] as string) : (nameLines as unknown as string);
+  pdf.text(nameFirstLine || (recipientName || 'Destinatario'), 3, 31);
 
   // Detalles
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
-  let y = 31 + (nameLines.length * 4);
+  let y = 35;
 
   if (recipientPhone) {
     pdf.text(`Tel: ${recipientPhone}`, 3, y);
