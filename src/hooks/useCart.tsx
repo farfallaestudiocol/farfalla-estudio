@@ -156,6 +156,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Agregado al carrito",
         description: "El producto se agregó correctamente",
+        variant: "success",
       });
     } catch (error) {
       console.error('Error adding to cart:', error);
