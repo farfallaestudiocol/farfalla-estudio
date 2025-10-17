@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Helmet } from "react-helmet-async";
 
 interface ProductVariant {
   id: string;
@@ -289,15 +290,60 @@ const ProductDetail = () => {
     );
   }
 
+  // ✅ SEO dynamic metadata
+  const firstImage = product.images?.[0]
+    ? convertGoogleDriveUrlToBase64(product.images[0])
+    : '/placeholder.svg';
+  const description = product.short_description || product.description?.slice(0, 150) || '';
+
+  const schemaOrgProduct = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": firstImage,
+    "description": description,
+    "sku": selectedVariant?.sku || product.slug,
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "COP",
+      "price": getCurrentPrice(),
+      "availability": product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "url": window.location.href
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating || 5,
+      "reviewCount": product.review_count || 1
+    }
+  };
+
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>{`${product.name} | ${settings?.site_name || 'Farfalla'}`}</title>
+        <meta name="description" content={description} />
+        <meta property="og:title" content={product.name} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={firstImage} />
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={window.location.href} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={product.name} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={firstImage} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaOrgProduct)}
+        </script>
+      </Helmet>
+
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-farfalla-teal transition-colors">
+            <Link to="/" className="hover:text-farfalla-teal transition-colors inline-flex items-center">
+              <ArrowLeft className="w-4 h-4 mr-1" />
               Inicio
             </Link>
             <span>/</span>
