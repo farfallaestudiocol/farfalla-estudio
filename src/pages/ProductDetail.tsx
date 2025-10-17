@@ -91,6 +91,13 @@ const ProductDetail = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+useEffect(() => {
+  console.log("DEBUG useCart:", useCart());
+  console.log("DEBUG useWishlist:", useWishlist());
+  console.log("DEBUG useToast:", useToast());
+  console.log("DEBUG useSiteSettings:", useSiteSettings());
+}, []);
+  
   useEffect(() => {
     if (productSlug) {
       fetchProduct();
