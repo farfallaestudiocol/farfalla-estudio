@@ -1,6 +1,7 @@
 import { Heart, Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import DynamicLogo from "@/components/DynamicLogo";
+import { safeHref } from '@/lib/safeUrl';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -75,9 +76,9 @@ const Footer = () => {
 
             {/* Social Media */}
             <div className="flex justify-center gap-3 mt-6">
-              {settings?.social_instagram && (
+              {safeHref(settings?.social_instagram) && (
                 <a 
-                  href={settings.social_instagram} 
+                  href={safeHref(settings?.social_instagram) as string} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
@@ -85,9 +86,9 @@ const Footer = () => {
                   <Instagram className="h-5 w-5" />
                 </a>
               )}
-              {settings?.social_facebook && (
+              {safeHref(settings?.social_facebook) && (
                 <a 
-                  href={settings.social_facebook} 
+                  href={safeHref(settings?.social_facebook) as string} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"

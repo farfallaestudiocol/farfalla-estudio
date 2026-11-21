@@ -4,6 +4,7 @@ import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { safeHref } from '@/lib/safeUrl';
 import {
   Carousel,
   CarouselContent,
@@ -140,13 +141,16 @@ const BannerCarousel = () => {
                     </p>
                   )}
                   <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in slide-in-from-bottom-10 duration-1000 delay-400">
-                    <Button 
-                      className="farfalla-btn-primary"
-                      onClick={() => window.location.href = slide.button_link}
-                    >
-                      {slide.button_text}
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
+                    {/* Solo se muestra si el enlace es válido y seguro (antes, uno vacío recargaba la página) */}
+                    {safeHref(slide.button_link) && (
+                      <Button
+                        className="farfalla-btn-primary"
+                        onClick={() => window.location.assign(safeHref(slide.button_link) as string)}
+                      >
+                        {slide.button_text}
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
                 {slide.image_url && (
