@@ -22,7 +22,11 @@ function getGoogleDriveConfig(): GoogleDriveConfig {
   return {
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: `https://26adf891-ac86-4a79-b567-82e0f319e2b7.lovableproject.com/google-drive-callback`
+    // Debe coincidir con una URI autorizada en la consola de Google Cloud. Al pasar a
+    // producción, definir el secreto GOOGLE_DRIVE_REDIRECT_URI con
+    // https://<dominio>/google-drive-callback.
+    redirect_uri: Deno.env.get('GOOGLE_DRIVE_REDIRECT_URI')
+      ?? `https://26adf891-ac86-4a79-b567-82e0f319e2b7.lovableproject.com/google-drive-callback`
   };
 }
 

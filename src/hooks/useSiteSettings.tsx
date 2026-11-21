@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SiteSettings {
+export interface SiteSettings {
   shipping_enabled: boolean;
   free_shipping_enabled: boolean;
   free_shipping_minimum: number;

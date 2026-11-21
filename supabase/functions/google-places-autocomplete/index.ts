@@ -14,9 +14,9 @@ serve(async (req) => {
   try {
     const { input, sessionToken } = await req.json()
     
-    if (!input || typeof input !== 'string') {
+    if (!input || typeof input !== 'string' || input.length > 200) {
       return new Response(
-        JSON.stringify({ error: 'Input parameter is required' }),
+        JSON.stringify({ error: 'Input parameter is required (max 200 characters)' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -46,7 +46,7 @@ serve(async (req) => {
     })
 
     // Add session token if provided (for session-based billing)
-    if (sessionToken) {
+    if (sessionToken && typeof sessionToken === 'string' && sessionToken.length <= 100) {
       params.append('sessiontoken', sessionToken)
     }
 

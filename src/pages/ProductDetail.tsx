@@ -47,6 +47,7 @@ interface Product {
   slug: string;
   description?: string;
   short_description?: string;
+  tags?: string[] | null;
   price: number;
   compare_price?: number;
   images: string[];

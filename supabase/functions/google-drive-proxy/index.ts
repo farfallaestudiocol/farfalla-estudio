@@ -23,6 +23,15 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // El id se inserta en URLs de Google: solo se aceptan los caracteres de un id real
+    // de Drive. Así no se puede colar "&", "/" ni "?" para alterar la petición.
+    if (!/^[A-Za-z0-9_-]{10,120}$/.test(fileId)) {
+      return new Response(JSON.stringify({ error: 'Invalid fileId parameter' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     console.log(`Processing Google Drive file ID: ${fileId}`);
 
     // Array of different Google Drive URL formats to try

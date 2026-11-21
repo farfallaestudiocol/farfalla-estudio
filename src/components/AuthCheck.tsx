@@ -8,27 +8,20 @@ interface AuthCheckProps {
   requireAdmin?: boolean;
 }
 
+/**
+ * Protege rutas. Es una comodidad de interfaz: la seguridad real la dan las
+ * políticas RLS de la base de datos, que se aplican igual aunque esta pantalla se evada.
+ */
 export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
-  console.log('AuthCheck - User:', user?.email);
-  console.log('AuthCheck - Profile:', profile);
-  console.log('AuthCheck - Loading:', loading);
-  console.log('AuthCheck - RequireAdmin:', requireAdmin);
+  const notAllowed = !loading && (!user || (requireAdmin && profile?.role !== 'admin'));
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        console.log('AuthCheck - Redirecting to /auth - no user');
-        navigate('/auth');
-      } else if (requireAdmin && profile?.role !== 'admin') {
-        console.log('AuthCheck - Redirecting to / - not admin. Profile role:', profile?.role);
-        // Temporalmente comentado para debugging
-        // navigate('/');
-      }
-    }
-  }, [user, profile, loading, navigate, requireAdmin]);
+    if (!notAllowed) return;
+    navigate(user ? '/' : '/auth', { replace: true });
+  }, [notAllowed, user, navigate]);
 
   if (loading) {
     return (
@@ -41,14 +34,7 @@ export const AuthCheck = ({ children, requireAdmin = false }: AuthCheckProps) =>
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
-  // Temporalmente comentado para debugging
-  // if (!user || (requireAdmin && profile?.role !== 'admin')) {
-  //   return null;
-  // }
+  if (notAllowed) return null;
 
   return <>{children}</>;
 };

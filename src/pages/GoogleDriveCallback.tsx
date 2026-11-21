@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { functionUrl } from '@/lib/config';
 
 export default function GoogleDriveCallback() {
   const [searchParams] = useSearchParams();
@@ -38,7 +39,7 @@ export default function GoogleDriveCallback() {
     // Intercambiar código por tokens
     const exchangeCode = async () => {
       try {
-        const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-auth/exchange', {
+        const response = await fetch(`${functionUrl('google-drive-auth')}/exchange`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

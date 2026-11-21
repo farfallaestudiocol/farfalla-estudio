@@ -193,9 +193,6 @@ Deno.serve(async (req) => {
     // --- Crear el pedido ---
     const userId = await getAuthUserId(req)
 
-    const { data: orderNumber, error: numErr } = await db.rpc('generate_order_number')
-    if (numErr) throw new Error('No se pudo generar el número de pedido')
-
     const sa = body.shipping_address
     const addressJson = {
       name: sa.name || body.customer.name,
@@ -210,48 +207,67 @@ Deno.serve(async (req) => {
       longitude: sa.longitude ?? null,
     }
 
-    const { data: order, error: orderError } = await db
-      .from('orders')
-      .insert({
-        user_id: userId,
-        is_guest: !userId,
-        order_number: orderNumber,
-        status: 'pending',
-        payment_status: 'completed',
-        payment_method: 'wompi',
-        payment_reference: body.payment_reference,
-        total_amount: totalAmount,
-        shipping_amount: Math.round(shipping),
-        tax_amount: tax,
-        discount_amount: 0,
-        currency,
-        customer_email: customerEmail,
-        customer_name: body.customer.name.trim(),
-        customer_phone: body.customer.phone.trim(),
-        customer_document_type: body.customer.document_type || null,
-        customer_document_number: body.customer.document_number?.trim() || null,
-        accepted_terms_at: new Date().toISOString(),
-        shipping_address: addressJson,
-        billing_address: addressJson,
-        notes: body.notes?.toString().slice(0, 2000) || null,
-      })
-      .select('id, order_number, total_amount, status, payment_status, access_token')
-      .single()
+    const orderColumns = 'id, order_number, total_amount, status, payment_status, access_token'
 
-    if (orderError) {
-      // Carrera con otra solicitud del mismo pago: el índice único evita el duplicado.
-      if ((orderError as any).code === '23505') {
+    // El número de pedido se calcula como "último + 1": si dos clientes pagan a la
+    // vez pueden recibir el mismo número y la restricción única rechaza al segundo.
+    // Como el pago ya está aprobado, se reintenta con un número nuevo en vez de fallar.
+    let order: any = null
+    for (let attempt = 1; attempt <= 5 && !order; attempt++) {
+      const { data: orderNumber, error: numErr } = await db.rpc('generate_order_number')
+      if (numErr) throw new Error('No se pudo generar el número de pedido')
+
+      const { data, error: orderError } = await db
+        .from('orders')
+        .insert({
+          user_id: userId,
+          is_guest: !userId,
+          order_number: orderNumber,
+          status: 'pending',
+          payment_status: 'completed',
+          payment_method: 'wompi',
+          payment_reference: body.payment_reference,
+          total_amount: totalAmount,
+          shipping_amount: Math.round(shipping),
+          tax_amount: tax,
+          discount_amount: 0,
+          currency,
+          customer_email: customerEmail,
+          customer_name: body.customer.name.trim(),
+          customer_phone: body.customer.phone.trim(),
+          customer_document_type: body.customer.document_type || null,
+          customer_document_number: body.customer.document_number?.trim() || null,
+          accepted_terms_at: new Date().toISOString(),
+          shipping_address: addressJson,
+          billing_address: addressJson,
+          notes: body.notes?.toString().slice(0, 2000) || null,
+        })
+        .select(orderColumns)
+        .single()
+
+      if (!orderError) {
+        order = data
+        break
+      }
+
+      const isUniqueViolation = (orderError as any).code === '23505'
+      const detail = `${orderError.message ?? ''} ${(orderError as any).details ?? ''}`
+      if (isUniqueViolation && detail.includes('payment_reference')) {
+        // Carrera con otra solicitud del mismo pago: se devuelve el pedido ya creado.
         const { data: dup } = await db
           .from('orders')
-          .select('id, order_number, total_amount, status, payment_status, access_token')
+          .select(orderColumns)
           .eq('payment_method', 'wompi')
           .eq('payment_reference', body.payment_reference)
           .maybeSingle()
         if (dup) return json({ success: true, already_exists: true, order: dup })
       }
+      if (isUniqueViolation && detail.includes('order_number') && attempt < 5) continue
+
       console.error('Error creating order:', orderError)
       throw new Error('No se pudo crear el pedido')
     }
+    if (!order) throw new Error('No se pudo crear el pedido')
 
     const { error: itemsError } = await db
       .from('order_items')

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Save, Send, ShieldCheck, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { functionUrl } from '@/lib/config';
 
 // Las tablas/funciones nuevas aún no están en types.ts (se genera con
 // `supabase gen types`), por eso se accede sin tipado estricto.
@@ -29,7 +30,7 @@ interface PublicEmailSettings {
   extra_config: Record<string, unknown>;
 }
 
-const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facilcorreo-webhook`;
+const WEBHOOK_URL = functionUrl('facilcorreo-webhook');
 
 const EmailSettingsForm = () => {
   const { toast } = useToast();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -8,86 +8,106 @@ export interface UserProfile {
   full_name: string | null;
   role: string;
   avatar_url: string | null;
+  document_type_id?: string | null;
+  document_number?: string | null;
 }
 
-export const useAuth = () => {
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: UserProfile | null;
+  loading: boolean;
+  isAdmin: boolean;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Estado de autenticación único para toda la app. Antes cada componente que usaba
+ * `useAuth()` abría su propia suscripción y su propia consulta de perfil (16 en total).
+ */
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const profileUserId = useRef<string | null>(null);
+
+  const loadProfile = useCallback(async (userId: string) => {
+    try {
+      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      profileUserId.current = userId;
+      setProfile(data as UserProfile | null);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer profile fetching to prevent deadlocks
-          setTimeout(async () => {
-            try {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              
-              setProfile(profileData);
-              setLoading(false);
-            } catch (error) {
-              console.error('Error fetching profile:', error);
-              setLoading(false);
-            }
-          }, 0);
-        } else {
-          setProfile(null);
-          setLoading(false);
-        }
-      }
-    );
+    // El listener se registra PRIMERO para no perder eventos
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
+      if (nextSession?.user) {
+        // Mismo usuario (p. ej. renovación de token): no se vuelve a pedir el perfil
+        if (profileUserId.current === nextSession.user.id) {
+          setLoading(false);
+          return;
+        }
+        // Se difiere para evitar bloqueos dentro del callback de auth
+        const userId = nextSession.user.id;
+        setTimeout(() => loadProfile(userId), 0);
+      } else {
+        profileUserId.current = null;
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session: current } }) => {
+      if (!current?.user) {
         setSession(null);
         setUser(null);
         setProfile(null);
         setLoading(false);
       }
-      // Don't set loading to false here if there's a user - let the auth state change handle it
+      // Con sesión, `loading` lo baja loadProfile() desde el listener
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadProfile]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
-      // Clean up auth state
       setUser(null);
       setSession(null);
       setProfile(null);
-      
-      // Attempt global sign out
+      profileUserId.current = null;
       await supabase.auth.signOut({ scope: 'global' });
-      
-      // Force page reload for clean state
-      window.location.href = '/auth';
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even if sign out fails, redirect to auth page
+    } finally {
+      // Recarga completa para dejar la app en un estado limpio
       window.location.href = '/auth';
     }
-  };
+  }, []);
 
-  const isAdmin = profile?.role === 'admin';
+  const value = useMemo<AuthContextType>(
+    () => ({ user, session, profile, loading, isAdmin: profile?.role === 'admin', signOut }),
+    [user, session, profile, loading, signOut],
+  );
 
-  return {
-    user,
-    session,
-    profile,
-    loading,
-    signOut,
-    isAdmin,
-  };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

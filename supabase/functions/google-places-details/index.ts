@@ -14,7 +14,7 @@ serve(async (req) => {
   try {
     const { placeId, sessionToken } = await req.json()
     
-    if (!placeId || typeof placeId !== 'string') {
+    if (!placeId || typeof placeId !== 'string' || !/^[A-Za-z0-9_-]{10,300}$/.test(placeId)) {
       return new Response(
         JSON.stringify({ error: 'Place ID parameter is required' }),
         { 
@@ -45,7 +45,7 @@ serve(async (req) => {
     })
 
     // Add session token if provided (for session-based billing)
-    if (sessionToken) {
+    if (sessionToken && typeof sessionToken === 'string' && sessionToken.length <= 100) {
       params.append('sessiontoken', sessionToken)
     }
 

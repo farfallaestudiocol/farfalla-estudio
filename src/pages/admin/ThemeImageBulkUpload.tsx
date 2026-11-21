@@ -11,6 +11,7 @@ import { Loader2, Upload, X, ArrowLeft, Link } from 'lucide-react';
 import { useThemes } from '@/hooks/useThemes';
 import { toast } from 'sonner';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
+import { functionUrl } from '@/lib/config';
 
 interface ImageElementData {
   file: File;
@@ -64,7 +65,7 @@ export default function ThemeImageBulkUpload() {
     setIsAuthorizing(true);
     
     try {
-      const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-auth/authorize');
+      const response = await fetch(`${functionUrl('google-drive-auth')}/authorize`);
       const data = await response.json();
       
       if (data.authUrl) {
@@ -140,7 +141,7 @@ export default function ThemeImageBulkUpload() {
       formData.append('themeName', themeName);
       formData.append('refreshToken', refreshToken);
       
-      const response = await fetch('https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-upload', {
+      const response = await fetch(functionUrl('google-drive-upload'), {
         method: 'POST',
         body: formData,
       });
