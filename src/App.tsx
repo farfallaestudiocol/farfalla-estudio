@@ -9,6 +9,7 @@ import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { SiteSettingsProvider } from "@/hooks/useSiteSettings";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import ChatbotWidget from "@/components/ChatbotWidget";
 import GoogleDriveAuthListener from "@/components/GoogleDriveAuthListener";
 
 interface ErrorBoundaryState {
@@ -110,6 +111,7 @@ const App = () => (
               <GoogleDriveAuthListener />
               <WhatsAppWidget />
               <BrowserRouter>
+              <ChatbotWidget />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

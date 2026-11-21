@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { resolveChatbotConfig } from '@/lib/chatbot';
 
 const WhatsAppWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,10 @@ const WhatsAppWidget = () => {
 
   // Sin número configurado no se muestra el botón (abriría un chat vacío)
   if (!whatsappNumber) return null;
+
+  // El chatbot web aparece abajo a la derecha: si está activo, WhatsApp pasa a la izquierda
+  // para que los dos botones no se tapen.
+  const side = resolveChatbotConfig(settings) ? 'left-6' : 'right-6';
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
@@ -38,7 +43,7 @@ const WhatsAppWidget = () => {
   return (
     <>
       {/* Floating WhatsApp Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className={`fixed bottom-6 ${side} z-50`}>
         <Button
           onClick={() => setIsOpen(true)}
           className="h-14 w-14 rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"

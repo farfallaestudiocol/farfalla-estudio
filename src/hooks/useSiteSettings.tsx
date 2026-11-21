@@ -18,6 +18,10 @@ export interface SiteSettings {
   contact_email: string;
   contact_phone: string;
   whatsapp_number: string;
+  chatbot_enabled: boolean;
+  chatbot_bot_id: string;
+  chatbot_color: string;
+  chatbot_script_url: string;
   contact_city: string;
   contact_address: string;
   social_instagram: string;
@@ -54,6 +58,10 @@ const defaultSettings: SiteSettings = {
   contact_email: 'hola@farfallaestudio.co',
   contact_phone: '+57 300 123 4567',
   whatsapp_number: '',
+  chatbot_enabled: false,
+  chatbot_bot_id: '',
+  chatbot_color: '',
+  chatbot_script_url: '',
   contact_city: 'Bogotá',
   contact_address: 'Bogotá, Colombia',
   social_instagram: 'https://instagram.com/farfallaestudio',
@@ -94,6 +102,10 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'contact_email',
           'contact_phone',
           'whatsapp_number',
+          'chatbot_enabled',
+          'chatbot_bot_id',
+          'chatbot_color',
+          'chatbot_script_url',
           'contact_city',
           'contact_address',
           'social_instagram',
