@@ -5,14 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Save, Send, ShieldCheck, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { functionUrl } from '@/lib/config';
+import { readFunctionError } from '@/lib/functionErrors';
 
 // Las tablas/funciones nuevas aún no están en types.ts (se genera con
 // `supabase gen types`), por eso se accede sin tipado estricto.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
 interface PublicEmailSettings {
@@ -20,17 +21,16 @@ interface PublicEmailSettings {
   is_enabled: boolean;
   api_base_url: string | null;
   has_api_key: boolean;
-  has_api_secret: boolean;
   has_webhook_secret: boolean;
   sender_name: string | null;
   sender_email: string | null;
   reply_to_email: string | null;
   track_opens: boolean;
   track_clicks: boolean;
-  extra_config: Record<string, unknown>;
 }
 
 const WEBHOOK_URL = functionUrl('facilcorreo-webhook');
+const DEFAULT_API_URL = 'https://app.facil-apps.com.co';
 
 const EmailSettingsForm = () => {
   const { toast } = useToast();
@@ -46,13 +46,11 @@ const EmailSettingsForm = () => {
   const [replyTo, setReplyTo] = useState('');
   const [trackOpens, setTrackOpens] = useState(true);
   const [trackClicks, setTrackClicks] = useState(true);
-  const [extraConfig, setExtraConfig] = useState('{}');
   const [testEmail, setTestEmail] = useState('');
 
   // Los secretos nunca se leen de vuelta: el campo queda vacío y solo se
   // envía si el admin escribe un valor nuevo.
   const [apiKey, setApiKey] = useState('');
-  const [apiSecret, setApiSecret] = useState('');
   const [webhookSecret, setWebhookSecret] = useState('');
 
   const load = async () => {
@@ -78,28 +76,20 @@ const EmailSettingsForm = () => {
       setReplyTo(s.reply_to_email || '');
       setTrackOpens(s.track_opens);
       setTrackClicks(s.track_clicks);
-      setExtraConfig(JSON.stringify(s.extra_config || {}, null, 2));
     }
     setLoading(false);
   };
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const save = async () => {
-    let parsedExtra: Record<string, unknown>;
-    try {
-      parsedExtra = JSON.parse(extraConfig || '{}');
-    } catch {
-      toast({ title: 'JSON inválido', description: 'La configuración adicional no es un JSON válido', variant: 'destructive' });
-      return;
-    }
-
-    if (isEnabled && (!apiBaseUrl.trim() || !senderEmail.trim() || !(apiKey || current?.has_api_key))) {
+    if (isEnabled && (!senderEmail.trim() || !(apiKey || current?.has_api_key))) {
       toast({
         title: 'Faltan datos',
-        description: 'Para activar el envío se requiere URL de la API, API key y correo remitente',
+        description: 'Para activar el envío se requiere la clave de API y el correo remitente',
         variant: 'destructive',
       });
       return;
@@ -110,24 +100,21 @@ const EmailSettingsForm = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const update: Record<string, unknown> = {
         is_enabled: isEnabled,
-        api_base_url: apiBaseUrl.trim() || null,
+        api_base_url: apiBaseUrl.trim().replace(/\/+$/, '') || null,
         sender_name: senderName.trim() || null,
         sender_email: senderEmail.trim() || null,
         reply_to_email: replyTo.trim() || null,
         track_opens: trackOpens,
         track_clicks: trackClicks,
-        extra_config: parsedExtra,
         updated_by: user?.id ?? null,
       };
-      if (apiKey) update.api_key = apiKey;
-      if (apiSecret) update.api_secret = apiSecret;
-      if (webhookSecret) update.webhook_secret = webhookSecret;
+      if (apiKey) update.api_key = apiKey.trim();
+      if (webhookSecret) update.webhook_secret = webhookSecret.trim();
 
       const { error } = await db.from('email_settings').update(update).eq('id', 1);
       if (error) throw error;
 
       setApiKey('');
-      setApiSecret('');
       setWebhookSecret('');
       toast({ title: 'Éxito', description: 'Configuración de correo guardada' });
       await load();
@@ -146,9 +133,13 @@ const EmailSettingsForm = () => {
       const { data, error } = await supabase.functions.invoke('send-order-email', {
         body: { type: 'test', to: testEmail.trim() },
       });
-      if (error) throw error;
+      // Con error HTTP supabase-js oculta el cuerpo; se lee el motivo real (dominio sin verificar, clave inválida...)
+      if (error) throw new Error((await readFunctionError(error)) || 'No se pudo enviar');
       if (!data?.success) throw new Error(data?.error || 'No se pudo enviar');
-      toast({ title: 'Correo de prueba enviado', description: `Revisa la bandeja de ${testEmail.trim()}` });
+      toast({
+        title: 'Prueba aceptada por Fácil Correo',
+        description: 'Quedó en cola. Si la clave es de modo test, valida todo pero no envía ningún correo.',
+      });
     } catch (error) {
       toast({
         title: 'Error al enviar la prueba',
@@ -184,6 +175,16 @@ const EmailSettingsForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="rounded-md border bg-muted/40 p-4 text-sm space-y-2">
+            <p className="font-medium">Antes de activar el envío</p>
+            <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+              <li>En Fácil Correo, agrega y <strong>verifica el dominio</strong> desde el que se enviará (registros DNS de propiedad y DKIM; SPF y retorno de rebotes son recomendados).</li>
+              <li>Crea una <strong>clave de API</strong> con los permisos <code>send</code> y <code>read_events</code>. Se muestra una sola vez: pégala aquí.</li>
+              <li>Empieza con una clave de <strong>modo test</strong> (valida todo y no envía a nadie). Cuando todo funcione, cambia a una clave <strong>live</strong>.</li>
+              <li>El correo remitente debe ser de ese dominio verificado.</li>
+            </ol>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="email_enabled">Envío de correos activo</Label>
@@ -193,45 +194,35 @@ const EmailSettingsForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="api_base_url">URL base de la API</Label>
+            <Label htmlFor="api_base_url">Dirección de la API</Label>
             <Input
               id="api_base_url"
               type="url"
               value={apiBaseUrl}
               onChange={(e) => setApiBaseUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder={DEFAULT_API_URL}
             />
+            <p className="text-sm text-muted-foreground">
+              La que le entregó Fácil Correo, sin <code>/v1/messages</code>. Si se deja vacía se usa {DEFAULT_API_URL}.
+            </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="api_key">API key</Label>
-                {secretBadge(!!current?.has_api_key)}
-              </div>
-              <Input
-                id="api_key"
-                type="password"
-                autoComplete="new-password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={current?.has_api_key ? '•••••••• (dejar vacío para conservar)' : 'Pega la API key'}
-              />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="api_key">Clave de API</Label>
+              {secretBadge(!!current?.has_api_key)}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="api_secret">API secret (si aplica)</Label>
-                {secretBadge(!!current?.has_api_secret)}
-              </div>
-              <Input
-                id="api_secret"
-                type="password"
-                autoComplete="new-password"
-                value={apiSecret}
-                onChange={(e) => setApiSecret(e.target.value)}
-                placeholder={current?.has_api_secret ? '•••••••• (dejar vacío para conservar)' : 'Opcional'}
-              />
-            </div>
+            <Input
+              id="api_key"
+              type="password"
+              autoComplete="new-password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={current?.has_api_key ? '•••••••• (dejar vacío para conservar)' : 'Pega la clave de API'}
+            />
+            <p className="text-sm text-muted-foreground">
+              Se guarda donde solo la lee el servidor; esta pantalla nunca la muestra de vuelta. Si se filtra, revócala en Fácil Correo y pega otra.
+            </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -266,20 +257,25 @@ const EmailSettingsForm = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            Webhook de eventos (aperturas, entregas, rebotes)
+            Webhook: entregas, rebotes, quejas y aperturas
           </CardTitle>
           <CardDescription>
-            Configura esta URL en Fácil Correo para que nos avise cuando el cliente abra el correo.
+            Sin esto, Fácil Correo acepta los correos pero la tienda no se entera de si llegaron o se abrieron.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>URL del webhook</Label>
+            <Label>1. URL del webhook</Label>
             <Input readOnly value={WEBHOOK_URL} onFocus={(e) => e.currentTarget.select()} />
+            <p className="text-sm text-muted-foreground">
+              En Fácil Correo, sección Webhooks, crea uno con esta URL. Eventos recomendados: <code>message.sent</code>, <code>message.delivered</code>,{' '}
+              <code>message.deferred</code>, <code>message.bounced</code>, <code>message.complained</code>, <code>message.opened</code>,{' '}
+              <code>message.clicked</code>, <code>message.failed</code> y <code>message.suppressed</code> (sin elegir eventos recibe todos).
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="webhook_secret">Secreto de firma del webhook</Label>
+              <Label htmlFor="webhook_secret">2. Secreto de firma</Label>
               {secretBadge(!!current?.has_webhook_secret)}
             </div>
             <Input
@@ -288,20 +284,11 @@ const EmailSettingsForm = () => {
               autoComplete="new-password"
               value={webhookSecret}
               onChange={(e) => setWebhookSecret(e.target.value)}
-              placeholder={current?.has_webhook_secret ? '•••••••• (dejar vacío para conservar)' : 'Opcional pero recomendado'}
+              placeholder={current?.has_webhook_secret ? '•••••••• (dejar vacío para conservar)' : 'Pega el secreto que muestra Fácil Correo'}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="extra_config">Configuración adicional (JSON)</Label>
-            <Textarea
-              id="extra_config"
-              rows={4}
-              className="font-mono text-sm"
-              value={extraConfig}
-              onChange={(e) => setExtraConfig(e.target.value)}
-              placeholder='{"template_id": "..."}'
-            />
-            <p className="text-sm text-muted-foreground">Parámetros propios del proveedor (plantillas, dominio, etc.).</p>
+            <p className="text-sm text-muted-foreground">
+              Fácil Correo lo muestra <strong>una sola vez</strong> al crear el webhook. Sin él, la tienda rechaza todos los eventos (es lo que impide que alguien falsifique avisos).
+            </p>
           </div>
         </CardContent>
       </Card>

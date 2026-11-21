@@ -27,9 +27,10 @@ Deno.serve(async (req) => {
           subject: 'Prueba de correo - Farfalla Estudio',
           html: '<p>Si recibes este mensaje, la integración con el proveedor de correo funciona.</p>',
           text: 'Si recibes este mensaje, la integración con el proveedor de correo funciona.',
+          tags: ['prueba'],
           metadata: { email_type: 'test' },
         },
-        { emailType: 'test' },
+        { emailType: 'test', idempotencyKey: `farfalla-test-${crypto.randomUUID()}` },
       )
       return json(result, result.success ? 200 : 502)
     }
@@ -41,7 +42,10 @@ Deno.serve(async (req) => {
       else if (body.status) emailType = statusToEmailType(String(body.status))
       if (!emailType) return json({ success: true, skipped: true })
 
-      const result = await sendOrderEmail(db, String(body.order_id), emailType, resolveSiteUrl(req))
+      // Reenviar la confirmación es una acción deliberada: necesita una clave de idempotencia nueva
+      const result = await sendOrderEmail(db, String(body.order_id), emailType, resolveSiteUrl(req), {
+        resend: body.type === 'order_confirmation',
+      })
       return json(result, result.success ? 200 : 502)
     }
 

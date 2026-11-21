@@ -142,12 +142,19 @@ export function renderOrderEmail(
   return { subject: copy.subject(order.order_number), html, text }
 }
 
-/** Carga la orden y envía el correo correspondiente. No lanza. */
+/**
+ * Carga la orden y envía el correo correspondiente. No lanza.
+ *
+ * Idempotencia: cada (pedido, tipo de correo) tiene una clave fija, así que si el envío
+ * se reintenta por un corte de red, Fácil Correo no manda un segundo correo. Con
+ * `resend: true` (reenvío deliberado del administrador) la clave es nueva.
+ */
 export async function sendOrderEmail(
   db: SupabaseClient,
   orderId: string,
   type: OrderEmailType,
   siteUrl: string,
+  opts: { resend?: boolean } = {},
 ): Promise<SendResult> {
   try {
     const { data: order, error } = await db
@@ -170,10 +177,19 @@ export async function sendOrderEmail(
 
     const mail = renderOrderEmail(type, order as OrderRow, (items || []) as ItemRow[], siteUrl, company?.setting_value || 'Farfalla Estudio')
 
+    const idempotencyKey = opts.resend ? `farfalla-${order.id}-${type}-r${Date.now()}` : `farfalla-${order.id}-${type}`
+
     return await sendEmail(
       db,
-      { to: order.customer_email, toName: order.customer_name, ...mail, metadata: { order_id: order.id, order_number: order.order_number, email_type: type } },
-      { orderId: order.id, emailType: type },
+      {
+        to: order.customer_email,
+        toName: order.customer_name,
+        ...mail,
+        tags: ['pedido', type],
+        externalRef: order.order_number,
+        metadata: { order_id: order.id, order_number: order.order_number, email_type: type },
+      },
+      { orderId: order.id, emailType: type, idempotencyKey },
     )
   } catch (err) {
     console.error('sendOrderEmail error:', err)
