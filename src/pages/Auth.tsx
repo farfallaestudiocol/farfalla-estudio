@@ -11,6 +11,8 @@ import { User, Mail, Lock, Eye, EyeOff, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import DynamicLogo from "@/components/DynamicLogo";
+import { Checkbox } from "@/components/ui/checkbox";
+import { POLICY_VERSION } from "@/lib/legal";
 
 interface DocumentType {
   id: string;
@@ -33,6 +35,7 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupFullName, setSignupFullName] = useState("");
+  const [signupAcceptedLegal, setSignupAcceptedLegal] = useState(false);
   const [signupDocumentType, setSignupDocumentType] = useState("");
   const [signupDocumentNumber, setSignupDocumentNumber] = useState("");
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
@@ -98,6 +101,12 @@ const Auth = () => {
       return;
     }
     
+    // Autorización previa, expresa e informada (Ley 1581 de 2012) y aceptación de los términos
+    if (!signupAcceptedLegal) {
+      toast.error("Debes aceptar los términos y autorizar el tratamiento de tus datos personales");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -113,6 +122,10 @@ const Auth = () => {
             full_name: signupFullName,
             document_type_code: signupDocumentType,
             document_number: signupDocumentNumber,
+            // Prueba de la autorización: cuándo y qué versión del texto se aceptó
+            accepted_terms_at: new Date().toISOString(),
+            accepted_privacy_at: new Date().toISOString(),
+            policy_version: POLICY_VERSION,
           },
         },
       });
@@ -130,6 +143,7 @@ const Auth = () => {
         setSignupFullName("");
         setSignupDocumentType("");
         setSignupDocumentNumber("");
+        setSignupAcceptedLegal(false);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -327,10 +341,25 @@ const Auth = () => {
                     </div>
                   </div>
 
+                  <div className="flex items-start gap-2">
+                    <Checkbox
+                      id="signup-legal"
+                      checked={signupAcceptedLegal}
+                      onCheckedChange={(v) => setSignupAcceptedLegal(v === true)}
+                      className="mt-1"
+                    />
+                    <Label htmlFor="signup-legal" className="text-sm font-normal leading-snug">
+                      He leído y acepto los{" "}
+                      <a href="/terminos" target="_blank" rel="noopener noreferrer" className="text-farfalla-teal underline">Términos y Condiciones</a>
+                      {" "}y autorizo el tratamiento de mis datos personales conforme a la{" "}
+                      <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="text-farfalla-teal underline">Política de Tratamiento de Datos Personales</a>.
+                    </Label>
+                  </div>
+
                   <Button
                     type="submit"
                     className="farfalla-btn-primary w-full"
-                    disabled={loading}
+                    disabled={loading || !signupAcceptedLegal}
                   >
                     {loading ? "Creando cuenta..." : "Crear Cuenta"}
                   </Button>

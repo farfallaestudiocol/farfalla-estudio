@@ -22,6 +22,10 @@ export interface SiteSettings {
   chatbot_bot_id: string;
   chatbot_color: string;
   chatbot_script_url: string;
+  legal_company_name: string;
+  legal_nit: string;
+  legal_address: string;
+  legal_privacy_email: string;
   contact_city: string;
   contact_address: string;
   social_instagram: string;
@@ -62,6 +66,10 @@ const defaultSettings: SiteSettings = {
   chatbot_bot_id: '',
   chatbot_color: '',
   chatbot_script_url: '',
+  legal_company_name: '',
+  legal_nit: '',
+  legal_address: '',
+  legal_privacy_email: '',
   contact_city: 'Bogotá',
   contact_address: 'Bogotá, Colombia',
   social_instagram: 'https://instagram.com/farfallaestudio',
@@ -106,6 +114,10 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'chatbot_bot_id',
           'chatbot_color',
           'chatbot_script_url',
+          'legal_company_name',
+          'legal_nit',
+          'legal_address',
+          'legal_privacy_email',
           'contact_city',
           'contact_address',
           'social_instagram',

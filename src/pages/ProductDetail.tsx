@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
 import { FrequentlyBoughtTogether } from "@/components/FrequentlyBoughtTogether";
 import { ProductThemes } from "@/components/ProductThemes";
-import { Helmet } from "react-helmet-async";
+import { useSeo } from '@/hooks/useSeo';
 import { 
   Heart, 
   ShoppingCart, 
@@ -252,6 +252,22 @@ const ProductDetail = () => {
     }
   };
 
+  // SEO: título, descripción, Open Graph y canónica del producto (o noindex si no existe)
+  useSeo(
+    product
+      ? {
+          title: `${product.name} | Farfalla Estudio`,
+          description: product.short_description || 'Descubre los productos personalizados de Farfalla Estudio',
+          keywords: product.tags?.join(', ') || undefined,
+          image: product.images?.[0] ? convertGoogleDriveUrlToBase64(product.images[0]) : undefined,
+          url: `https://farfallaestudio.com.co/producto/${product.slug}`,
+          type: 'product',
+        }
+      : loading
+        ? { title: 'Producto | Farfalla Estudio' }
+        : { title: 'Producto no encontrado | Farfalla Estudio', noindex: true },
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -270,17 +286,6 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <div className="min-h-screen">
-        <Helmet>
-         <title>{product ? `${product.name} | Farfalla Estudio` : "Producto | Farfalla Estudio"}</title>
-         <meta name="description" content={product?.short_description || "Descubre los productos personalizados de Farfalla Estudio"} />
-         <meta name="keywords" content={product?.tags?.join(', ') || "productos personalizados, regalos únicos, Farfalla Estudio"} />
-         <meta property="og:title" content={product ? `${product.name} | Farfalla Estudio` : "Producto | Farfalla Estudio"} />
-         <meta property="og:description" content={product?.short_description || "Conoce los productos personalizados de Farfalla Estudio"} />
-         <meta property="og:image" content={product?.images?.[0] || "https://farfallaestudio.com.co/og-default.jpg"} />
-         <meta property="og:url" content={`https://farfallaestudio.com.co/producto/${product?.slug || ''}`} />
-         <link rel="canonical" href={`https://farfallaestudio.com.co/producto/${product?.slug || ''}`} />
-        </Helmet>
-
         <Header />
         <div className="min-h-screen farfalla-section-gradient flex items-center justify-center">
           <div className="text-center">
@@ -303,6 +308,7 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen">
+
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

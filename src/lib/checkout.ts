@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { readFunctionError } from '@/lib/functionErrors';
+import { POLICY_VERSION } from '@/lib/legal';
 
 export interface CheckoutCustomer {
   name: string;
@@ -43,6 +44,10 @@ export interface CreateOrderPayload {
   }[];
   notes?: string;
   accepted_terms: boolean;
+  // Autorización de tratamiento de datos (Ley 1581 de 2012), aparte de los términos de compra,
+  // y versión del texto que se mostró: es la prueba de la autorización.
+  accepted_privacy: boolean;
+  policy_version: string;
 }
 
 export const emptyCustomer: CheckoutCustomer = {
@@ -71,6 +76,7 @@ export function validateCheckout(
   customer: CheckoutCustomer,
   address: CheckoutAddress | null,
   acceptedTerms: boolean,
+  acceptedPrivacy: boolean,
 ): string[] {
   const problems: string[] = [];
   if (!customer.name.trim()) problems.push('Nombre completo');
@@ -81,7 +87,8 @@ export function validateCheckout(
   if (!address || !address.street_address.trim() || !address.city.trim() || !address.state.trim()) {
     problems.push('Dirección de entrega (calle, ciudad y departamento)');
   }
-  if (!acceptedTerms) problems.push('Aceptar términos y tratamiento de datos');
+  if (!acceptedTerms) problems.push('Aceptar los términos y condiciones');
+  if (!acceptedPrivacy) problems.push('Autorizar el tratamiento de datos personales');
   return problems;
 }
 
@@ -103,6 +110,8 @@ export function buildOrderPayload(
     })),
     notes: notes.trim() || undefined,
     accepted_terms: true,
+    accepted_privacy: true,
+    policy_version: POLICY_VERSION,
   };
 }
 

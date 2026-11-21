@@ -33,6 +33,7 @@ export function useCheckout() {
   const [guestAddress, setGuestAddress] = useState<CheckoutAddress>(emptyAddress);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [notes, setNotes] = useState('');
 
   // Usuario con sesión: dirección guardada elegida. Invitado: la escrita en el formulario.
@@ -59,7 +60,7 @@ export function useCheckout() {
   const settingsReady = settings !== null;
   const totals = settings ? calculateTotals(getCartTotal(), settings, address) : null;
 
-  const missingFields = validateCheckout(customer, address, acceptedTerms);
+  const missingFields = validateCheckout(customer, address, acceptedTerms, acceptedPrivacy);
   const orderPayload =
     missingFields.length === 0 && address ? buildOrderPayload(items, customer, address, notes) : null;
 
@@ -101,6 +102,8 @@ export function useCheckout() {
     setSelectedAddressId,
     acceptedTerms,
     setAcceptedTerms,
+    acceptedPrivacy,
+    setAcceptedPrivacy,
     notes,
     setNotes,
     address,

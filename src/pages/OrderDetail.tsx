@@ -48,6 +48,9 @@ interface Order {
   customer_phone?: string;
   customer_document_type?: string;
   customer_document_number?: string;
+  accepted_terms_at?: string | null;
+  accepted_privacy_at?: string | null;
+  policy_version?: string | null;
   is_guest?: boolean;
   user_id?: string;
   shipping_address?: any;
@@ -374,6 +377,12 @@ const OrderDetail = () => {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <span>{order.customer_document_type} {order.customer_document_number}</span>
+                      </div>
+                    )}
+                    {isAdmin && order.accepted_privacy_at && (
+                      <div className="flex items-center gap-2 md:col-span-2 text-sm text-muted-foreground">
+                        Autorización de datos personales: {new Date(order.accepted_privacy_at).toLocaleString('es-CO')}
+                        {order.policy_version ? ` · política versión ${order.policy_version}` : ''}
                       </div>
                     )}
                     {isAdmin && order.is_guest && (

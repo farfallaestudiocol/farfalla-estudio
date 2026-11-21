@@ -11,7 +11,7 @@ import type { CheckoutState } from '@/hooks/useCheckout';
 export function CheckoutSection({ checkout }: { checkout: CheckoutState }) {
   const {
     user, settings, totals, customer, setCustomer, guestAddress, setGuestAddress,
-    selectedAddressId, setSelectedAddressId, acceptedTerms, setAcceptedTerms,
+    selectedAddressId, setSelectedAddressId, acceptedTerms, setAcceptedTerms, acceptedPrivacy, setAcceptedPrivacy,
     notes, setNotes, missingFields, beforePayment, completeOrder,
   } = checkout;
 
@@ -25,6 +25,8 @@ export function CheckoutSection({ checkout }: { checkout: CheckoutState }) {
         onAddressChange={setGuestAddress}
         acceptedTerms={acceptedTerms}
         onAcceptedTermsChange={setAcceptedTerms}
+        acceptedPrivacy={acceptedPrivacy}
+        onAcceptedPrivacyChange={setAcceptedPrivacy}
       />
 
       {/* Usuarios con sesión: direcciones guardadas */}
