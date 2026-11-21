@@ -16,9 +16,11 @@ import {
   Truck,
   DollarSign,
   ShoppingBag,
-  Mail
+  Mail,
+  Bot
 } from 'lucide-react';
 import EmailSettingsForm from '@/components/admin/EmailSettingsForm';
+import ChatbotSettingsForm from '@/components/admin/ChatbotSettingsForm';
 import { useToast } from '@/hooks/use-toast';
 
 interface SiteSetting {
@@ -56,7 +58,12 @@ const Settings = () => {
       'tax_enabled',
       'tax_rate',
       'currency',
-      'wompi_environment'
+      'wompi_environment',
+      // Se editan en la pestaña Chatbot
+      'chatbot_enabled',
+      'chatbot_bot_id',
+      'chatbot_color',
+      'chatbot_script_url'
     ];
 
     const filtered = settings.filter(setting => {
@@ -282,7 +289,7 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="ecommerce" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="ecommerce" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               E-commerce
@@ -290,6 +297,10 @@ const Settings = () => {
             <TabsTrigger value="email" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               Correo
+            </TabsTrigger>
+            <TabsTrigger value="chatbot" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Chatbot
             </TabsTrigger>
             <TabsTrigger value="general" className="flex items-center gap-2">
               <SettingsIcon className="h-4 w-4" />
@@ -583,6 +594,11 @@ const Settings = () => {
                 </p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Chatbot Tab */}
+          <TabsContent value="chatbot" className="space-y-6">
+            <ChatbotSettingsForm />
           </TabsContent>
 
           {/* Email Provider Tab */}

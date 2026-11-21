@@ -284,8 +284,12 @@ Deno.serve(async (req) => {
       if (clearErr) console.error('Error clearing cart:', clearErr)
     }
 
-    // Correo de confirmación: un fallo aquí no debe afectar el pedido (queda en email_events).
-    await sendOrderEmail(db, order.id, 'order_confirmation', resolveSiteUrl(req))
+    // Correo de confirmación: un fallo aquí no debe afectar el pedido (queda en email_events)
+    // ni retrasar la respuesta al cliente, así que se envía en segundo plano.
+    const emailTask = sendOrderEmail(db, order.id, 'order_confirmation', resolveSiteUrl(req))
+    const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime
+    if (runtime?.waitUntil) runtime.waitUntil(emailTask)
+    else await emailTask
 
     return json({ success: true, order })
   } catch (error) {

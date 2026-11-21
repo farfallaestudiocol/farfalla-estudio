@@ -7,6 +7,7 @@ import { Mail, Eye, RefreshCw } from 'lucide-react';
 import { resendConfirmation } from '@/lib/orderEmails';
 import { useToast } from '@/hooks/use-toast';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
 interface EmailEvent {
@@ -34,10 +35,13 @@ const TYPE_LABEL: Record<string, string> = {
 const STATUS_LABEL: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   queued: { label: 'En cola', variant: 'outline' },
   sent: { label: 'Enviado', variant: 'secondary' },
+  deferred: { label: 'Demorado', variant: 'outline' },
   delivered: { label: 'Entregado', variant: 'secondary' },
   opened: { label: 'Abierto', variant: 'default' },
   clicked: { label: 'Clic', variant: 'default' },
   bounced: { label: 'Rebotó', variant: 'destructive' },
+  complained: { label: 'Marcado como spam', variant: 'destructive' },
+  suppressed: { label: 'No enviado (dirección suprimida)', variant: 'destructive' },
   failed: { label: 'Falló', variant: 'destructive' },
 };
 
