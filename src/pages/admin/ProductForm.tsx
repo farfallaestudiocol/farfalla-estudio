@@ -668,47 +668,42 @@ const ProductForm = () => {
             </CardContent>
           </Card>
 
-          {/* Submit */}
-          <div className="flex gap-4 pt-6">
-            <Button 
-              type="submit" 
-              disabled={saving}
-              className="farfalla-btn-primary"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  {isEditing ? 'Actualizar' : 'Crear'} Producto
-                </>
-              )}
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/admin/products">
-                Cancelar
-              </Link>
-            </Button>
-          </div>
         </form>
 
-        {/* Variants Management - Only show when editing */}
+        {/* Management Sections - Only show when editing */}
         {isEditing && (
-          <ProductVariantsManager productId={id} />
+          <div className="space-y-8 mt-8">
+            <ProductVariantsManager productId={id} />
+            <ProductThemeManager productId={id} />
+            <ProductRelationshipsManager productId={id} />
+          </div>
         )}
 
-        {/* Theme Management - Only show when editing */}
-        {isEditing && (
-          <ProductThemeManager productId={id} />
-        )}
-
-        {/* Relationships Management - Only show when editing */}
-        {isEditing && (
-          <ProductRelationshipsManager productId={id} />
-        )}
+        {/* Submit */}
+        <div className="flex gap-4 pt-8">
+          <Button 
+            onClick={handleSubmit}
+            disabled={saving}
+            className="farfalla-btn-primary"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                {isEditing ? 'Actualizar' : 'Crear'} Producto
+              </>
+            )}
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/products">
+              Cancelar
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

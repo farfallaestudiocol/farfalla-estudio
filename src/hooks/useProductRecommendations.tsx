@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ProductRecommendation {
@@ -17,7 +17,7 @@ export const useProductRecommendations = (productId: string | null) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     if (!productId) return;
     
     setIsLoading(true);
@@ -40,11 +40,11 @@ export const useProductRecommendations = (productId: string | null) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productId]);
 
   useEffect(() => {
     fetchRecommendations();
-  }, [productId]);
+  }, [fetchRecommendations]);
 
   return {
     recommendations,
@@ -58,29 +58,29 @@ export const useFrequentlyBoughtTogether = (productId: string | null) => {
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchFrequentlyBought = async () => {
-      if (!productId) return;
-      
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase.rpc('get_frequently_bought_together', {
-          target_product_id: productId,
-          limit_count: 4
-        });
+  const fetchFrequentlyBought = useCallback(async () => {
+    if (!productId) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('get_frequently_bought_together', {
+        target_product_id: productId,
+        limit_count: 4
+      });
 
-        if (!error && data) {
-          setProducts(data);
-        }
-      } catch (err) {
-        console.error('Error fetching frequently bought together:', err);
-      } finally {
-        setIsLoading(false);
+      if (!error && data) {
+        setProducts(data);
       }
-    };
-
-    fetchFrequentlyBought();
+    } catch (err) {
+      console.error('Error fetching frequently bought together:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [productId]);
+
+  useEffect(() => {
+    fetchFrequentlyBought();
+  }, [fetchFrequentlyBought]);
 
   return { products, isLoading };
 };

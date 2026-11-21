@@ -28,6 +28,7 @@ export const VariantThemeManager = ({ productId, variantId, variantName }: Varia
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchThemes();
     fetchVariantThemes();

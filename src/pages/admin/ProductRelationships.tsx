@@ -68,8 +68,8 @@ export default function ProductRelationships() {
           strength,
           created_at,
           updated_at,
-          product:products!product_relationships_product_id_fkey(name),
-          related_product:products!product_relationships_related_product_id_fkey(name)
+          product:products!product_id(name),
+          related_product:products!related_product_id(name)
         `);
 
       if (error) throw error;

@@ -10,8 +10,15 @@ const WhatsAppWidget = () => {
   const [message, setMessage] = useState('');
   const { settings } = useSiteSettings();
 
-  // Default WhatsApp number - this should be configurable from admin settings
-  const whatsappNumber = '573001234567'; // Default Colombian number - this would be configurable
+  // Número configurable desde Configuración: primero "whatsapp_number" y, si está vacío,
+  // el teléfono de contacto. wa.me exige solo dígitos con indicativo de país, así que se
+  // quitan espacios, "+", guiones y paréntesis, y a un celular colombiano de 10 dígitos se
+  // le antepone el 57.
+  const digits = (settings?.whatsapp_number || settings?.contact_phone || '').replace(/\D/g, '');
+  const whatsappNumber = digits.length === 10 ? `57${digits}` : digits;
+
+  // Sin número configurado no se muestra el botón (abriría un chat vacío)
+  if (!whatsappNumber) return null;
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
