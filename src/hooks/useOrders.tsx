@@ -134,7 +134,6 @@ export const useOrders = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Order updated:', payload);
           fetchOrders();
         }
       )

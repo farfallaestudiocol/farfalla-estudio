@@ -42,6 +42,7 @@ export const ProductThemeManager = ({ productId, variants = [] }: ProductThemeMa
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchThemes();
     fetchProductThemes();

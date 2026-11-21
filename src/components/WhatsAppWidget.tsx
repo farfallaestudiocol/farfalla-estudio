@@ -10,8 +10,7 @@ const WhatsAppWidget = () => {
   const [message, setMessage] = useState('');
   const { settings } = useSiteSettings();
 
-  // Default WhatsApp number - this should be configurable from admin settings
-  const whatsappNumber = '573001234567'; // Default Colombian number - this would be configurable
+  const whatsappNumber = settings?.contact_phone?.replace(/\s/g, '') || ''; // Use configurable number, remove spaces
 
   const handleSendMessage = () => {
     if (!message.trim()) return;

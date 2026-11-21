@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,14 +41,14 @@ export const ProductThemes = ({
 
   useEffect(() => {
     fetchProductThemes();
-  }, [productId, variantId]);
+  }, [fetchProductThemes]);
 
   const handleThemeSelect = (theme: Theme) => {
     setSelectedTheme(theme);
     onThemeSelect?.(theme.id);
   };
 
-  const fetchProductThemes = async () => {
+  const fetchProductThemes = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -94,7 +94,7 @@ export const ProductThemes = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, variantId, selectedThemeId, required, onThemeSelect]);
 
   if (loading) {
     return (

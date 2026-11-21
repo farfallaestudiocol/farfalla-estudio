@@ -127,8 +127,6 @@ export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
-  
-  console.log('Current path:', currentPath);
 
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
   const isGroupActive = (item: any) => 
@@ -171,7 +169,6 @@ export function AdminSidebar() {
                   <SidebarMenuButton 
                     isActive={isActive(item.url)}
                     onClick={() => {
-                      console.log('Navegando a:', item.url);
                       try {
                         navigate(item.url);
                       } catch (error) {
@@ -202,7 +199,6 @@ export function AdminSidebar() {
                   <SidebarMenuButton 
                     isActive={isActive(item.url)}
                     onClick={() => {
-                      console.log('Navegando a:', item.url);
                       if (item.title === 'Órdenes') {
                         // Forzar navegación directa para órdenes
                         window.location.href = item.url;

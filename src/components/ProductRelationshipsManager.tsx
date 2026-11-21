@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +9,19 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-interface ProductRelationship {
+// More specific types for the data coming from Supabase
+interface RelationshipFromDB {
   id: string;
   product_id: string;
   related_product_id: string;
   relationship_type: string;
   strength: number;
+  related_product?: { name: string }; // Joined data
+  product?: { name: string }; // Joined data
+}
+
+interface ProductRelationship extends RelationshipFromDB {
+  direction: 'incoming' | 'outgoing';
   product_name?: string;
   related_product_name?: string;
 }
@@ -41,18 +48,10 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
     strength: 5,
   });
 
-  useEffect(() => {
-    if (productId) {
-      fetchRelationships();
-      fetchProducts();
-    }
-  }, [productId]);
-
-  const fetchRelationships = async () => {
+  const fetchRelationships = useCallback(async () => {
     if (!productId) return;
     
     try {
-      // Obtener relaciones donde este producto es el principal o el relacionado
       const { data: outgoing, error: error1 } = await supabase
         .from('product_relationships')
         .select(`
@@ -61,7 +60,7 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
           related_product_id,
           relationship_type,
           strength,
-          related_product:products!product_relationships_related_product_id_fkey(name)
+          related_product:products!related_product_id(name)
         `)
         .eq('product_id', productId);
 
@@ -73,24 +72,23 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
           related_product_id,
           relationship_type,
           strength,
-          product:products!product_relationships_product_id_fkey(name)
+          product:products!product_id(name)
         `)
         .eq('related_product_id', productId);
 
       if (error1) throw error1;
       if (error2) throw error2;
 
-      // Formatear y combinar las relaciones
-      const outgoingFormatted = outgoing?.map(rel => ({
+      const outgoingFormatted: ProductRelationship[] = (outgoing as RelationshipFromDB[])?.map(rel => ({
         ...rel,
-        related_product_name: (rel.related_product as any)?.name || 'Producto no encontrado',
-        direction: 'outgoing' as const
+        related_product_name: rel.related_product?.name || 'Producto no encontrado',
+        direction: 'outgoing'
       })) || [];
 
-      const incomingFormatted = incoming?.map(rel => ({
+      const incomingFormatted: ProductRelationship[] = (incoming as RelationshipFromDB[])?.map(rel => ({
         ...rel,
-        product_name: (rel.product as any)?.name || 'Producto no encontrado',
-        direction: 'incoming' as const
+        product_name: rel.product?.name || 'Producto no encontrado',
+        direction: 'incoming'
       })) || [];
 
       setRelationships([...outgoingFormatted, ...incomingFormatted]);
@@ -102,9 +100,10 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
         variant: 'destructive',
       });
     }
-  };
+  }, [productId]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    if (!productId) return;
     try {
       const { data, error } = await supabase
         .from('products')
@@ -118,7 +117,14 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
     } catch (error) {
       console.error('Error fetching products:', error);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      fetchRelationships();
+      fetchProducts();
+    }
+  }, [productId, fetchRelationships, fetchProducts]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -404,18 +410,17 @@ const ProductRelationshipsManager = ({ productId }: ProductRelationshipsManagerP
                   <div className="flex items-center space-x-3">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium">
-                          {(relationship as any).direction === 'outgoing' 
-                            ? relationship.related_product_name 
-                            : relationship.product_name}
-                        </p>
-                        {getRelationshipBadge(relationship.relationship_type, (relationship as any).direction)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Fuerza: {relationship.strength}/10
-                        {(relationship as any).direction === 'incoming' && ' • Esta relación se gestiona desde el otro producto'}
-                      </p>
-                    </div>
+                                              <p className="font-medium">
+                                                {relationship.direction === 'outgoing' 
+                                                  ? relationship.related_product_name 
+                                                  : relationship.product_name}
+                                              </p>
+                                              {getRelationshipBadge(relationship.relationship_type, relationship.direction)}
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">
+                                              Fuerza: {relationship.strength}/10
+                                              {relationship.direction === 'incoming' && ' • Esta relación se gestiona desde el otro producto'}
+                                            </p>                    </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button

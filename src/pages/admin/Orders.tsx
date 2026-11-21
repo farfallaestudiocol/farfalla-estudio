@@ -52,10 +52,6 @@ export default function AdminOrders() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   
-  console.log('AdminOrders component loaded');
-  console.log('User:', user?.email);
-  console.log('IsAdmin:', isAdmin);
-  console.log('Loading:', loading);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

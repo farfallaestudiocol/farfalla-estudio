@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -83,7 +83,6 @@ const ProductDetail = () => {
   const [hasThemes, setHasThemes] = useState(false);
   const [personalizationNotes, setPersonalizationNotes] = useState('');
 
-  // Helper function to extract YouTube video ID from URL
   const getYouTubeVideoId = (url: string) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
@@ -91,13 +90,7 @@ const ProductDetail = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  useEffect(() => {
-    if (productSlug) {
-      fetchProduct();
-    }
-  }, [productSlug]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       const { data: productData, error } = await supabase
         .from('products')
@@ -192,7 +185,13 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productSlug, toast]);
+
+  useEffect(() => {
+    if (productSlug) {
+      fetchProduct();
+    }
+  }, [fetchProduct, productSlug]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {

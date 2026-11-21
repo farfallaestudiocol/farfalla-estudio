@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
@@ -32,6 +32,7 @@ interface Product {
   review_count: number;
   is_featured: boolean;
   subcategory_id?: string;
+  created_at: string;
   subcategories?: {
     name: string;
     slug: string;
@@ -64,36 +65,26 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Filters from URL params - Support both old and new formats
   const selectedSubcategoriesParam = searchParams.get('subcategories') || '';
   const oldSubcategoryParam = searchParams.get('subcategory');
   
-  // Combine both old single selection and new multiple selection
-  let selectedSubcategories: string[] = [];
-  if (selectedSubcategoriesParam) {
-    selectedSubcategories = selectedSubcategoriesParam.split(',');
-  } else if (oldSubcategoryParam && oldSubcategoryParam !== 'all') {
-    selectedSubcategories = [oldSubcategoryParam];
-  }
+  const selectedSubcategories = useMemo(() => {
+    if (selectedSubcategoriesParam) {
+      return selectedSubcategoriesParam.split(',');
+    } else if (oldSubcategoryParam && oldSubcategoryParam !== 'all') {
+      return [oldSubcategoryParam];
+    }
+    return [];
+  }, [selectedSubcategoriesParam, oldSubcategoryParam]);
   
   const sortBy = searchParams.get('sort') || 'name';
   const sortOrder = searchParams.get('order') || 'asc';
 
-  useEffect(() => {
-    if (categorySlug) {
-      fetchCategoryData();
-    }
-  }, [categorySlug]);
-
-  useEffect(() => {
-    applyFiltersAndSorting();
-  }, [products, selectedSubcategories, sortBy, sortOrder]);
-
-  const fetchCategoryData = async () => {
+  const fetchCategoryData = useCallback(async () => {
+    if (!categorySlug) return;
     try {
       setLoading(true);
 
-      // Fetch category
       const { data: categoryData, error: categoryError } = await supabase
         .from('categories')
         .select('*')
@@ -104,7 +95,6 @@ const CategoryPage = () => {
       if (categoryError) throw categoryError;
       setCategory(categoryData);
 
-      // Fetch subcategories for this category
       const { data: subcategoriesData, error: subcategoriesError } = await supabase
         .from('subcategories')
         .select('*')
@@ -115,7 +105,6 @@ const CategoryPage = () => {
       if (subcategoriesError) throw subcategoriesError;
       setSubcategories(subcategoriesData || []);
 
-      // Fetch products for this category
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -137,34 +126,20 @@ const CategoryPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categorySlug]);
 
-  const applyFiltersAndSorting = () => {
+  const applyFiltersAndSorting = useCallback(() => {
     let filtered = [...products];
 
-    // Filter by subcategories - Modified for multiple selection
     if (selectedSubcategories.length > 0) {
       filtered = filtered.filter(product => 
         product.subcategories?.slug && selectedSubcategories.includes(product.subcategories.slug)
       );
     }
 
-    // Sort products
     filtered.sort((a, b) => {
-      let aValue: any = a[sortBy as keyof Product];
-      let bValue: any = b[sortBy as keyof Product];
-
-      // Handle special cases
-      if (sortBy === 'price') {
-        aValue = a.price;
-        bValue = b.price;
-      } else if (sortBy === 'rating') {
-        aValue = a.rating || 0;
-        bValue = b.rating || 0;
-      } else if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-      }
+      const aValue = a[sortBy as keyof Product] as string | number;
+      const bValue = b[sortBy as keyof Product] as string | number;
 
       if (sortOrder === 'desc') {
         return bValue > aValue ? 1 : -1;
@@ -173,7 +148,15 @@ const CategoryPage = () => {
     });
 
     setFilteredProducts(filtered);
-  };
+  }, [products, selectedSubcategories, sortBy, sortOrder]);
+
+  useEffect(() => {
+    fetchCategoryData();
+  }, [fetchCategoryData]);
+
+  useEffect(() => {
+    applyFiltersAndSorting();
+  }, [applyFiltersAndSorting]);
 
   const updateSubcategoriesParam = (subcategorySlugs: string[]) => {
     const params = new URLSearchParams(searchParams);

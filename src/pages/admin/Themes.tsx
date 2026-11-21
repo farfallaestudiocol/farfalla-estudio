@@ -143,12 +143,11 @@ const Themes = () => {
                   </div>
                 )}
                 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/admin/theme-elements/${theme.id}`)}
-                    className="flex-1"
+                    onClick={() => navigate(`/admin/themes/${theme.id}/elements`)}
                     title="Gestionar elementos"
                   >
                     <Settings className="h-4 w-4 mr-1" />
@@ -156,7 +155,7 @@ const Themes = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={() => toggleThemeStatus(theme.id, theme.is_active)}
                   >
                     {theme.is_active ? (
@@ -165,7 +164,7 @@ const Themes = () => {
                       <Eye className="h-4 w-4" />
                     )}
                   </Button>
-                  <Button asChild variant="outline" size="sm">
+                  <Button asChild variant="outline" size="icon">
                     <Link to={`/admin/themes/edit/${theme.id}`}>
                       <Edit className="h-4 w-4" />
                     </Link>
@@ -173,7 +172,7 @@ const Themes = () => {
                   
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="icon">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>

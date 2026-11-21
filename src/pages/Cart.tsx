@@ -411,8 +411,6 @@ const Cart = () => {
                         customerEmail={user?.email || ''}
                         customerName={profile?.full_name}
                         onSuccess={async (result) => {
-                        console.log('Payment successful:', result);
-                        
                         try {
                            // Create order with cart items
                           const orderItems = items.map(item => ({
@@ -489,9 +487,7 @@ const Cart = () => {
                           toast.error('Error al procesar el pedido');
                         }
                         }}
-                        onError={(error) => {
-                          console.log('Payment error:', error);
-                        }}
+                        onError={(error) => {}}
                       />
                     ) : (
                       <Card>

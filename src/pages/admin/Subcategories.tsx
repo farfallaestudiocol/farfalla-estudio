@@ -16,6 +16,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 
 interface Subcategory {
   id: string;
@@ -214,9 +215,10 @@ const Subcategories = () => {
                 {subcategory.image_url && (
                   <div className="mb-4">
                     <img
-                      src={subcategory.image_url}
+                      src={convertGoogleDriveUrlToBase64(subcategory.image_url)}
                       alt={subcategory.name}
                       className="w-full h-32 object-cover rounded-lg"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
                     />
                   </div>
                 )}

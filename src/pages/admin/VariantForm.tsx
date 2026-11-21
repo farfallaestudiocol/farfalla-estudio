@@ -19,7 +19,7 @@ interface Product {
 interface VariantFormData {
   name: string;
   product_id: string;
-  price: number;
+  price: number | null;
   sku: string;
   stock_quantity: number;
   is_active: boolean;
@@ -37,7 +37,7 @@ const VariantForm = () => {
   const [formData, setFormData] = useState<VariantFormData>({
     name: '',
     product_id: '',
-    price: 0,
+    price: null,
     sku: '',
     stock_quantity: 0,
     is_active: true,
@@ -120,7 +120,7 @@ const VariantForm = () => {
       const variantData = {
         name: formData.name.trim(),
         product_id: formData.product_id,
-        price: formData.price > 0 ? formData.price : null,
+        price: formData.price,
         sku: formData.sku.trim() || null,
         stock_quantity: formData.stock_quantity,
         is_active: formData.is_active,
@@ -163,15 +163,6 @@ const VariantForm = () => {
     }
   };
 
-  const formatPriceForDisplay = (priceInCents: number) => {
-    return (priceInCents / 100).toFixed(2);
-  };
-
-  const handlePriceChange = (value: string) => {
-    const euros = parseFloat(value) || 0;
-    setFormData(prev => ({ ...prev, price: Math.round(euros * 100) }));
-  };
-
   return (
     <div className="min-h-screen farfalla-section-gradient">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -195,162 +186,170 @@ const VariantForm = () => {
           </div>
         </div>
 
-        {/* Form */}
-        <Card className="farfalla-card">
-          <CardHeader>
-            <CardTitle>Información de la Variante</CardTitle>
-            <CardDescription>
-              Configura los detalles de la variante del producto
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nombre de la Variante *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ej: Niño, Niña, Talla M"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="product_id">Producto *</Label>
-                  <Select 
-                    value={formData.product_id} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, product_id: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un producto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.map((product) => (
-                        <SelectItem key={product.id} value={product.id}>
-                          {product.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Precio (€)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formatPriceForDisplay(formData.price)}
-                    onChange={(e) => handlePriceChange(e.target.value)}
-                    placeholder="0.00"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Deja en 0 para usar el precio del producto principal
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sku">SKU</Label>
-                  <Input
-                    id="sku"
-                    value={formData.sku}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                    placeholder="Código único"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="stock_quantity">Stock</Label>
-                  <Input
-                    id="stock_quantity"
-                    type="number"
-                    min="0"
-                    value={formData.stock_quantity}
-                    onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="display_order">Orden de Visualización</Label>
-                  <Input
-                    id="display_order"
-                    type="number"
-                    min="0"
-                    value={formData.display_order}
-                    onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Número menor = aparece primero
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="is_active">Estado</Label>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                <div className="space-y-8">
+                  {/* Form */}
+                  <Card className="farfalla-card">
+                    <CardHeader>
+                      <CardTitle>Información de la Variante</CardTitle>
+                      <CardDescription>
+                        Configura los detalles de la variante del producto
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="name">Nombre de la Variante *</Label>
+                            <Input
+                              id="name"
+                              value={formData.name}
+                              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="Ej: Niño, Niña, Talla M"
+                              required
+                            />
+                          </div>
+        
+                          <div className="space-y-2">
+                            <Label htmlFor="product_id">Producto *</Label>
+                            <Select 
+                              value={formData.product_id} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, product_id: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona un producto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {products.map((product) => (
+                                  <SelectItem key={product.id} value={product.id}>
+                                    {product.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="price">Precio Adicional</Label>
+                            <Input
+                              id="price"
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={formData.price === null ? '' : formData.price}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const numericValue = value.replace(/[^0-9]/g, '');
+                                setFormData(prev => ({
+                                  ...prev,
+                                  price: numericValue === '' ? null : parseInt(numericValue, 10)
+                                }));
+                              }}
+                              placeholder="20000"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Deja en blanco para usar el precio del producto principal
+                            </p>
+                          </div>
+        
+                          <div className="space-y-2">
+                            <Label htmlFor="sku">SKU</Label>
+                            <Input
+                              id="sku"
+                              value={formData.sku}
+                              onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
+                              placeholder="Código único"
+                            />
+                          </div>
+        
+                          <div className="space-y-2">
+                            <Label htmlFor="stock_quantity">Stock</Label>
+                            <Input
+                              id="stock_quantity"
+                              type="number"
+                              min="0"
+                              value={formData.stock_quantity}
+                              onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
+                            />
+                          </div>
+                        </div>
+        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="display_order">Orden de Visualización</Label>
+                            <Input
+                              id="display_order"
+                              type="number"
+                              min="0"
+                              value={formData.display_order}
+                              onChange={(e) => setFormData(prev => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Número menor = aparece primero
+                            </p>
+                          </div>
+        
+                          <div className="space-y-2">
+                            <Label htmlFor="is_active">Estado</Label>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                id="is_active"
+                                checked={formData.is_active}
+                                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                              />
+                              <Label htmlFor="is_active" className="text-sm">
+                                {formData.is_active ? 'Activa' : 'Inactiva'}
+                              </Label>
+                            </div>
+                          </div>
+                        </div>
+        
+                        <div className="space-y-2">
+                          <Label htmlFor="image_url">Imagen de la Variante</Label>
+                          <Input
+                            id="image_url"
+                            value={formData.image_url}
+                            onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                            placeholder="URL de la imagen de Google Drive"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            URL de Google Drive para la imagen de esta variante
+                          </p>
+                        </div>
+        
+                        <div className="flex gap-4 pt-4">
+                          <Button 
+                            type="submit" 
+                            className="farfalla-btn-primary"
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
+                            {isEditing ? 'Actualizar' : 'Crear'} Variante
+                          </Button>
+                          <Button asChild variant="outline">
+                            <Link to="/admin/variants">
+                              Cancelar
+                            </Link>
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+        
+                  {/* Theme Management - Only show when editing */}
+                  {isEditing && formData.product_id && (
+                    <VariantThemeManager 
+                      productId={formData.product_id} 
+                      variantId={id!}
+                      variantName={formData.name}
                     />
-                    <Label htmlFor="is_active" className="text-sm">
-                      {formData.is_active ? 'Activa' : 'Inactiva'}
-                    </Label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Imagen de la Variante</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  placeholder="URL de la imagen de Google Drive"
-                />
-                <p className="text-xs text-muted-foreground">
-                  URL de Google Drive para la imagen de esta variante
-                </p>
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <Button 
-                  type="submit" 
-                  className="farfalla-btn-primary"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
                   )}
-                  {isEditing ? 'Actualizar' : 'Crear'} Variante
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/admin/variants">
-                    Cancelar
-                  </Link>
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Theme Management - Only show when editing */}
-        {isEditing && formData.product_id && (
-          <VariantThemeManager 
-            productId={formData.product_id} 
-            variantId={id!}
-            variantName={formData.name}
-          />
-        )}
-      </div>
+                </div>      </div>
     </div>
   );
 };
