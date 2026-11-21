@@ -59,7 +59,7 @@ const defaultSettings: SiteSettings = {
   company_name: 'Farfalla Estudio',
   company_logo_url: '',
   company_description: 'Artículos personalizados hechos con el corazón',
-  contact_email: 'hola@farfallaestudio.co',
+  contact_email: 'contacto@farfallaestudio.com.co',
   contact_phone: '+57 300 123 4567',
   whatsapp_number: '',
   chatbot_enabled: false,

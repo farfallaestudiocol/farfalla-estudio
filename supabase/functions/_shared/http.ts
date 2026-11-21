@@ -38,5 +38,5 @@ export function resolveSiteUrl(req: Request): string {
   const fromEnv = Deno.env.get('SITE_URL')
   if (fromEnv) return fromEnv
   const origin = req.headers.get('origin')
-  return origin || 'https://farfallaestudio.co'
+  return origin || 'https://farfallaestudio.com.co'
 }
