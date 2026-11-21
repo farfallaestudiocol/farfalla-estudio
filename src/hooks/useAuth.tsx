@@ -33,8 +33,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const profileUserId = useRef<string | null>(null);
+  // Usuario cuyo perfil se está pidiendo ahora mismo: evita lanzar una segunda consulta
+  // cuando llegan dos eventos de autenticación seguidos (INITIAL_SESSION y SIGNED_IN)
+  const profileInFlight = useRef<string | null>(null);
 
   const loadProfile = useCallback(async (userId: string) => {
+    profileInFlight.current = userId;
     try {
       const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
       profileUserId.current = userId;
@@ -42,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
+      if (profileInFlight.current === userId) profileInFlight.current = null;
       setLoading(false);
     }
   }, []);
@@ -53,16 +58,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextSession?.user ?? null);
 
       if (nextSession?.user) {
-        // Mismo usuario (p. ej. renovación de token): no se vuelve a pedir el perfil
+        // Mismo usuario (p. ej. renovación de token) o su perfil ya viene en camino: no se repite
         if (profileUserId.current === nextSession.user.id) {
           setLoading(false);
           return;
         }
+        if (profileInFlight.current === nextSession.user.id) return;
+        profileInFlight.current = nextSession.user.id;
         // Se difiere para evitar bloqueos dentro del callback de auth
         const userId = nextSession.user.id;
         setTimeout(() => loadProfile(userId), 0);
       } else {
         profileUserId.current = null;
+        profileInFlight.current = null;
         setProfile(null);
         setLoading(false);
       }
@@ -87,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setProfile(null);
       profileUserId.current = null;
+      profileInFlight.current = null;
       await supabase.auth.signOut({ scope: 'global' });
     } catch (error) {
       console.error('Error signing out:', error);

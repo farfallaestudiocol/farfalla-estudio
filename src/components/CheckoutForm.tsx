@@ -23,6 +23,8 @@ interface CheckoutFormProps {
   onAddressChange: (a: CheckoutAddress) => void;
   acceptedTerms: boolean;
   onAcceptedTermsChange: (v: boolean) => void;
+  acceptedPrivacy: boolean;
+  onAcceptedPrivacyChange: (v: boolean) => void;
 }
 
 const CheckoutForm = ({
@@ -33,6 +35,8 @@ const CheckoutForm = ({
   onAddressChange,
   acceptedTerms,
   onAcceptedTermsChange,
+  acceptedPrivacy,
+  onAcceptedPrivacyChange,
 }: CheckoutFormProps) => {
   const { user, profile } = useAuth();
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
@@ -159,11 +163,27 @@ const CheckoutForm = ({
         </div>
       )}
 
-      <div className="flex items-start gap-2 pt-2">
-        <Checkbox id="co-terms" checked={acceptedTerms} onCheckedChange={(v) => onAcceptedTermsChange(v === true)} className="mt-1" />
-        <Label htmlFor="co-terms" className="text-sm font-normal leading-snug">
-          Acepto el tratamiento de mis datos personales para gestionar este pedido y recibir notificaciones sobre él.
-        </Label>
+      <div className="space-y-3 pt-2">
+        <div className="flex items-start gap-2">
+          <Checkbox id="co-terms" checked={acceptedTerms} onCheckedChange={(v) => onAcceptedTermsChange(v === true)} className="mt-1" />
+          <Label htmlFor="co-terms" className="text-sm font-normal leading-snug">
+            He leído y acepto los{' '}
+            <a href="/terminos" target="_blank" rel="noopener noreferrer" className="text-farfalla-teal underline">
+              Términos y Condiciones
+            </a>{' '}
+            de compra.
+          </Label>
+        </div>
+        <div className="flex items-start gap-2">
+          <Checkbox id="co-privacy" checked={acceptedPrivacy} onCheckedChange={(v) => onAcceptedPrivacyChange(v === true)} className="mt-1" />
+          <Label htmlFor="co-privacy" className="text-sm font-normal leading-snug">
+            Autorizo el tratamiento de mis datos personales para gestionar este pedido, conforme a la{' '}
+            <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="text-farfalla-teal underline">
+              Política de Tratamiento de Datos Personales
+            </a>
+            . Conozco mis derechos como titular.
+          </Label>
+        </div>
       </div>
     </div>
   );

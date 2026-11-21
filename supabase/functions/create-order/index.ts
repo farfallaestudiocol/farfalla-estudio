@@ -35,6 +35,10 @@ interface CreateOrderRequest {
   items: RequestItem[]
   notes?: string
   accepted_terms: boolean
+  // Autorización de tratamiento de datos (Ley 1581 de 2012), separada de los términos de compra,
+  // y versión del texto que se mostró (prueba de la autorización).
+  accepted_privacy: boolean
+  policy_version: string
   // id de la transacción de Wompi (result.transaction.id)
   payment_reference: string
 }
@@ -66,7 +70,11 @@ function validate(body: CreateOrderRequest) {
       throw new HttpError('Cantidad inválida')
     }
   }
-  if (body.accepted_terms !== true) throw new HttpError('Debes aceptar los términos y el tratamiento de datos')
+  if (body.accepted_terms !== true) throw new HttpError('Debes aceptar los términos y condiciones')
+  if (body.accepted_privacy !== true) throw new HttpError('Debes autorizar el tratamiento de tus datos personales')
+  if (typeof body.policy_version !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(body.policy_version)) {
+    throw new HttpError('Versión de la política inválida')
+  }
   if (!body.payment_reference || typeof body.payment_reference !== 'string') throw new HttpError('Falta la referencia de pago')
 }
 
@@ -238,6 +246,8 @@ Deno.serve(async (req) => {
           customer_document_type: body.customer.document_type || null,
           customer_document_number: body.customer.document_number?.trim() || null,
           accepted_terms_at: new Date().toISOString(),
+          accepted_privacy_at: new Date().toISOString(),
+          policy_version: body.policy_version,
           shipping_address: addressJson,
           billing_address: addressJson,
           notes: body.notes?.toString().slice(0, 2000) || null,

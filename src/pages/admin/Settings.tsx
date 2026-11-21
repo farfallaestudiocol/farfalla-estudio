@@ -17,10 +17,12 @@ import {
   DollarSign,
   ShoppingBag,
   Mail,
-  Bot
+  Bot,
+  Scale
 } from 'lucide-react';
 import EmailSettingsForm from '@/components/admin/EmailSettingsForm';
 import ChatbotSettingsForm from '@/components/admin/ChatbotSettingsForm';
+import LegalSettingsForm from '@/components/admin/LegalSettingsForm';
 import { useToast } from '@/hooks/use-toast';
 
 interface SiteSetting {
@@ -63,7 +65,12 @@ const Settings = () => {
       'chatbot_enabled',
       'chatbot_bot_id',
       'chatbot_color',
-      'chatbot_script_url'
+      'chatbot_script_url',
+      // Se editan en la pestaña Legal
+      'legal_company_name',
+      'legal_nit',
+      'legal_address',
+      'legal_privacy_email'
     ];
 
     const filtered = settings.filter(setting => {
@@ -289,7 +296,7 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="ecommerce" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="ecommerce" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               E-commerce
@@ -301,6 +308,10 @@ const Settings = () => {
             <TabsTrigger value="chatbot" className="flex items-center gap-2">
               <Bot className="h-4 w-4" />
               Chatbot
+            </TabsTrigger>
+            <TabsTrigger value="legal" className="flex items-center gap-2">
+              <Scale className="h-4 w-4" />
+              Legal
             </TabsTrigger>
             <TabsTrigger value="general" className="flex items-center gap-2">
               <SettingsIcon className="h-4 w-4" />
@@ -594,6 +605,11 @@ const Settings = () => {
                 </p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Legal Tab */}
+          <TabsContent value="legal" className="space-y-6">
+            <LegalSettingsForm />
           </TabsContent>
 
           {/* Chatbot Tab */}
