@@ -76,6 +76,9 @@ BEGIN
 END;
 $$;
 
+-- Función de trigger: no debe ser invocable desde la API pública.
+REVOKE EXECUTE ON FUNCTION public.touch_products_for_search() FROM PUBLIC, anon, authenticated;
+
 DROP TRIGGER IF EXISTS categories_search_touch ON public.categories;
 CREATE TRIGGER categories_search_touch
 AFTER UPDATE OF name ON public.categories
