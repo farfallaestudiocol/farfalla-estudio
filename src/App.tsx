@@ -62,6 +62,8 @@ import Auth from "./pages/Auth";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import GuestOrderTracking from "./pages/GuestOrderTracking";
+import SearchResults from "./pages/SearchResults";
 import PaymentResult from "./pages/PaymentResult";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
@@ -150,9 +152,11 @@ const App = () => (
                 } />
                 <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
                 <Route path="/producto/:productSlug" element={<ProductDetail />} />
+                <Route path="/buscar" element={<SearchResults />} />
                 <Route path="/carrito" element={<Cart />} />
                 <Route path="/payment-result" element={<PaymentResult />} />
                 <Route path="/mis-pedidos" element={<Orders />} />
+                <Route path="/pedido/seguimiento" element={<GuestOrderTracking />} />
                 <Route path="/pedido/:orderId" element={<OrderDetail />} />
                 <Route path="/mis-direcciones" element={<UserAddresses />} />
                 <Route path="/google-drive-callback" element={<GoogleDriveCallback />} />

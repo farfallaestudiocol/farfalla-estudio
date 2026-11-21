@@ -28,6 +28,9 @@ import {
   FileText
 } from 'lucide-react';
 
+import OrderEmailHistory from '@/components/admin/OrderEmailHistory';
+import { notifyOrderStatus } from '@/lib/orderEmails';
+
 interface Order {
   id: string;
   order_number: string;
@@ -43,6 +46,9 @@ interface Order {
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
+  customer_document_type?: string;
+  customer_document_number?: string;
+  is_guest?: boolean;
   user_id?: string;
   shipping_address?: any;
   billing_address?: any;
@@ -168,6 +174,11 @@ const OrderDetail = () => {
         title: "Estado actualizado",
         description: "El estado de la orden ha sido actualizado exitosamente",
       });
+
+      const emailWarning = await notifyOrderStatus(orderId, newStatus);
+      if (emailWarning) {
+        toast({ title: "Aviso", description: emailWarning, variant: "destructive" });
+      }
     } catch (error) {
       console.error('Error updating order status:', error);
       toast({
@@ -359,6 +370,17 @@ const OrderDetail = () => {
                         <span>{order.customer_phone}</span>
                       </div>
                     )}
+                    {order.customer_document_number && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>{order.customer_document_type} {order.customer_document_number}</span>
+                      </div>
+                    )}
+                    {isAdmin && order.is_guest && (
+                      <div className="flex items-center gap-2 md:col-span-2">
+                        <Badge variant="outline">Compra sin registro</Badge>
+                      </div>
+                    )}
                   </div>
 
                   {order.shipping_address && (
@@ -511,6 +533,8 @@ const OrderDetail = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {isAdmin && order && <OrderEmailHistory orderId={order.id} />}
             </div>
           </div>
         </div>

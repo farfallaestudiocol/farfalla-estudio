@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SearchBox from "@/components/SearchBox";
 import { Search, ShoppingCart, User, Menu, X, LogOut, Settings, ChevronDown, Package, Shield, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,14 +103,7 @@ const Header = () => {
 
           {/* Search Bar - Desktop only */}
           <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="Buscar productos..."
-                className="farfalla-input pl-10 w-full"
-              />
-            </div>
+            <SearchBox />
           </div>
 
           {/* Right Icons */}
@@ -122,15 +116,7 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80 p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    type="search"
-                    placeholder="Buscar productos..."
-                    className="farfalla-input pl-10 w-full"
-                    autoFocus
-                  />
-                </div>
+                <SearchBox autoFocus onSearch={() => setIsSearchOpen(false)} />
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -224,14 +210,7 @@ const Header = () => {
 
         {/* Mobile Search Bar */}
         <div className="md:hidden pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="search"
-              placeholder="Buscar productos..."
-              className="farfalla-input pl-10 w-full"
-            />
-          </div>
+          <SearchBox />
         </div>
       </div>
 
