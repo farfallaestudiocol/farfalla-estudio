@@ -79,14 +79,6 @@ const WompiWidget = ({
 
       const { signature, amountInCents, publicKey, environment } = signatureData;
 
-      console.log('Wompi payment data:', {
-        publicKey,
-        currency,
-        amountInCents,
-        reference,
-        signature,
-        environment
-      });
 
       // Configure Wompi widget
       const checkout = new window.WidgetCheckout({
@@ -107,7 +99,6 @@ const WompiWidget = ({
       // Open the widget
       onBeforeOpen?.();
       checkout.open((result: any) => {
-        console.log('Wompi result:', result);
         
         if (result.transaction && result.transaction.status === 'APPROVED') {
           toast.success('¡Pago exitoso!');
@@ -120,7 +111,7 @@ const WompiWidget = ({
           onError?.(result);
         } else {
           // Handle redirect flow - user will be redirected to payment-result page
-          console.log('Payment redirect initiated');
+          // Flujo por redirección: /payment-result retoma el pedido al volver
         }
         
         setIsLoading(false);

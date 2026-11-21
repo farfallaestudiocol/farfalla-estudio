@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { SiteSettingsProvider } from "@/hooks/useSiteSettings";
@@ -99,6 +100,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <SiteSettingsProvider>
         <CartProvider>
           <WishlistProvider>
@@ -168,6 +170,7 @@ const App = () => (
           </WishlistProvider>
         </CartProvider>
       </SiteSettingsProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

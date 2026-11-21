@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SiteSettings {
+export interface SiteSettings {
   shipping_enabled: boolean;
   free_shipping_enabled: boolean;
   free_shipping_minimum: number;
@@ -17,6 +17,7 @@ interface SiteSettings {
   company_description: string;
   contact_email: string;
   contact_phone: string;
+  whatsapp_number: string;
   contact_city: string;
   contact_address: string;
   social_instagram: string;
@@ -52,6 +53,7 @@ const defaultSettings: SiteSettings = {
   company_description: 'Artículos personalizados hechos con el corazón',
   contact_email: 'hola@farfallaestudio.co',
   contact_phone: '+57 300 123 4567',
+  whatsapp_number: '',
   contact_city: 'Bogotá',
   contact_address: 'Bogotá, Colombia',
   social_instagram: 'https://instagram.com/farfallaestudio',
@@ -91,6 +93,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'company_description',
           'contact_email',
           'contact_phone',
+          'whatsapp_number',
           'contact_city',
           'contact_address',
           'social_instagram',

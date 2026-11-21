@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { readFunctionError } from '@/lib/functionErrors';
 
 export interface CheckoutCustomer {
   name: string;
@@ -121,16 +122,7 @@ export async function submitOrder(
     body: { ...payload, payment_reference: paymentReference },
   });
 
-  if (error) {
-    let message = 'No se pudo crear el pedido';
-    try {
-      const body = await (error as any).context?.json?.();
-      if (body?.error) message = body.error;
-    } catch {
-      // se conserva el mensaje genérico
-    }
-    return { error: message };
-  }
+  if (error) return { error: (await readFunctionError(error)) || 'No se pudo crear el pedido' };
   if (!data?.success) return { error: data?.error || 'No se pudo crear el pedido' };
   return { order: data.order as CreatedOrder };
 }

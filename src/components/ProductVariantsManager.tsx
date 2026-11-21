@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface ProductVariant {
   id: string;
@@ -29,10 +30,11 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
+  const { settings } = useSiteSettings();
   
   const [formData, setFormData] = useState({
     name: '',
-    price: 0,
+    price: null as number | null,
     sku: '',
     stock_quantity: 0,
     is_active: true,
@@ -40,22 +42,14 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
     image_url: '',
   });
 
-  useEffect(() => {
-    if (productId) {
-      fetchVariants();
-    }
-  }, [productId]);
-
-  const fetchVariants = async () => {
+  const fetchVariants = useCallback(async () => {
     if (!productId) return;
-    
     try {
       const { data, error } = await supabase
         .from('product_variants')
         .select('*')
         .eq('product_id', productId)
         .order('display_order');
-
       if (error) throw error;
       setVariants(data || []);
     } catch (error) {
@@ -66,7 +60,13 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
         variant: 'destructive',
       });
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      fetchVariants();
+    }
+  }, [productId, fetchVariants]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +77,7 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
       const variantData = {
         name: formData.name.trim(),
         product_id: productId,
-        price: formData.price > 0 ? formData.price : null,
+        price: formData.price,
         sku: formData.sku.trim() || null,
         stock_quantity: formData.stock_quantity,
         is_active: formData.is_active,
@@ -125,7 +125,7 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
     setEditingVariant(variant);
     setFormData({
       name: variant.name,
-      price: variant.price || 0,
+      price: variant.price,
       sku: variant.sku || '',
       stock_quantity: variant.stock_quantity,
       is_active: variant.is_active,
@@ -167,7 +167,7 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
   const resetForm = () => {
     setFormData({
       name: '',
-      price: 0,
+      price: null,
       sku: '',
       stock_quantity: 0,
       is_active: true,
@@ -178,13 +178,13 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
     setShowForm(false);
   };
 
-  const formatPriceForDisplay = (priceInCents: number) => {
-    return (priceInCents / 100).toFixed(2);
-  };
-
-  const handlePriceChange = (value: string) => {
-    const euros = parseFloat(value) || 0;
-    setFormData(prev => ({ ...prev, price: Math.round(euros * 100) }));
+  const formatPrice = (price: number | null) => {
+    if (price === null) return 'Sin precio específico';
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: settings?.currency || 'COP',
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
   if (!productId) {
@@ -253,18 +253,25 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="variant_price">Precio (€)</Label>
+                <Label htmlFor="variant_price">Precio Adicional</Label>
                 <Input
                   id="variant_price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formatPriceForDisplay(formData.price)}
-                  onChange={(e) => handlePriceChange(e.target.value)}
-                  placeholder="0.00"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={formData.price === null ? '' : formData.price}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numericValue = value.replace(/[^0-9]/g, '');
+                    setFormData(prev => ({
+                      ...prev,
+                      price: numericValue === '' ? null : parseInt(numericValue, 10)
+                    }));
+                  }}
+                  placeholder="20000"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Deja en 0 para usar el precio del producto principal
+                  Deja en blanco para usar el precio del producto principal
                 </p>
               </div>
 
@@ -360,7 +367,7 @@ const ProductVariantsManager = ({ productId }: ProductVariantsManagerProps) => {
                     <div>
                       <p className="font-medium">{variant.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {variant.price ? `€${(variant.price / 100).toFixed(2)}` : 'Sin precio específico'}
+                        {formatPrice(variant.price)}
                         {variant.sku && ` • SKU: ${variant.sku}`}
                         • Stock: {variant.stock_quantity}
                         • {variant.is_active ? 'Activa' : 'Inactiva'}

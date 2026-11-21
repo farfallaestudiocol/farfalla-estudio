@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { readFunctionError } from '@/lib/functionErrors';
 
 /**
  * Pide al servidor enviar el correo que corresponde a un cambio de estado.
@@ -11,14 +12,8 @@ export async function notifyOrderStatus(orderId: string, status: string): Promis
       body: { order_id: orderId, status },
     });
     if (error) {
-      let msg = 'No se pudo enviar el correo al cliente';
-      try {
-        const body = await (error as any).context?.json?.();
-        if (body?.error) msg = `Correo no enviado: ${body.error}`;
-      } catch {
-        // mensaje genérico
-      }
-      return msg;
+      const detail = await readFunctionError(error);
+      return detail ? `Correo no enviado: ${detail}` : 'No se pudo enviar el correo al cliente';
     }
     if (data && data.success === false) return `Correo no enviado: ${data.error}`;
     return null;

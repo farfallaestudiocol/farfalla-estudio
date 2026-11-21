@@ -50,13 +50,13 @@ const CheckoutForm = ({
   // Prellenado con los datos de la cuenta (solo campos aún vacíos)
   useEffect(() => {
     if (!user) return;
-    const code = documentTypes.find((d) => d.id === (profile as any)?.document_type_id)?.code;
+    const code = documentTypes.find((d) => d.id === profile?.document_type_id)?.code;
     onCustomerChange({
       ...customer,
       name: customer.name || profile?.full_name || '',
       email: customer.email || user.email || '',
       document_type: customer.document_type || code || '',
-      document_number: customer.document_number || (profile as any)?.document_number || '',
+      document_number: customer.document_number || profile?.document_number || '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, profile, documentTypes]);

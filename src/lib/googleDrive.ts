@@ -1,7 +1,8 @@
+import { functionUrl } from '@/lib/config';
+
 export const convertGoogleDriveUrlToBase64 = (url: string): string => {
   if (!url) return url;
   
-  console.log('Original URL:', url);
   
   let fileId: string | null = null;
   
@@ -17,7 +18,6 @@ export const convertGoogleDriveUrlToBase64 = (url: string): string => {
     const match = url.match(pattern);
     if (match) {
       fileId = match[1];
-      console.log('Extracted file ID:', fileId);
       break;
     }
   }
@@ -25,17 +25,14 @@ export const convertGoogleDriveUrlToBase64 = (url: string): string => {
   // If it's just a file ID (no URL format)
   if (!fileId && /^[a-zA-Z0-9_-]{25,}$/.test(url)) {
     fileId = url;
-    console.log('Using URL as file ID:', fileId);
   }
   
   // If we found a file ID, use our proxy
   if (fileId) {
-    const proxyUrl = `https://zvzmnqcbmhpddrpfjrzr.supabase.co/functions/v1/google-drive-proxy?fileId=${fileId}`;
-    console.log('Using proxy URL for Google Drive:', proxyUrl);
+    const proxyUrl = `${functionUrl('google-drive-proxy')}?fileId=${fileId}`;
     return proxyUrl;
   }
   
-  console.log('No Google Drive pattern matched, returning original URL');
   return url; // Return original URL if it's not Google Drive
 };
 
