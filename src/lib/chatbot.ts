@@ -6,10 +6,23 @@
 
 export const DEFAULT_WIDGET_SCRIPT_URL = 'https://app.facil-apps.com.co/widget.js';
 
+export const DEFAULT_BOT_NAME = 'Asistente virtual';
+
+/**
+ * Dos formas de mostrar el chatbot:
+ * - "launcher": el botón flotante de la tienda ofrece el asistente y WhatsApp en un mismo menú, y el
+ *   asistente se abre con el enlace «Abrir el chat» del panel de Fácil Correo. No carga el script del widget.
+ * - "script": se carga el widget de Fácil Correo, que pone su propio botón flotante.
+ */
+export type ChatbotMode = 'launcher' | 'script';
+
 export interface ChatbotConfig {
-  botId: string;
+  mode: ChatbotMode;
+  name: string; // cómo se llama el asistente de cara al cliente
+  botId: string; // '' en modo launcher
   color: string; // '' si no se definió
-  scriptUrl: string;
+  scriptUrl: string; // '' en modo launcher
+  chatUrl: string; // '' en modo script
 }
 
 // Lo que se guarda en site_settings (público: el identificador del chatbot lo es por diseño).
@@ -18,6 +31,8 @@ export interface ChatbotSettings {
   chatbot_bot_id: string;
   chatbot_color: string;
   chatbot_script_url: string;
+  chatbot_name: string;
+  chatbot_chat_url: string;
 }
 
 const BOT_ID_RE = /^[A-Za-z0-9_-]{3,64}$/;
@@ -39,9 +54,45 @@ export function isValidScriptUrl(v: string): boolean {
   }
 }
 
-/** Devuelve la configuración lista para cargar, o null si el chatbot no debe mostrarse. */
+/**
+ * El enlace «Abrir el chat» se abre en una ventana aparte: solo se acepta https, sin usuario
+ * ni contraseña en la dirección.
+ */
+export function isValidChatUrl(v: string): boolean {
+  if (v.length > 500) return false;
+  try {
+    const u = new URL(v);
+    return u.protocol === 'https:' && !u.username && !u.password;
+  } catch {
+    return false;
+  }
+}
+
+/** Nombre visible del asistente: sin espacios de sobra, sin caracteres de control y hasta 40 letras. */
+export function cleanBotName(v: string | undefined | null): string {
+  const name = [...(v ?? '')]
+    .filter((ch) => ch.charCodeAt(0) > 31)
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40);
+  return name || DEFAULT_BOT_NAME;
+}
+
+/** Devuelve la configuración lista para usar, o null si el chatbot no debe mostrarse. */
 export function resolveChatbotConfig(s: Partial<ChatbotSettings> | null | undefined): ChatbotConfig | null {
   if (!s || !s.chatbot_enabled) return null;
+  const name = cleanBotName(s.chatbot_name);
+  const rawColor = (s.chatbot_color || '').trim();
+  const color = isValidColor(rawColor) ? rawColor : '';
+
+  // Con enlace de chat válido, el asistente va dentro del botón flotante de la tienda
+  const chatUrl = (s.chatbot_chat_url || '').trim();
+  if (chatUrl && isValidChatUrl(chatUrl)) {
+    return { mode: 'launcher', name, botId: '', color, scriptUrl: '', chatUrl };
+  }
+
+  // Si no, se usa el widget de Fácil Correo con su propio botón
   const botId = (s.chatbot_bot_id || '').trim();
   if (!isValidBotId(botId)) return null;
 
@@ -49,8 +100,7 @@ export function resolveChatbotConfig(s: Partial<ChatbotSettings> | null | undefi
   const scriptUrl = rawUrl || DEFAULT_WIDGET_SCRIPT_URL;
   if (!isValidScriptUrl(scriptUrl)) return null;
 
-  const rawColor = (s.chatbot_color || '').trim();
-  return { botId, color: isValidColor(rawColor) ? rawColor : '', scriptUrl };
+  return { mode: 'script', name, botId, color, scriptUrl, chatUrl: '' };
 }
 
 export interface ParsedInstall {

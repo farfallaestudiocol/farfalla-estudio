@@ -22,6 +22,8 @@ export interface SiteSettings {
   chatbot_bot_id: string;
   chatbot_color: string;
   chatbot_script_url: string;
+  chatbot_name: string;
+  chatbot_chat_url: string;
   legal_company_name: string;
   legal_nit: string;
   legal_address: string;
@@ -66,6 +68,8 @@ const defaultSettings: SiteSettings = {
   chatbot_bot_id: '',
   chatbot_color: '',
   chatbot_script_url: '',
+  chatbot_name: '',
+  chatbot_chat_url: '',
   legal_company_name: '',
   legal_nit: '',
   legal_address: '',
@@ -114,6 +118,8 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
           'chatbot_bot_id',
           'chatbot_color',
           'chatbot_script_url',
+          'chatbot_name',
+          'chatbot_chat_url',
           'legal_company_name',
           'legal_nit',
           'legal_address',

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Bot, Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { DEFAULT_WIDGET_SCRIPT_URL, isValidColor, isValidScriptUrl, parseInstallInput } from '@/lib/chatbot';
+import { DEFAULT_BOT_NAME, DEFAULT_WIDGET_SCRIPT_URL, cleanBotName, isValidChatUrl, isValidColor, isValidScriptUrl, parseInstallInput } from '@/lib/chatbot';
 
 /**
  * Chatbot web de Fácil Correo (manual, sección 12). Aquí solo se guarda el identificador
@@ -25,6 +25,8 @@ const ChatbotSettingsForm = () => {
   const [installInput, setInstallInput] = useState('');
   const [color, setColor] = useState('');
   const [scriptUrl, setScriptUrl] = useState('');
+  const [botName, setBotName] = useState('');
+  const [chatUrl, setChatUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   const savedBotId = settings?.chatbot_bot_id || '';
@@ -36,6 +38,8 @@ const ChatbotSettingsForm = () => {
     setEnabled(settings.chatbot_enabled);
     setColor(settings.chatbot_color || '');
     setScriptUrl(settings.chatbot_script_url || '');
+    setBotName(settings.chatbot_name || '');
+    setChatUrl(settings.chatbot_chat_url || '');
     setLoaded(true);
   }, [settings, loaded]);
 
@@ -61,8 +65,12 @@ const ChatbotSettingsForm = () => {
       });
       return;
     }
-    if (enabled && !botId) {
-      toast({ title: 'Falta el identificador', description: 'Para activar el chatbot pega su identificador o código de instalación.', variant: 'destructive' });
+    if (chatUrl.trim() && !isValidChatUrl(chatUrl.trim())) {
+      toast({ title: 'Enlace del chat inválido', description: 'Debe ser una dirección que empiece por https://', variant: 'destructive' });
+      return;
+    }
+    if (enabled && !chatUrl.trim() && !botId) {
+      toast({ title: 'Falta cómo abrir el chatbot', description: 'Pega el enlace «Abrir el chat» o el código de instalación del chatbot.', variant: 'destructive' });
       return;
     }
     if (color.trim() && !isValidColor(color.trim())) {
@@ -80,6 +88,8 @@ const ChatbotSettingsForm = () => {
         { setting_key: 'chatbot_enabled', setting_value: String(enabled), setting_type: 'boolean', description: 'Mostrar el chatbot web de Fácil Correo en la tienda' },
         { setting_key: 'chatbot_bot_id', setting_value: botId, setting_type: 'text', description: 'Identificador público del chatbot (data-bot)' },
         { setting_key: 'chatbot_color', setting_value: color.trim(), setting_type: 'text', description: 'Color del widget del chatbot (opcional)' },
+        { setting_key: 'chatbot_name', setting_value: botName.trim() ? cleanBotName(botName) : '', setting_type: 'text', description: 'Nombre del asistente virtual que ven los clientes' },
+        { setting_key: 'chatbot_chat_url', setting_value: chatUrl.trim(), setting_type: 'text', description: 'Enlace «Abrir el chat» del chatbot (el asistente se abre desde el botón flotante)' },
         { setting_key: 'chatbot_script_url', setting_value: scriptUrl.trim(), setting_type: 'text', description: 'Dirección del script del widget (vacío = la de Fácil Correo por defecto)' },
       ];
       const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'setting_key' });
@@ -126,26 +136,41 @@ const ChatbotSettingsForm = () => {
             <p className="font-medium">Antes de activarlo, en el panel de Fácil Correo</p>
             <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
               <li>Entra a <strong>Chatbots → Nuevo chatbot</strong> (si no aparece, pide que activen el chatbot en tu plan).</li>
-              <li>En <strong>Configuración</strong> completa el mensaje de bienvenida, el tono y la política de privacidad. En <strong>sitios permitidos</strong> agrega esta tienda: <code>{window.location.origin}</code>. Si lo dejas vacío, el chatbot puede aparecer en cualquier sitio.</li>
+              <li>En <strong>Configuración</strong> completa el mensaje de bienvenida, el tono y la política de privacidad. Si usas el código de instalación, en <strong>sitios permitidos</strong> agrega esta tienda: <code>{window.location.origin}</code>.</li>
               <li>En <strong>Conocimiento</strong> carga las preguntas frecuentes, textos, productos y precios. El chatbot solo responde con lo que cargues.</li>
-              <li>En <strong>Instalación</strong> copia el código y pégalo aquí abajo. No hace falta pegarlo en el código de la tienda.</li>
+              <li>Copia el enlace <strong>«Abrir el chat»</strong> (o, en <strong>Instalación</strong>, el código) y pégalo aquí abajo.</li>
             </ol>
             <p className="text-muted-foreground">
-              No necesitas credenciales de WhatsApp para el chatbot web. Conectar WhatsApp, Messenger o Instagram se hace aparte, en la pestaña Canales de Fácil Correo.
+              <strong>Cómo se muestra:</strong> con el enlace del chat, el botón flotante de la tienda ofrece <em>dos opciones</em>: el asistente y WhatsApp.
+              Si solo pegas el código de instalación, se usa el botón propio del widget y el de WhatsApp pasa a la izquierda.
+              No necesitas credenciales de WhatsApp para el chatbot: conectar WhatsApp al asistente se hace aparte, en la pestaña Canales de Fácil Correo.
             </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="chatbot_enabled">Mostrar el chatbot en la tienda</Label>
-              <p className="text-sm text-muted-foreground">No aparece en el administrador. Si está activo, el botón de WhatsApp pasa a la izquierda para no taparse.</p>
+              <p className="text-sm text-muted-foreground">No aparece en el administrador.</p>
             </div>
             <Switch id="chatbot_enabled" checked={enabled} onCheckedChange={setEnabled} />
           </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="chatbot_name">Nombre del asistente</Label>
+              <Input id="chatbot_name" maxLength={40} value={botName} onChange={(e) => setBotName(e.target.value)} placeholder={DEFAULT_BOT_NAME} />
+              <p className="text-sm text-muted-foreground">Así lo verán los clientes en el botón de contacto. Ej.: «Mariposa», «Farfi».</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chatbot_chat_url">Enlace «Abrir el chat»</Label>
+              <Input id="chatbot_chat_url" type="url" value={chatUrl} onChange={(e) => setChatUrl(e.target.value)} placeholder="https://…" />
+              <p className="text-sm text-muted-foreground">Se abre en una ventana aparte al elegir el asistente en el botón de contacto.</p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="chatbot_install">Código de instalación o identificador</Label>
+              <Label htmlFor="chatbot_install">Código de instalación o identificador <span className="font-normal text-muted-foreground">(alternativa al enlace)</span></Label>
               {savedBotId ? <Badge variant="secondary">Configurado: {savedBotId}</Badge> : <Badge variant="outline">Sin configurar</Badge>}
             </div>
             <Textarea

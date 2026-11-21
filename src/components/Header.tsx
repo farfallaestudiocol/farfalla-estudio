@@ -116,7 +116,7 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80 p-4">
-                <SearchBox autoFocus onSearch={() => setIsSearchOpen(false)} />
+                <SearchBox autoFocus inlineResults onSearch={() => setIsSearchOpen(false)} />
               </DropdownMenuContent>
             </DropdownMenu>
 

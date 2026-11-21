@@ -1,22 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Loader2, SearchX } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { searchProducts, SearchProductRow as ProductRow } from '@/lib/searchProducts';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-
-interface ProductRow {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  compare_price: number | null;
-  images: string[] | null;
-  rating: number | null;
-  review_count: number | null;
-  is_featured: boolean | null;
-}
 
 const SearchResults = () => {
   const [params] = useSearchParams();
@@ -33,18 +21,17 @@ const SearchResults = () => {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    // search_products aún no está en types.ts (se genera con `supabase gen types`)
-    (supabase as unknown as { rpc: (fn: string, args: object) => Promise<{ data: ProductRow[] | null; error: unknown }> })
-      .rpc('search_products', { search_query: query })
-      .then(({ data, error: rpcError }) => {
+    searchProducts(query)
+      .then((rows) => {
         if (cancelled) return;
-        if (rpcError) {
-          console.error('Error searching products:', rpcError);
-          setError(true);
-          setProducts([]);
-        } else {
-          setProducts(data || []);
-        }
+        setProducts(rows);
+        setLoading(false);
+      })
+      .catch((rpcError) => {
+        if (cancelled) return;
+        console.error('Error searching products:', rpcError);
+        setError(true);
+        setProducts([]);
         setLoading(false);
       });
     return () => {

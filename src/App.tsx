@@ -8,7 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { SiteSettingsProvider } from "@/hooks/useSiteSettings";
-import WhatsAppWidget from "@/components/WhatsAppWidget";
+import FloatingContact from "@/components/FloatingContact";
 import ChatbotWidget from "@/components/ChatbotWidget";
 import GoogleDriveAuthListener from "@/components/GoogleDriveAuthListener";
 
@@ -66,6 +66,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import GuestOrderTracking from "./pages/GuestOrderTracking";
 import SearchResults from "./pages/SearchResults";
+import Catalog from "./pages/Catalog";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import TermsAndConditions from "./pages/legal/TermsAndConditions";
 import PaymentResult from "./pages/PaymentResult";
@@ -111,9 +112,9 @@ const App = () => (
               <Toaster />
               <Sonner />
               <GoogleDriveAuthListener />
-              <WhatsAppWidget />
               <BrowserRouter>
               <ChatbotWidget />
+              <FloatingContact />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -158,6 +159,7 @@ const App = () => (
                 } />
                 <Route path="/categoria/:categorySlug" element={<CategoryPage />} />
                 <Route path="/producto/:productSlug" element={<ProductDetail />} />
+                <Route path="/productos" element={<Catalog />} />
                 <Route path="/buscar" element={<SearchResults />} />
                 <Route path="/privacidad" element={<PrivacyPolicy />} />
                 <Route path="/terminos" element={<TermsAndConditions />} />

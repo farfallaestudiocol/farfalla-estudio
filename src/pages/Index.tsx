@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { convertGoogleDriveUrlToBase64 } from '@/lib/googleDrive';
 import { useCart } from '@/hooks/useCart';
@@ -267,9 +267,11 @@ const Index = () => {
           )}
 
           <div className="text-center mt-12">
-            <Button className="farfalla-btn-primary">
-              Ver Todas las Creaciones
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button asChild className="farfalla-btn-primary">
+              <Link to="/productos">
+                Ver Todas las Creaciones
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -292,9 +294,6 @@ const Index = () => {
                       : 'Entregas cuidadosas para preservar cada detalle de tus creaciones artesanales.'
                     }
                   </p>
-                  <Button className="farfalla-btn-primary">
-                    Ver Creaciones
-                  </Button>
                 </div>
               </div>
             </section>

@@ -66,6 +66,8 @@ const Settings = () => {
       'chatbot_bot_id',
       'chatbot_color',
       'chatbot_script_url',
+      'chatbot_name',
+      'chatbot_chat_url',
       // Se editan en la pestaña Legal
       'legal_company_name',
       'legal_nit',
