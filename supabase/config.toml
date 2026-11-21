@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.google-drive-auth]
 verify_jwt = false
+
+[functions.get-guest-order]
+verify_jwt = false
+
+[functions.facilcorreo-webhook]
+verify_jwt = false
+
+[functions.send-order-email]
+verify_jwt = false

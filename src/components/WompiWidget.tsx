@@ -12,6 +12,7 @@ interface WompiWidgetProps {
   customerName?: string;
   onSuccess?: (transactionData: any) => void;
   onError?: (error: any) => void;
+  onBeforeOpen?: () => void;
 }
 
 declare global {
@@ -26,7 +27,8 @@ const WompiWidget = ({
   customerEmail, 
   customerName,
   onSuccess,
-  onError 
+  onError,
+  onBeforeOpen
 }: WompiWidgetProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -103,6 +105,7 @@ const WompiWidget = ({
       });
 
       // Open the widget
+      onBeforeOpen?.();
       checkout.open((result: any) => {
         console.log('Wompi result:', result);
         

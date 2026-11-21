@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { notifyOrderStatus } from '@/lib/orderEmails';
 
 interface OrderItem {
   id: string;
@@ -111,6 +112,11 @@ export default function AdminOrders() {
         title: "Éxito",
         description: "Estado de la orden actualizado",
       });
+
+      const emailWarning = await notifyOrderStatus(orderId, newStatus);
+      if (emailWarning) {
+        toast({ title: "Aviso", description: emailWarning, variant: "destructive" });
+      }
 
       fetchOrders();
     } catch (error) {

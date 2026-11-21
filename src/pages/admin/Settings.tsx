@@ -15,8 +15,10 @@ import {
   Settings as SettingsIcon,
   Truck,
   DollarSign,
-  ShoppingBag
+  ShoppingBag,
+  Mail
 } from 'lucide-react';
+import EmailSettingsForm from '@/components/admin/EmailSettingsForm';
 import { useToast } from '@/hooks/use-toast';
 
 interface SiteSetting {
@@ -280,10 +282,14 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="ecommerce" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="ecommerce" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               E-commerce
+            </TabsTrigger>
+            <TabsTrigger value="email" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Correo
             </TabsTrigger>
             <TabsTrigger value="general" className="flex items-center gap-2">
               <SettingsIcon className="h-4 w-4" />
@@ -577,6 +583,11 @@ const Settings = () => {
                 </p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Email Provider Tab */}
+          <TabsContent value="email" className="space-y-6">
+            <EmailSettingsForm />
           </TabsContent>
         </Tabs>
       </div>

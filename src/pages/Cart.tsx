@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +10,18 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WompiWidget from '@/components/WompiWidget';
 import { AddressSelector } from '@/components/AddressSelector';
+import CheckoutForm from '@/components/CheckoutForm';
+import {
+  CheckoutAddress,
+  CheckoutCustomer,
+  buildOrderPayload,
+  clearPendingCheckout,
+  emptyAddress,
+  emptyCustomer,
+  savePendingCheckout,
+  submitOrder,
+  validateCheckout,
+} from '@/lib/checkout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -45,6 +57,10 @@ const Cart = () => {
   const { addresses } = useUserAddresses();
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const navigate = useNavigate();
+  const [customer, setCustomer] = useState<CheckoutCustomer>(emptyCustomer);
+  const [guestAddress, setGuestAddress] = useState<CheckoutAddress>(emptyAddress);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [editingPersonalization, setEditingPersonalization] = useState<{[key: string]: string}>({});
 
   const formatPrice = (price: number) => {
@@ -56,6 +72,27 @@ const Cart = () => {
       currency,
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  // Dirección de entrega según el tipo de comprador
+  const getEffectiveAddress = (): CheckoutAddress | null => {
+    if (user) {
+      const a = addresses.find(addr => addr.id === selectedAddressId);
+      if (!a) return null;
+      return {
+        name: a.name,
+        full_address: a.full_address,
+        street_address: a.street_address,
+        city: a.city,
+        state: a.state,
+        postal_code: a.postal_code || undefined,
+        country: a.country,
+        phone: a.phone || undefined,
+        latitude: a.latitude,
+        longitude: a.longitude,
+      };
+    }
+    return guestAddress;
   };
 
   // Calculate shipping based on settings and selected address
@@ -70,19 +107,17 @@ const Cart = () => {
       return 0;
     }
     
-    // Get selected address to determine shipping rate
-    const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+    // Dirección efectiva: la guardada (usuario con sesión) o la escrita en el formulario (invitado)
+    const effectiveAddress = getEffectiveAddress();
     
-    if (!selectedAddress) {
-      // Default to outside Bogotá rate if no address selected
+    if (!effectiveAddress || (!effectiveAddress.city && !effectiveAddress.state)) {
+      // Sin dirección aún: tarifa fuera de Bogotá por defecto
       return settings?.shipping_cost_outside_bogota || settings?.shipping_cost || 0;
     }
     
     // Check if address is in Bogotá
-    const isBogota = selectedAddress.city?.toLowerCase().includes('bogotá') || 
-                     selectedAddress.city?.toLowerCase().includes('bogota') ||
-                     selectedAddress.state?.toLowerCase().includes('bogotá') ||
-                     selectedAddress.state?.toLowerCase().includes('bogota');
+    const isBogota = /bogot[aá]/i.test(effectiveAddress.city || '') ||
+                     /bogot[aá]/i.test(effectiveAddress.state || '');
     
     return isBogota 
       ? (settings?.shipping_cost_bogota || settings?.shipping_cost || 0)
@@ -98,6 +133,12 @@ const Cart = () => {
   const shipping = calculateShipping();
   const tax = calculateTax();
   const finalTotal = getCartTotal() + shipping + tax;
+
+  const effectiveAddress = getEffectiveAddress();
+  const missingFields = validateCheckout(customer, effectiveAddress, acceptedTerms);
+  const orderPayload = missingFields.length === 0 && effectiveAddress
+    ? buildOrderPayload(items, customer, effectiveAddress, orderNotes)
+    : null;
 
   if (isLoading) {
     return (
@@ -353,14 +394,27 @@ const Cart = () => {
                       </div>
                     </div>
 
-                    {/* Address Selection */}
-                    <div className="w-full min-w-0">
-                      <AddressSelector
-                        selectedAddressId={selectedAddressId}
-                        onAddressSelect={setSelectedAddressId}
-                        required={true}
-                      />
-                    </div>
+                    {/* Datos del comprador (con o sin cuenta) */}
+                    <CheckoutForm
+                      customer={customer}
+                      onCustomerChange={setCustomer}
+                      showAddress={!user}
+                      address={guestAddress}
+                      onAddressChange={setGuestAddress}
+                      acceptedTerms={acceptedTerms}
+                      onAcceptedTermsChange={setAcceptedTerms}
+                    />
+
+                    {/* Address Selection (usuarios con sesión: direcciones guardadas) */}
+                    {user && (
+                      <div className="w-full min-w-0">
+                        <AddressSelector
+                          selectedAddressId={selectedAddressId}
+                          onAddressSelect={setSelectedAddressId}
+                          required={true}
+                        />
+                      </div>
+                    )}
 
                     {/* Order Notes */}
                     <div className="w-full space-y-2">
@@ -383,130 +437,53 @@ const Cart = () => {
 
                   {/* Wompi Payment Widget */}
                   <div className="w-full">
-                    {!user && (
-                      <div className="mb-4 p-4 bg-muted rounded-lg text-center">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Debes iniciar sesión para continuar
-                        </p>
-                        <Link to="/auth">
-                          <Button variant="outline" size="sm">
-                            Iniciar Sesión
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                    
-                    {user && !selectedAddressId && (
-                      <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
-                        
-                          Selecciona una dirección de entrega para continuar
-                       
-                      </div>
-                    )}
-
-                    {user && selectedAddressId ? (
-                      <WompiWidget 
+                    {missingFields.length > 0 ? (
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <div className="text-muted-foreground">
+                            <p className="mb-2">Completa estos datos para continuar con el pago</p>
+                            <div className="text-sm space-y-1">
+                              {missingFields.map(f => <p key={f}>• {f}</p>)}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <WompiWidget
                         amount={finalTotal}
                         currency={settings?.currency || 'COP'}
-                        customerEmail={user?.email || ''}
-                        customerName={profile?.full_name}
+                        customerEmail={customer.email.trim()}
+                        customerName={customer.name.trim()}
+                        onBeforeOpen={() => {
+                          // Si el pago termina en otra página (PSE, etc.), /payment-result lo retoma
+                          if (orderPayload) savePendingCheckout(orderPayload);
+                        }}
                         onSuccess={async (result) => {
-                        console.log('Payment successful:', result);
-                        
-                        try {
-                           // Create order with cart items
-                          const orderItems = items.map(item => ({
-                            product_id: item.product.id,
-                            variant_id: item.variant?.id,
-                            quantity: item.quantity,
-                            unit_price: item.variant?.price || item.product.price,
-                            product_name: item.product.name,
-                            variant_name: item.variant?.name,
-                            product_sku: item.variant?.sku || item.product.sku,
-                            theme_id: item.theme_id,
-                            theme_name: item.theme?.name,
-                            personalization_notes: item.personalization_notes
-                          }));
-
-                          // Get selected address
-                          const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
-
-                          // Create order data
-                          const orderData = {
-                            customer_email: user?.email || '',
-                            customer_name: profile?.full_name || user?.email || '',
-                            customer_phone: selectedAddress?.phone || '',
-                            shipping_address: selectedAddress ? {
-                              name: selectedAddress.name,
-                              full_address: selectedAddress.full_address,
-                              street_address: selectedAddress.street_address,
-                              city: selectedAddress.city,
-                              state: selectedAddress.state,
-                              postal_code: selectedAddress.postal_code,
-                              country: selectedAddress.country,
-                              phone: selectedAddress.phone,
-                              latitude: selectedAddress.latitude,
-                              longitude: selectedAddress.longitude
-                            } : null,
-                            billing_address: selectedAddress ? {
-                              name: selectedAddress.name,
-                              full_address: selectedAddress.full_address,
-                              street_address: selectedAddress.street_address,
-                              city: selectedAddress.city,
-                              state: selectedAddress.state,
-                              postal_code: selectedAddress.postal_code,
-                              country: selectedAddress.country,
-                              phone: selectedAddress.phone,
-                              latitude: selectedAddress.latitude,
-                              longitude: selectedAddress.longitude
-                            } : null,
-                            items: orderItems,
-                            shipping_amount: shipping,
-                            tax_amount: tax,
-                            discount_amount: 0,
-                            currency: settings?.currency || 'COP',
-                            payment_method: 'wompi',
-                            payment_reference: result.transaction?.id || '',
-                            notes: orderNotes.trim()
-                          };
-
-                          // Call create order function
-                          const { data: createOrderData } = await supabase.functions.invoke('create-order', {
-                            body: orderData
-                          });
-
-                          if (createOrderData?.success) {
-                            toast.success('¡Pedido creado exitosamente!');
-                            // Clear cart (will be done by the edge function if user is authenticated)
-                            clearCart();
-                            // Redirect to order success page or orders list
-                            window.location.href = '/mis-pedidos';
-                          } else {
-                            toast.error('Error al crear el pedido');
+                          const reference = result.transaction?.id;
+                          if (!orderPayload || !reference) {
+                            toast.error('No se pudo registrar el pedido. Contacta a soporte con tu ID de transacción.');
+                            return;
                           }
-                        } catch (error) {
-                          console.error('Error creating order:', error);
-                          toast.error('Error al procesar el pedido');
-                        }
+                          const { order, error } = await submitOrder(orderPayload, reference);
+                          if (error || !order) {
+                            toast.error(`${error || 'Error al crear el pedido'}. Tu pago fue aprobado; contacta a soporte con el ID de transacción ${reference}.`);
+                            return;
+                          }
+                          clearPendingCheckout();
+                          toast.success('¡Pedido creado exitosamente!');
+                          await clearCart();
+                          // Invitados: página de seguimiento con su enlace secreto
+                          navigate(
+                            user || !order.access_token
+                              ? '/mis-pedidos'
+                              : `/pedido/seguimiento?token=${order.access_token}`
+                          );
                         }}
                         onError={(error) => {
                           console.log('Payment error:', error);
                         }}
                       />
-                    ) : (
-                      <Card>
-                        <CardContent className="p-6 text-center">
-                          <div className="text-muted-foreground">
-                            <p className="mb-2">Complete los pasos anteriores para continuar con el pago</p>
-                            <div className="text-sm space-y-1">
-                              {!user && <p>• Inicia sesión</p>}
-                              {user && !selectedAddressId && <p>• Selecciona una dirección de entrega</p>}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
                     )}
-
                   </div>
 
                   <div className="mt-4 text-xs text-muted-foreground text-center">

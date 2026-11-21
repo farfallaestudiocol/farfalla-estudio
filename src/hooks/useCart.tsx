@@ -44,16 +44,112 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// ---- Carrito de invitado (sin sesión): vive en localStorage ----
+const GUEST_CART_KEY = 'farfalla_guest_cart_v1';
+
+interface GuestCartEntry {
+  id: string;
+  product_id: string;
+  variant_id?: string | null;
+  theme_id?: string | null;
+  quantity: number;
+  personalization_notes?: string | null;
+}
+
+const readGuestCart = (): GuestCartEntry[] => {
+  try {
+    const raw = localStorage.getItem(GUEST_CART_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeGuestCart = (entries: GuestCartEntry[]) => {
+  try {
+    localStorage.setItem(GUEST_CART_KEY, JSON.stringify(entries));
+  } catch {
+    // almacenamiento bloqueado (modo privado, etc.): el carrito de invitado no persistirá
+  }
+};
+
+const newLocalId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `guest-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Carga los datos de producto de las entradas del carrito de invitado
+  const fetchGuestItems = async () => {
+    const entries = readGuestCart();
+    if (entries.length === 0) {
+      setItems([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const productIds = [...new Set(entries.map(e => e.product_id))];
+      const variantIds = [...new Set(entries.map(e => e.variant_id).filter(Boolean))] as string[];
+      const themeIds = [...new Set(entries.map(e => e.theme_id).filter(Boolean))] as string[];
+
+      const [productsRes, variantsRes, themesRes] = await Promise.all([
+        supabase.from('products').select('id, name, price, images, slug, sku').in('id', productIds),
+        variantIds.length
+          ? supabase.from('product_variants').select('id, name, price, sku').in('id', variantIds)
+          : Promise.resolve({ data: [], error: null }),
+        themeIds.length
+          ? supabase.from('themes').select('id, name').in('id', themeIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+      if (productsRes.error) throw productsRes.error;
+
+      const products = new Map((productsRes.data || []).map(p => [p.id, p]));
+      const variants = new Map((variantsRes.data || []).map((v: any) => [v.id, v]));
+      const themes = new Map((themesRes.data || []).map((t: any) => [t.id, t]));
+
+      // Se descartan productos que ya no existen o no están activos
+      const valid = entries.filter(e => products.has(e.product_id));
+      if (valid.length !== entries.length) writeGuestCart(valid);
+
+      setItems(valid.map(e => {
+        const p: any = products.get(e.product_id);
+        const v: any = e.variant_id ? variants.get(e.variant_id) : undefined;
+        const t: any = e.theme_id ? themes.get(e.theme_id) : undefined;
+        return {
+          id: e.id,
+          product_id: e.product_id,
+          variant_id: e.variant_id || undefined,
+          quantity: e.quantity,
+          theme_id: e.theme_id || undefined,
+          personalization_notes: e.personalization_notes || undefined,
+          product: { id: p.id, name: p.name, price: p.price, images: p.images || [], slug: p.slug, sku: p.sku },
+          variant: v ? { id: v.id, name: v.name, price: v.price, sku: v.sku } : undefined,
+          theme: t ? { id: t.id, name: t.name } : undefined,
+        };
+      }));
+    } catch (error) {
+      console.error('Error fetching guest cart:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo cargar el carrito",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch cart items from database
   const fetchCartItems = async () => {
     if (!user) {
-      setItems([]);
+      await fetchGuestItems();
       return;
     }
 
@@ -129,10 +225,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Add item to cart
   const addToCart = async (productId: string, variantId?: string, quantity = 1, themeId?: string, personalizationNotes?: string) => {
     if (!user) {
+      writeGuestCart([
+        ...readGuestCart(),
+        {
+          id: newLocalId(),
+          product_id: productId,
+          variant_id: variantId ?? null,
+          theme_id: themeId ?? null,
+          quantity,
+          personalization_notes: personalizationNotes ?? null,
+        },
+      ]);
+      await fetchGuestItems();
       toast({
-        title: "Inicia sesión",
-        description: "Necesitas iniciar sesión para agregar productos al carrito",
-        variant: "destructive",
+        title: "Agregado al carrito",
+        description: "El producto se agregó correctamente",
+        variant: "success",
       });
       return;
     }
@@ -170,6 +278,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Remove item from cart
   const removeFromCart = async (itemId: string) => {
+    if (!user) {
+      writeGuestCart(readGuestCart().filter(e => e.id !== itemId));
+      setItems(items.filter(item => item.id !== itemId));
+      toast({
+        title: "Producto eliminado",
+        description: "El producto se eliminó del carrito",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('cart_items')
@@ -200,6 +318,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (!user) {
+      writeGuestCart(readGuestCart().map(e => e.id === itemId ? { ...e, quantity } : e));
+      setItems(items.map(item => item.id === itemId ? { ...item, quantity } : item));
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('cart_items')
@@ -223,7 +347,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Update item personalization
   const updatePersonalization = async (itemId: string, personalizationNotes: string) => {
-    if (!user) return;
+    if (!user) {
+      writeGuestCart(readGuestCart().map(e => e.id === itemId ? { ...e, personalization_notes: personalizationNotes } : e));
+      setItems(items.map(item => item.id === itemId ? { ...item, personalization_notes: personalizationNotes } : item));
+      toast({
+        title: "Personalización actualizada",
+        description: "Los datos de personalización han sido guardados",
+      });
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -253,7 +385,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Clear cart
   const clearCart = async () => {
-    if (!user) return;
+    if (!user) {
+      writeGuestCart([]);
+      setItems([]);
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -289,7 +425,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Fetch cart items when user changes
   useEffect(() => {
-    fetchCartItems();
+    const load = async () => {
+      // Al iniciar sesión, el carrito de invitado se pasa a la cuenta
+      if (user) {
+        const guestEntries = readGuestCart();
+        if (guestEntries.length > 0) {
+          writeGuestCart([]); // se vacía primero para no fusionar dos veces
+          const { error } = await supabase.from('cart_items').insert(
+            guestEntries.map(e => ({
+              user_id: user.id,
+              product_id: e.product_id,
+              variant_id: e.variant_id ?? null,
+              theme_id: e.theme_id ?? null,
+              quantity: e.quantity,
+              personalization_notes: e.personalization_notes ?? null,
+            }))
+          );
+          if (error) {
+            console.error('Error merging guest cart:', error);
+            writeGuestCart(guestEntries); // se conserva para reintentar
+          }
+        }
+      }
+      await fetchCartItems();
+    };
+    load();
   }, [user]);
 
   const value = {

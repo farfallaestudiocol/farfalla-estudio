@@ -90,31 +90,6 @@ export const useOrders = () => {
     }
   }, []);
 
-  const createOrder = async (orderData: any) => {
-    try {
-      const authToken = (await supabase.auth.getSession()).data.session?.access_token;
-      
-      const { data, error } = await supabase.functions.invoke('create-order', {
-        body: orderData,
-        headers: authToken ? {
-          Authorization: `Bearer ${authToken}`
-        } : undefined
-      });
-
-      if (error) throw error;
-      
-      // Refresh orders after creating
-      if (data.success) {
-        await fetchOrders();
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error creating order:', error);
-      throw error;
-    }
-  };
-
   useEffect(() => {
     fetchOrders();
   }, [user]);
@@ -149,7 +124,6 @@ export const useOrders = () => {
     orders,
     isLoading,
     fetchOrders,
-    getOrder,
-    createOrder
+    getOrder
   };
 };
