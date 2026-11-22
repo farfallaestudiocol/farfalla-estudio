@@ -151,8 +151,8 @@ const SearchBox = ({ autoFocus, onSearch, inlineResults }: SearchBoxProps) => {
           role="listbox"
           className={
             inlineResults
-              ? 'mt-2 rounded-lg border bg-background'
-              : 'absolute left-0 right-0 top-full mt-2 z-50 rounded-lg border bg-background shadow-lg'
+              ? 'mt-2 rounded-lg border bg-white'
+              : 'absolute left-0 right-0 top-full mt-2 z-50 rounded-lg border bg-white shadow-lg overflow-hidden'
           }
         >
           {loading && results.length === 0 && (

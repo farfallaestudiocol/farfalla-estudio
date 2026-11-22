@@ -97,7 +97,7 @@ const FloatingContact = () => {
           <div
             role="menu"
             aria-label="Opciones de contacto"
-            className={`absolute bottom-16 ${menuSide} w-72 rounded-xl border bg-background p-2 shadow-xl animate-in slide-in-from-bottom-2`}
+            className={`absolute bottom-16 ${menuSide} w-72 rounded-xl border bg-white p-2 shadow-xl animate-in slide-in-from-bottom-2`}
           >
             <p className="px-3 pt-2 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">¿Cómo quieres hablar con nosotros?</p>
             <button
