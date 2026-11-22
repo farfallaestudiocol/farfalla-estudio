@@ -104,7 +104,7 @@ const FloatingContact = () => {
               type="button"
               role="menuitem"
               onClick={openChat}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-muted"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-farfalla-teal-100"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-farfalla-teal text-white">
                 <Bot className="h-5 w-5" />
@@ -118,7 +118,7 @@ const FloatingContact = () => {
               type="button"
               role="menuitem"
               onClick={openWhatsapp}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-muted"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-farfalla-teal-100"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
                 <MessageCircle className="h-5 w-5" />
