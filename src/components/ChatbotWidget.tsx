@@ -16,9 +16,11 @@ const ChatbotWidget = () => {
   const isAdminRoute = pathname.startsWith('/admin');
 
   const config = resolveChatbotConfig(settings);
-  const botId = config?.botId;
-  const color = config?.color;
-  const scriptUrl = config?.scriptUrl;
+  // En modo "launcher" el asistente se abre desde el botón flotante de la tienda (FloatingContact)
+  const scriptMode = config?.mode === 'script';
+  const botId = scriptMode ? config?.botId : undefined;
+  const color = scriptMode ? config?.color : undefined;
+  const scriptUrl = scriptMode ? config?.scriptUrl : undefined;
 
   useEffect(() => {
     if (!botId || !scriptUrl || isAdminRoute) return;

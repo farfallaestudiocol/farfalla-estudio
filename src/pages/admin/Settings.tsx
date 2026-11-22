@@ -21,6 +21,7 @@ import {
   Scale
 } from 'lucide-react';
 import EmailSettingsForm from '@/components/admin/EmailSettingsForm';
+import EmailTemplateForm from '@/components/admin/EmailTemplateForm';
 import ChatbotSettingsForm from '@/components/admin/ChatbotSettingsForm';
 import LegalSettingsForm from '@/components/admin/LegalSettingsForm';
 import { useToast } from '@/hooks/use-toast';
@@ -66,6 +67,10 @@ const Settings = () => {
       'chatbot_bot_id',
       'chatbot_color',
       'chatbot_script_url',
+      'chatbot_name',
+      'chatbot_chat_url',
+      // Se editan en la pestaña Correo (plantilla)
+      ...['logo_url', 'color', 'accent', 'header', 'footer', 'intro_order_confirmation', 'intro_status_processing', 'intro_status_shipped', 'intro_status_delivered', 'intro_status_cancelled'].map((k) => `email_tpl_${k}`),
       // Se editan en la pestaña Legal
       'legal_company_name',
       'legal_nit',
@@ -620,6 +625,7 @@ const Settings = () => {
           {/* Email Provider Tab */}
           <TabsContent value="email" className="space-y-6">
             <EmailSettingsForm />
+            <EmailTemplateForm />
           </TabsContent>
         </Tabs>
       </div>
