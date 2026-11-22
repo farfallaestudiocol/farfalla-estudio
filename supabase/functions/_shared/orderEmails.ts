@@ -10,7 +10,7 @@ export type { OrderEmailType }
 
 /** Lee la plantilla estándar guardada en site_settings (valores inválidos → por defecto). */
 export async function loadTemplate(db: SupabaseClient): Promise<EmailTemplate> {
-  const { data } = await db.from('site_settings').select('setting_key, setting_value').like('setting_key', 'email_tpl_%')
+  const { data } = await db.from('site_settings').select('setting_key, setting_value').or('setting_key.like.email_tpl_%,setting_key.in.(logo_rectangular_color_url,logo_color_url,company_logo_url)')
   const cfg: Record<string, string> = {}
   for (const r of data || []) cfg[r.setting_key] = r.setting_value ?? ''
   return templateFromSettings(cfg)

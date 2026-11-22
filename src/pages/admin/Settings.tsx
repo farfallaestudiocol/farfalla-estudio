@@ -70,7 +70,7 @@ const Settings = () => {
       'chatbot_name',
       'chatbot_chat_url',
       // Se editan en la pestaña Correo (plantilla)
-      ...['logo_url', 'color', 'header', 'footer', 'intro_order_confirmation', 'intro_status_processing', 'intro_status_shipped', 'intro_status_delivered', 'intro_status_cancelled'].map((k) => `email_tpl_${k}`),
+      ...['logo_url', 'color', 'accent', 'header', 'footer', 'intro_order_confirmation', 'intro_status_processing', 'intro_status_shipped', 'intro_status_delivered', 'intro_status_cancelled'].map((k) => `email_tpl_${k}`),
       // Se editan en la pestaña Legal
       'legal_company_name',
       'legal_nit',

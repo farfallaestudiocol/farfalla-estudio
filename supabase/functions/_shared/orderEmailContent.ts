@@ -1,6 +1,6 @@
 // Contenido de los correos de pedido (HTML + texto). Sin dependencias de Deno: también lo usa
 // el panel de administración para la vista previa de la plantilla.
-import { DEFAULT_TEMPLATE, EmailTemplate, escapeHtml, renderEmailShell } from './emailTemplate.ts'
+import { DEFAULT_BRAND_COLOR, DEFAULT_TEMPLATE, EmailTemplate, escapeHtml, isHexColor, renderEmailShell } from './emailTemplate.ts'
 
 export type OrderEmailType =
   | 'order_confirmation'
@@ -92,30 +92,31 @@ export function renderOrderEmail(
     .map((i) => {
       const extra = [i.variant_name, i.theme_name].filter(Boolean).join(' · ')
       return `<tr>
-        <td style="padding:8px 0;border-bottom:1px solid #eee">${esc(i.product_name)}${extra ? `<br><span style="color:#777;font-size:12px">${esc(extra)}</span>` : ''}</td>
-        <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
-        <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${money(i.total_price, order.currency)}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #e3eeed;font-size:14px">${esc(i.product_name)}${extra ? `<br><span style="color:#888;font-size:12px">${esc(extra)}</span>` : ''}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #e3eeed;text-align:center;font-size:14px;color:#666">×${i.quantity}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #e3eeed;text-align:right;font-size:14px;white-space:nowrap">${money(i.total_price, order.currency)}</td>
       </tr>`
     })
     .join('')
 
   const addr = order.shipping_address
   const addrText = addr ? [addr.full_address || addr.street_address, addr.city, addr.state].filter(Boolean).join(', ') : ''
+  const accent = isHexColor(tpl.brandColor) ? tpl.brandColor : DEFAULT_BRAND_COLOR
 
   const bodyHtml = `
-      <p style="color:#555;margin:0 0 16px">Hola ${esc(order.customer_name)}, ${esc(intro)}</p>
-      <p style="margin:0 0 8px"><strong>Pedido ${esc(order.order_number)}</strong></p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <tr><th align="left">Producto</th><th>Cant.</th><th align="right">Total</th></tr>
-        ${rows}
-      </table>
-      <p style="text-align:right;font-size:14px">
-        Envío: ${money(order.shipping_amount || 0, order.currency)}<br>
-        Impuestos: ${money(order.tax_amount || 0, order.currency)}<br>
-        <strong>Total: ${money(order.total_amount, order.currency)}</strong>
-      </p>
-      ${addrText ? `<p style="font-size:14px"><strong>Dirección de entrega:</strong><br>${esc(addrText)}</p>` : ''}
-      <p style="color:#999;font-size:12px;margin:20px 0 0">Guarda este correo: el botón te permite consultar tu pedido sin necesidad de cuenta.</p>`
+      <p style="margin:0 0 4px;text-align:center;color:#333;font-size:16px">Hola <strong>${esc(order.customer_name)}</strong>,</p>
+      <p style="margin:0 0 22px;text-align:center;color:#555">${esc(intro)}</p>
+      <div style="background:#f5fbfa;border:1px solid #dcefed;border-radius:12px;padding:18px 20px">
+        <p style="margin:0 0 10px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:${accent};font-weight:bold">Pedido ${esc(order.order_number)}</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          ${rows}
+          <tr><td colspan="2" style="padding:10px 0 2px;font-size:13px;color:#777">Envío</td><td style="padding:10px 0 2px;text-align:right;font-size:13px;color:#777">${money(order.shipping_amount || 0, order.currency)}</td></tr>
+          <tr><td colspan="2" style="padding:2px 0;font-size:13px;color:#777">Impuestos</td><td style="padding:2px 0;text-align:right;font-size:13px;color:#777">${money(order.tax_amount || 0, order.currency)}</td></tr>
+          <tr><td colspan="2" style="padding:10px 0 0;font-size:16px;font-weight:bold">Total</td><td style="padding:10px 0 0;text-align:right;font-size:16px;font-weight:bold;color:${accent}">${money(order.total_amount, order.currency)}</td></tr>
+        </table>
+      </div>
+      ${addrText ? `<p style="margin:18px 0 0;font-size:14px;color:#555"><strong>Dirección de entrega</strong><br>${esc(addrText)}</p>` : ''}
+      <p style="margin:22px 0 0;text-align:center;color:#999;font-size:12px">Guarda este correo: el botón te permite consultar tu pedido sin necesidad de cuenta.</p>`
 
   const html = renderEmailShell(tpl, {
     title: copy.title,
@@ -127,7 +128,7 @@ export function renderOrderEmail(
 
   const text = [
     copy.title,
-    `Hola ${order.customer_name}, ${intro}`,
+    `Hola ${order.customer_name},\n${intro}`,
     `Pedido ${order.order_number}`,
     ...items.map((i) => `- ${i.product_name} x${i.quantity}: ${money(i.total_price, order.currency)}`),
     `Total: ${money(order.total_amount, order.currency)}`,

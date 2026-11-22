@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LayoutTemplate, Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
-  DEFAULT_BRAND_COLOR, DEFAULT_TEMPLATE, TEMPLATE_KEYS, EmailTemplate, isHexColor, isHttpsUrl, templateFromSettings,
+  DEFAULT_ACCENT_COLOR, DEFAULT_BRAND_COLOR, DEFAULT_TEMPLATE, TEMPLATE_KEYS, EmailTemplate, isHexColor, isHttpsUrl, templateFromSettings,
 } from '../../../supabase/functions/_shared/emailTemplate.ts';
 import { COPY, OrderEmailType, renderOrderEmail } from '../../../supabase/functions/_shared/orderEmailContent.ts';
 
@@ -40,6 +40,7 @@ const EmailTemplateForm = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [company, setCompany] = useState('Farfalla Estudio');
+  const [brandLogo, setBrandLogo] = useState('');
   const [tpl, setTpl] = useState<EmailTemplate>(DEFAULT_TEMPLATE);
   const [previewType, setPreviewType] = useState<OrderEmailType>('order_confirmation');
 
@@ -48,11 +49,13 @@ const EmailTemplateForm = () => {
       const { data } = await supabase
         .from('site_settings')
         .select('setting_key, setting_value')
-        .or('setting_key.like.email_tpl_%,setting_key.eq.company_name');
+        .or('setting_key.like.email_tpl_%,setting_key.in.(company_name,logo_rectangular_color_url,logo_color_url,company_logo_url)');
       const cfg: Record<string, string> = {};
       for (const r of data || []) cfg[r.setting_key] = r.setting_value ?? '';
       if (cfg.company_name) setCompany(cfg.company_name);
-      setTpl(templateFromSettings(cfg));
+      setBrandLogo(templateFromSettings({ ...cfg, [TEMPLATE_KEYS.logoUrl]: '' }).logoUrl);
+      // El campo guarda solo el logo propio de la plantilla; el de la marca se usa si está vacío
+      setTpl({ ...templateFromSettings(cfg), logoUrl: (cfg[TEMPLATE_KEYS.logoUrl] || '').trim() });
       setLoading(false);
     })();
   }, []);
@@ -63,14 +66,19 @@ const EmailTemplateForm = () => {
   const preview = useMemo(
     () => renderOrderEmail(previewType, SAMPLE_ORDER, SAMPLE_ITEMS, window.location.origin, company, {
       ...tpl,
+      logoUrl: isHttpsUrl(tpl.logoUrl) ? tpl.logoUrl : brandLogo,
       intros: Object.fromEntries(Object.entries(tpl.intros).map(([k, v]) => [k, v.trim()])),
     }).html,
-    [previewType, tpl, company],
+    [previewType, tpl, company, brandLogo],
   );
 
   const save = async () => {
     if (tpl.brandColor.trim() && !isHexColor(tpl.brandColor)) {
       toast({ title: 'Color inválido', description: 'Usa un color hexadecimal como #0f766e.', variant: 'destructive' });
+      return;
+    }
+    if (tpl.accentColor.trim() && !isHexColor(tpl.accentColor)) {
+      toast({ title: 'Color inválido', description: 'El acento debe ser un color hexadecimal como #F4B0B9.', variant: 'destructive' });
       return;
     }
     if (tpl.logoUrl.trim() && !isHttpsUrl(tpl.logoUrl)) {
@@ -83,6 +91,7 @@ const EmailTemplateForm = () => {
       const rows = [
         row(TEMPLATE_KEYS.logoUrl, tpl.logoUrl.trim(), 'Plantilla de correo: logo (https)'),
         row(TEMPLATE_KEYS.brandColor, tpl.brandColor.trim(), 'Plantilla de correo: color principal'),
+        row(TEMPLATE_KEYS.accentColor, tpl.accentColor.trim(), 'Plantilla de correo: color de acento'),
         row(TEMPLATE_KEYS.headerText, tpl.headerText.trim(), 'Plantilla de correo: texto de la cabecera'),
         row(TEMPLATE_KEYS.footerText, tpl.footerText.trim(), 'Plantilla de correo: pie de página'),
         ...TYPES.map(({ type }) => row(TEMPLATE_KEYS.intro(type), (tpl.intros[type] || '').trim(), `Plantilla de correo: introducción «${type}»`)),
@@ -122,14 +131,21 @@ const EmailTemplateForm = () => {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="tpl_accent">Color de acento (franja)</Label>
+              <div className="flex items-center gap-2">
+                <Input id="tpl_accent" value={tpl.accentColor} onChange={(e) => set({ accentColor: e.target.value })} placeholder={DEFAULT_ACCENT_COLOR} />
+                {isHexColor(tpl.accentColor) && <span className="h-8 w-8 shrink-0 rounded border" style={{ backgroundColor: tpl.accentColor }} aria-label="Vista previa del acento" />}
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="tpl_header">Texto de la cabecera</Label>
               <Input id="tpl_header" maxLength={80} value={tpl.headerText} onChange={(e) => set({ headerText: e.target.value })} placeholder={company} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tpl_logo">Logo (dirección https de la imagen, opcional)</Label>
+            <Label htmlFor="tpl_logo">Logo propio para los correos (opcional)</Label>
             <Input id="tpl_logo" type="url" value={tpl.logoUrl} onChange={(e) => set({ logoUrl: e.target.value })} placeholder="https://…/logo.png" />
-            <p className="text-sm text-muted-foreground">Si lo dejas vacío, la cabecera muestra el texto sobre el color principal.</p>
+            <p className="text-sm text-muted-foreground">Si lo dejas vacío se usa el logo horizontal de la marca (Branding); si tampoco hay, el nombre de la tienda.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="tpl_footer">Pie de página</Label>
@@ -150,7 +166,7 @@ const EmailTemplateForm = () => {
                 />
               </div>
             ))}
-            <p className="text-sm text-muted-foreground">Se muestra después de «Hola, nombre del cliente,». Vacío = el texto por defecto.</p>
+            <p className="text-sm text-muted-foreground">Se muestra debajo de «Hola, nombre del cliente,». Vacío = el texto por defecto.</p>
           </div>
 
           <div className="flex justify-end">
