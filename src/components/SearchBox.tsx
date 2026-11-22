@@ -176,7 +176,7 @@ const SearchBox = ({ autoFocus, onSearch, inlineResults }: SearchBoxProps) => {
               role="option"
               aria-selected={i === active}
               onClick={finish}
-              className={`flex items-center gap-3 px-3 py-2 text-sm hover:bg-muted ${i === active ? 'bg-muted' : ''}`}
+              className={`flex items-center gap-3 px-3 py-2 text-sm hover:bg-farfalla-teal-100 ${i === active ? 'bg-farfalla-teal-100' : ''}`}
             >
               <img
                 src={p.images?.[0] ? convertGoogleDriveUrlToBase64(p.images[0]) : '/placeholder.svg'}
@@ -192,7 +192,7 @@ const SearchBox = ({ autoFocus, onSearch, inlineResults }: SearchBoxProps) => {
             <button
               type="button"
               onClick={goToResults}
-              className="w-full border-t px-4 py-2.5 text-left text-sm font-medium text-farfalla-teal hover:bg-muted"
+              className="w-full border-t px-4 py-2.5 text-left text-sm font-medium text-farfalla-teal-900 hover:bg-farfalla-teal-100"
             >
               Ver todos los resultados para “{query}”
             </button>
