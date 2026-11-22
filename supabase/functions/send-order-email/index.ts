@@ -1,7 +1,8 @@
 // Solo para administradores: correo de prueba y envío/reenvío de correos de pedido.
 import { corsHeaders, json, getAuthUserId, isAdminUser, resolveSiteUrl } from '../_shared/http.ts'
 import { getServiceClient, sendEmail } from '../_shared/email.ts'
-import { sendOrderEmail, statusToEmailType, OrderEmailType } from '../_shared/orderEmails.ts'
+import { sendOrderEmail, statusToEmailType, OrderEmailType, loadTemplate } from '../_shared/orderEmails.ts'
+import { renderEmailShell, escapeHtml } from '../_shared/emailTemplate.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
@@ -25,7 +26,11 @@ Deno.serve(async (req) => {
         {
           to,
           subject: 'Prueba de correo - Farfalla Estudio',
-          html: '<p>Si recibes este mensaje, la integración con el proveedor de correo funciona.</p>',
+          html: renderEmailShell(await loadTemplate(db), {
+            title: 'Correo de prueba',
+            bodyHtml: `<p>${escapeHtml('Si recibes este mensaje, la integración con el proveedor de correo funciona y así se ve la plantilla.')}</p>`,
+            companyName: 'Farfalla Estudio',
+          }),
           text: 'Si recibes este mensaje, la integración con el proveedor de correo funciona.',
           tags: ['prueba'],
           metadata: { email_type: 'test' },
